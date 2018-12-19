@@ -14,8 +14,6 @@
  * Local imports 
  */
 import { reduxVariables } from '../../config/redux-variables';
-import log from '../../utils/logger';
-import Log from '../../utils/logger';
 
 /* ****************************************
 * Configure action structure 
@@ -32,7 +30,7 @@ export const actionDictionary = (reduxVar = reduxVariables) => {
     Object.keys(reduxVar).map((itemKey) => {
         const unfilteredReduxLayer = reduxVar[ itemKey ];
         if (!unfilteredReduxLayer) {
-            log.error('Wrong configuration settings');
+            console.error('Wrong configuration settings');
             throw new Error('Wrong configuration settings');
         } else if (typeof (unfilteredReduxLayer) === 'string') {
             /** this will cast the type to a string type  */
@@ -46,12 +44,12 @@ export const actionDictionary = (reduxVar = reduxVariables) => {
             // Check if the type is not what we are expecting and throw an error 
             if (
                 unfilteredReduxLayer.constructor !== Array) {
-                log.error('Wrong configuration settings');
+                console.error('Wrong configuration settings');
                 throw new Error('Wrong configuration settings');
             }
             const reduxLayer = unfilteredReduxLayer;
             reduxLayer.map((layer) => {
-                Log.error('Invalid value passed into the actionDictionary expected a string ');
+                console.error('Invalid value passed into the actionDictionary expected a string ');
                 if ( typeof(layer) !== 'string') throw new Error('Please ensure you pass string as your actions');
                 actions[ layer ] = {
                     request: REQUEST_ITEM(layer),
