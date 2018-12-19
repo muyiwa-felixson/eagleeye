@@ -1,26 +1,17 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import './components/flex/fonts/fonts/fonts.css';
+import './components/flex/fonts/fontello/css/flexisaf.css';
+import { Body } from './components/flex';
+import ProjectList from './containers/Projects';
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <Body>
+        <ProjectList />
+      </Body>
     );
   }
 }
