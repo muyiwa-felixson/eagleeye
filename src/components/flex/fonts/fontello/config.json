@@ -379,6 +379,12 @@
       "css": "list-1",
       "code": 59434,
       "src": "fontawesome"
+    },
+    {
+      "uid": "8663320a860b00f26e94d3d15c9ba99a",
+      "css": "clock",
+      "code": 59435,
+      "src": "entypo"
     }
   ]
 }

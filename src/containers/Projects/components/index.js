@@ -99,6 +99,7 @@ ${props => props.layout === "card" && css`
   z-index: 1;
   transition: all 0.3s ease-out;
   box-shadow: 0 0 0 ${transparentize(0.9, Theme.PrimaryGreyDark)};
+  overflow: hidden;
 
   &:hover{
     box-shadow: 0px 10px 40px ${transparentize(0.9, Theme.PrimaryGreyDark)};
@@ -139,13 +140,46 @@ ${props => props.layout === "card" && css`
   }
   & .project-name{
     padding: 5px 0;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     font-weight: bold;
     text-transform: uppercase;
+    position: relative;
+    width: inherit;
+    height: 40px;
+    overflow: hidden;
+text-overflow: ellipsis;
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
   }
-  & .project-completion{
+  & .project-contractor{
+    margin-bottom: 15px;
+    font-size: 12px;
+    font-weight: normal;
+    opacity: 0.5;
+    position: relative;
+    width: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-style: italic;
+    /* ${Theme.Truncate("100%")}; */
+  }
+  .project-timer{
+    & i{
+      display: inline-block;
+      margin-right: 5px;
+    }
+    display: inline-block;
+    margin: 5px 0;
+    border-radius: ${Theme.PrimaryRadius};
+    padding: 3px 5px;
+    font-size: 10px;
+    background: ${props => props.color && transparentize(0.8, props.color)};
+    color: ${props => props.color && props.color};
   }
   & .project-payment{
+    margin-bottom: 10px;
   }
   & .project-buttons{
     margin: 10px -20px;
@@ -155,8 +189,8 @@ ${props => props.layout === "card" && css`
     position: absolute;
     top: 10px;
     right: 10px;
-    height: 30px;
-    width: 30px;
+    height: 20px;
+    width: 20px;
     background: ${Theme.PrimaryColor};
     color: #fff;
     border-radius: 50%;
@@ -164,7 +198,7 @@ ${props => props.layout === "card" && css`
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 10px;
     text-shadow: 0 1px 5px ${transparentize(0.9, Theme.PrimaryGreyDark)};
 
     &.non{
@@ -193,7 +227,7 @@ ${props => props.layout === "list" && css`
   transition: all 0.3s ease-out;
   box-shadow: 0 0 0 ${transparentize(0.9, Theme.PrimaryGreyDark)};
   display: grid;
-  grid-template-columns: 80px 160px auto  100px 100px 50px;
+  grid-template-columns: 80px 160px auto  minmax(100px, 200px) 100px 100px 50px 120px;
   grid-gap: 10px;
   align-items: center;
 
@@ -227,6 +261,29 @@ ${props => props.layout === "list" && css`
   & .project-name{
     font-weight: bold;
     text-transform: uppercase;
+  }
+  & .project-contractor{
+    font-size: 12px;
+    font-weight: normal;
+    opacity: 0.6;
+    position: relative;
+    width: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* ${Theme.Truncate("100%")}; */
+  }
+  .project-timer{
+    & i{
+      display: inline-block;
+      margin-right: 5px;
+    }
+    display: inline-block;
+    border-radius: ${Theme.PrimaryRadius};
+    padding: 3px 5px;
+    font-size: 10px;
+    background: ${props => props.color && transparentize(0.8, props.color)};
+    color: ${props => props.color && props.color};
   }
   & .project-completion{
   }

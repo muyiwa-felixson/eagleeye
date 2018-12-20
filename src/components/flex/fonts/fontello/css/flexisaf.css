@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'flexisaf';
-  src: url('../font/flexisaf.eot?5281426');
-  src: url('../font/flexisaf.eot?5281426#iefix') format('embedded-opentype'),
-       url('../font/flexisaf.woff2?5281426') format('woff2'),
-       url('../font/flexisaf.woff?5281426') format('woff'),
-       url('../font/flexisaf.ttf?5281426') format('truetype'),
-       url('../font/flexisaf.svg?5281426#flexisaf') format('svg');
+  src: url('../font/flexisaf.eot?65945827');
+  src: url('../font/flexisaf.eot?65945827#iefix') format('embedded-opentype'),
+       url('../font/flexisaf.woff2?65945827') format('woff2'),
+       url('../font/flexisaf.woff?65945827') format('woff'),
+       url('../font/flexisaf.ttf?65945827') format('truetype'),
+       url('../font/flexisaf.svg?65945827#flexisaf') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -15,7 +15,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'flexisaf';
-    src: url('../font/flexisaf.svg?5281426#flexisaf') format('svg');
+    src: url('../font/flexisaf.svg?65945827#flexisaf') format('svg');
   }
 }
 */
@@ -98,6 +98,7 @@
 .icon-th-list:before { content: '\e828'; } /* '' */
 .icon-th-large:before { content: '\e829'; } /* '' */
 .icon-list-1:before { content: '\e82a'; } /* '' */
+.icon-clock:before { content: '\e82b'; } /* '' */
 .icon-spin5:before { content: '\e838'; } /* '' */
 .icon-spin6:before { content: '\e839'; } /* '' */
 .icon-filter:before { content: '\f0b0'; } /* '' */

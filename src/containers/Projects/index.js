@@ -5,14 +5,20 @@ import { Theme } from '../../components/flex/theme';
 
 const ProjectCardComponent = (props) => {
   return (
-    <ProjectCard layout={props.layout}>
+    <ProjectCard layout={props.layout} color={props.late ? Theme.PrimaryRed : Theme.PrimaryDark}>
       <div className="project-year">{props.year}<span>{props.month}</span></div>
       <div className="project-code">{props.code}</div>
 
       <div className="project-name">{props.name}</div>
+
+      <div className="project-contractor"><i className="icon-user-outline" /> {props.contractor}</div>
+
       <div className="project-completion"><Label>Completion</Label><LineBar percentage={`${props.completed}%`} /></div>
       <div className="project-payment"><Label>Payment</Label><LineBar color={Theme.PrimaryBlue} percentage={`${props.paid}%`} /></div>
       {props.completed === 100 ? <div className="project-status"><i className="icon-ok" /></div> : <div className="project-status non">~</div>}
+
+      <div className="project-timer"><i className="icon-clock" />{props.due}</div>
+
       {/* <div className="project-buttons"></div> */}
     </ProjectCard>
   )
@@ -61,7 +67,9 @@ class ProjectList extends Component {
             </Grid>
           </Grid>
 
-          <Grid default={this.state.viewlayout === "card" ? "repeat(5, 1fr)" : "1fr"} pad={this.state.viewlayout === "card" ? "30px" : "5px"}>
+          <Grid default={this.state.viewlayout === "card" ? "repeat(5, 1fr)" : "1fr"}
+            tablet={this.state.viewlayout === "card" ? "repeat(2, 1fr)" : "1fr"}
+            pad={this.state.viewlayout === "card" ? "30px" : "5px"}>
             <ProjectCardComponent
               year="2018"
               month="Sep"
@@ -70,6 +78,8 @@ class ProjectList extends Component {
               completed={75}
               paid={50}
               layout={this.state.viewlayout}
+              contractor="WebScript Solutions Limited"
+              due="2 days left"
             />
             <ProjectCardComponent
               year="2018"
@@ -79,6 +89,8 @@ class ProjectList extends Component {
               completed={100}
               paid={100}
               layout={this.state.viewlayout}
+              contractor="Alinko And Sons Telecoms and Networking Solutions Limited"
+              due=""
             />
             <ProjectCardComponent
               year="2018"
@@ -88,12 +100,14 @@ class ProjectList extends Component {
               completed={75}
               paid={50}
               layout={this.state.viewlayout}
+              due="3 months overdue"
+              late
             />
             <ProjectCardComponent
               year="2018"
               month="Sep"
               code="PM/2018/JUN/LAG/IKG/001"
-              name="Design a Solution for the Federal Agric Department"
+              name="Design of a very long solution that fills more than the desired length allowable by css"
               completed={100}
               paid={100}
               layout={this.state.viewlayout}
