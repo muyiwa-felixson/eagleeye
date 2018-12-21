@@ -18,6 +18,8 @@ const createTables = require("./db/createTables");
 
 const constants = require("./db/constants");
 
+const { query, bucket } = require("./db/index");
+
 app.use(
   bodyParser.urlencoded({
     limit: "2000mb",
@@ -36,9 +38,6 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors());
-/**
- * gragphQL
- */
 
 // require('./routes')(app);
 process.on("uncaughtException", function(err) {
