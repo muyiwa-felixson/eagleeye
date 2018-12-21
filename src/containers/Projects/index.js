@@ -13,7 +13,6 @@ const ProjectCardComponent = (props) => {
       <div className="project-completion"><Label>Completion</Label><LineBar percentage={`${props.completed}%`} /></div>
       <div className="project-payment"><Label>Payment</Label><LineBar color={Theme.PrimaryBlue} percentage={`${props.paid}%`} /></div>
       {props.completed === 100 ? <div className="project-status"><i className="icon-ok" /></div> : <div className="project-status non">~</div>}
-      {/* <div className="project-buttons"></div> */}
     </ProjectCard>
   )
 }
