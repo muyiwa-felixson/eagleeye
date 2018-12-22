@@ -9,16 +9,20 @@ export const Panel = styled.div`
     font-size: ${ Theme.PrimaryFontSize};
     margin: ${props => props.margin};
     padding: ${props => props.padding};
+    width: 100%;
+    max-width: ${props => props.maxwidth};
 `;
 
 Panel.defaultProps = {
-  margin: "0",
+  margin: "0 auto",
+  maxwidth: "1200px",
   padding: "0"
 };
 
 Panel.propTypes = {
   margin: PropTypes.string,
   padding: PropTypes.string,
+  maxwidth: PropTypes.string
 };
 
 export const Body = styled.div`
@@ -67,6 +71,11 @@ export const Boxed = styled.div`
 
 export const Container = styled.div`
   flex-grow: 1;
+`;
+
+export const Aligner = styled.div`
+  text-align: ${props => props.right ? "right" : "left"};
+  text-align: ${props => props.center && "center"};
 `;
 
 export const Grid = styled.div`
