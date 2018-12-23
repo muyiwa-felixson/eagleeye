@@ -312,3 +312,46 @@ export const Video = styled.div`
   }
 `;
 
+export const DragZone = styled.div`
+  border-radius: ${Theme.SecondaryRadius};
+  background: ${lighten(0.05, Theme.PrimaryGreyLight)};
+  padding: 30px;
+  min-height: 200px;
+  margin-top: 30px;
+  position: relative;
+
+  & .file-region{
+    overflow: hidden;
+  }
+  & i{
+    font-size: 60px;
+    opacity: 0.8;
+    display: block;
+    color: ${Theme.PrimaryColor};
+  }
+
+  & .placeholder{
+    text-align: center;
+    padding: 30px 20px;
+  }
+
+  ${Video}{
+    width: 60px;
+    height: 50px;
+    overflow: hidden;
+    margin: 5px;
+    &:after{
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    border-width: 5px;
+    top: 12px;
+    left: 17px;
+    }
+  }
+  ${Picture}{
+    margin: 5px;
+    width: 60px;
+    height: 50px;
+  }
+`;

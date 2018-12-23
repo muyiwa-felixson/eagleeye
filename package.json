@@ -27,6 +27,7 @@
     "rc-select": "^8.6.4",
     "rc-table": "^6.4.2",
     "react": "^16.6.3",
+    "react-currency-format": "^1.0.0",
     "react-dom": "^16.6.3",
     "react-redux": "^6.0.0",
     "react-resize-detector": "^3.2.1",
