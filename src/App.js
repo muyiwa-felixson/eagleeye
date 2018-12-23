@@ -11,8 +11,8 @@ class App extends Component {
   render() {
     return (
       <Body>
-        {/* <ProjectList /> */}
-        <Project />
+        <ProjectList />
+        {/* <Project /> */}
       </Body>
     );
   }
