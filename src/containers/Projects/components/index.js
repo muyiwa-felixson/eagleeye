@@ -22,6 +22,7 @@ export const TopBar = styled.div`
   align-content: center;
   box-shadow: 0 0 35px ${Theme.Shadow};
   z-index: 1000;
+   border-bottom: 1px solid ${Theme.PrimaryGreyLight};
 
   & .logo{
     text-align: center;
