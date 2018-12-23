@@ -403,6 +403,12 @@
       "css": "play",
       "code": 61455,
       "src": "mfglabs"
+    },
+    {
+      "uid": "e9bce795d01ef5a058c63cab0a03dc66",
+      "css": "upload-cloud-outline",
+      "code": 59437,
+      "src": "typicons"
     }
   ]
 }

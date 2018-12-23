@@ -1,10 +1,19 @@
 import React, { Component } from 'react';
-import { TopSection, LowerSection, TimeLine, TimeBox, TimeDate, TimeContent, TimeDiv, Picture, Video, PayContent } from './components';
+import CurrencyFormat from 'react-currency-format';
+import { createForm, formShape } from 'rc-form';
+import { TopSection, LowerSection, TimeLine, TimeBox, TimeDate, TimeContent, TimeDiv, Picture, Video, PayContent, DragZone } from './components';
 import { TopBar, LineBar } from '../Projects/components';
-import { Button, Input, Grid, SimpleSelect, Label, Panel, PaleButton, Aligner, H4, H5, P } from '../../components/flex';
+import { Button, Input, Grid, SimpleSelect, Label, Panel, PaleButton, Aligner, H4, H5, P, ModalComponent, Boxed, TextArea, InputWrapper } from '../../components/flex';
 import { Theme } from '../../components/flex/theme';
 
 
+const percentages = () => {
+  let list = []
+  for (let i = 1; i <= 100; i++) {
+    list.push({ value: i, label: `${i}%` })
+  }
+  return list
+}
 const TimeComponent = (props) => {
   return (
     <TimeBox type={props.type}>
@@ -66,11 +75,25 @@ class Project extends Component {
   constructor() {
     super();
     this.state = {
-
+      reportModal: false,
+      paymentModal: false,
+      projectCost: 34500200,
+      expectedCost: 0
     }
   }
 
+  submit = () => {
+    this.props.form.validateFields((error, value) => {
+      console.log(error, value);
+    });
+  }
+  onChangePercentage = (selectedOption) => {
+    this.setState({ expectedCost: this.state.projectCost * selectedOption.value / 100 });
+  }
+
   render() {
+    let errors;
+    const { getFieldProps, getFieldError } = this.props.form;
     return (
       <div>
         <TopBar>
@@ -155,7 +178,7 @@ class Project extends Component {
                 <P>PAYMENTS</P>
                 <H4 className="paid">23%</H4>
                 <P>Of Project Cost has been approved for payment</P>
-                <Button>Make New Payment</Button>
+                <Button onClick={() => this.setState({ paymentModal: true })}>Make New Payment</Button>
               </Aligner>
             </Grid>
           </Panel>
@@ -173,7 +196,7 @@ class Project extends Component {
                   </Grid>
                 </div>
                 <Aligner right>
-                  <PaleButton>New Report</PaleButton>
+                  <PaleButton color={Theme.PrimaryBlue} onClick={() => this.setState({ reportModal: true })}>New Report</PaleButton>
                 </Aligner>
               </Grid>
             </div>
@@ -226,9 +249,181 @@ class Project extends Component {
 
           </TimeLine>
         </Panel>
+
+        <ModalComponent
+          title="Project Report"
+          subTitle="Add A New"
+          open={this.state.reportModal}
+          onClose={() => this.setState({ reportModal: !this.state.reportModal })}
+          footer={<div><PaleButton>Cancel</PaleButton> <Button>Save Report</Button></div>}
+          expandable
+          fluid
+        >
+          Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt.
+          <Boxed padVertical="30px">
+            <Input
+              disabled
+              placeholder="Project Name"
+              value="Very Long Project Name, Thats Spans Multiple Lines Like State Names And Local Government Names and Much More."
+              type="text"
+              label="Project"
+              forminput
+            />
+            <p></p>
+            <Grid pad="15px" default="1fr 1fr 1fr" tablet="1fr 1fr">
+
+
+
+              {/* <Input
+                {...getFieldProps('femail', {
+                  onChange() { },
+                  rules: [{ required: true }],
+                })}
+                placeholder="email"
+                error={(errors = getFieldError('femail')) ? errors.join(',') : null}
+                type="email"
+                required
+                label="Email"
+                forminput
+              />
+
+              <Input
+                {...getFieldProps('fphone', {
+                  onChange() { },
+                  rules: [],
+                })}
+                disabled
+                placeholder="phone number"
+                error={(errors = getFieldError('fphone')) ? errors.join(',') : null}
+                type="phone"
+                label="Phone Number"
+                forminput
+              /> */}
+
+              <SimpleSelect
+                options={percentages()}
+                {...getFieldProps('option1', {
+                  onChange() { },
+                  rules: [{ required: true }],
+                })}
+                error={(errors = getFieldError('option1')) ? errors.join(',') : null}
+                type="select"
+                label="Select Level of Completion"
+                required
+                forminput
+              />
+              <Input
+                disabled
+                placeholder="Submitted By"
+                value="Damina Ibra"
+                type="text"
+                label="Submitted By"
+                forminput
+              />
+              <Input
+                disabled
+                placeholder="Submitted On"
+                value="Mon, 24th Dec 2018"
+                type="text"
+                label="Submitted By"
+                forminput
+              />
+            </Grid>
+            <p></p>
+            <TextArea
+              label="Report Comment"
+            />
+            <p>Esunt in culpa qui officia deserunt.</p>
+            <DragZone>
+              <div className="file-region">
+                <Picture />
+                <Video />
+              </div>
+              <div className="placeholder">
+                <i className="icon-upload-cloud-outline" />
+                <Button>Choose files to Upload</Button>
+                <P>Drag and drop files here to upload </P>
+              </div>
+            </DragZone>
+          </Boxed>
+        </ModalComponent>
+
+
+        <ModalComponent
+          title="Approve Payment"
+          subTitle="Select a percentage and"
+          open={this.state.paymentModal}
+          onClose={() => this.setState({ paymentModal: !this.state.paymentModal })}
+          footer={<div><PaleButton>Cancel</PaleButton> <Button>Approve</Button></div>}
+          expandable
+          width="1000px"
+        >
+
+          <Grid default="4fr 1fr" tablet="3fr 1fr" pad="20px">
+            <Input
+              disabled
+              placeholder="Project Name"
+              value="Very Long Project Name, Thats Spans Multiple Lines Like State Names And Local Government Names and Much More."
+              type="text"
+              label="Project"
+              forminput
+            />
+
+            <SimpleSelect
+              options={percentages()}
+              {...getFieldProps('option1', {
+                onChange() { },
+                rules: [{ required: true }],
+              })}
+              error={(errors = getFieldError('option1')) ? errors.join(',') : null}
+              type="select"
+              label="Select Payment Percentage"
+              required
+              onChange={this.onChangePercentage}
+              forminput
+            />
+          </Grid>
+          <Grid default="1fr 1fr 1fr" pad="20px">
+            <CurrencyFormat value={this.state.projectCost} displayType={'text'} thousandSeparator={true} prefix={'N'} renderText={value => <Input
+              disabled
+              placeholder="Project Cost"
+              value={value}
+              type="text"
+              label="Project Cost"
+              forminput
+            />} />
+
+            <CurrencyFormat value={this.state.expectedCost} displayType={'text'} thousandSeparator={true} prefix={'N'} renderText={value => <Input
+              disabled
+              placeholder="Project Cost"
+              value={value}
+              type="text"
+              label="Payment Amount"
+              forminput
+            />} />
+            {/* <Input
+              disabled
+              placeholder="Project Cost"
+              value="N 345,500.00"
+              type="text"
+              label="Project Cost"
+              forminput
+            /> */}
+
+            <Input
+              placeholder="Enter Password"
+              type="password"
+              label="Enter Password"
+              forminput
+            />
+
+
+          </Grid>
+
+        </ModalComponent>
       </div>
     )
   }
 }
 
-export default Project;
+export default createForm()(Project);
