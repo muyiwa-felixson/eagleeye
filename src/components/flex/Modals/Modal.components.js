@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styled, { css } from 'styled-components';
 import { darken, transparentize, lighten } from 'polished';
 import { Theme, media } from '../theme';
-import { Button , PaleButton } from '../';
+import { Button, PaleButton } from '../';
 
 
 let DefaultProps = {
@@ -190,13 +190,13 @@ export const ModalFooter = styled.div`
 
 
 export const Modal = (props) => {
-        return (
-            <ModalContainer backDropColor={props.backDropColor} backDropOpacity={props.backDropOpacity} position={props.position} open={props.open}>
-                <div>
-                    {props.children}
-                </div>
-            </ModalContainer>
-        )
+    return (
+        <ModalContainer backDropColor={props.backDropColor} backDropOpacity={props.backDropOpacity} position={props.position} open={props.open}>
+            <div>
+                {props.children}
+            </div>
+        </ModalContainer>
+    )
 }
 
 
@@ -217,21 +217,21 @@ export class ModalComponent extends React.Component {
     render() {
         return (
             <Modal backDropColor={this.props.backDropColor} backDropOpacity={this.props.backDropOpacity} position={this.props.position} open={this.props.open}>
-                
-                <ModalBody color={this.props.color} information={this.props.information} error={this.props.error} fluid={this.props.fluid} expand={this.state.expand}>
+
+                <ModalBody width={this.props.width} color={this.props.color} information={this.props.information} error={this.props.error} fluid={this.props.fluid} expand={this.state.expand}>
                     {this.props.onClose && (
-                    <ModalClose onClick={this.props.onClose}></ModalClose>
+                        <ModalClose onClick={this.props.onClose}></ModalClose>
                     )}
                     {this.props.expandable && (
-                        <ModalExpand onClick={()=> this.toggleExpand()} expanded={this.state.expand}></ModalExpand>
+                        <ModalExpand onClick={() => this.toggleExpand()} expanded={this.state.expand}></ModalExpand>
                     )}
                     {this.props.title && (
                         <ModalTitle subTitle={this.props.subTitle}>{this.props.title}</ModalTitle>
                     )}
                     {this.props.children && (
-                    <ModalContent>
-                        {this.props.children}
-                    </ModalContent>
+                        <ModalContent>
+                            {this.props.children}
+                        </ModalContent>
                     )}
                     {this.props.footer && (
                         <ModalFooter color={this.props.color}>
@@ -239,7 +239,7 @@ export class ModalComponent extends React.Component {
                         </ModalFooter>
                     )}
                 </ModalBody>
-                
+
             </Modal>
         )
     }

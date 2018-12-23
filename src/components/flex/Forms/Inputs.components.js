@@ -41,6 +41,53 @@ export const InputWrapper = styled.div`
         }
     `}
 
+    & textarea{
+        box-sizing: border-box;
+        border:none;
+        height: 80px;
+        background: none;
+        padding: 10px;
+        line-height: 22px;
+        display: block;
+        width: 100%;
+        position: relative;
+        border-radius: ${Theme.PrimaryRadius};
+        border: 1px solid ${lighten(0.6, Theme.PrimaryFontColor)};
+        z-index:2;
+        font-size: ${Theme.PrimaryFontSize};
+        transition: ${Theme.PrimaryTransition};
+        ${props => (props.type === 'number' || props.type === 'phone') && css`
+            -moz-appearance: textfield;
+            appearance: textfield;
+            margin: 0;
+            &::-webkit-inner-spin-button {
+            opacity: 0;
+            display: none;
+            }
+        `}
+        &:disabled{
+            border: 1px solid ${lighten(0.67, Theme.PrimaryFontColor)};
+            background: ${lighten(0.7, Theme.PrimaryFontColor)};
+            color: ${lighten(0.5, Theme.PrimaryFontColor)};
+        }
+        &:disabled::placeholder{
+            color: ${lighten(0.5, Theme.PrimaryFontColor)};
+        }
+        &:focus{
+            outline: none;
+            border: 1px solid ${Theme.PrimaryBlue};
+            box-shadow: none;
+        }
+        &:focus:hover{
+            border-width: 2px;
+            box-shadow: none;
+            padding: 9px;
+        }
+        ${props => props.error && css`
+            border: 1px solid ${lighten(0.15, Theme.PrimaryRed)};
+        `}
+    }
+
     & input{
         box-sizing: border-box;
         border:none;
@@ -203,6 +250,32 @@ Input.defaultProps = {
 };
 
 Input.propTypes = {
+    forminput: PropTypes.bool
+};
+
+export class TextArea extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = {}
+    }
+    render() {
+        return (
+            <InputWrapper {...this.props}>
+                {this.props.label && <Label>{this.props.label}</Label>}
+                <textarea
+                    {...this.props}
+                />
+                {this.props.error && <em>{this.props.error}</em>}
+            </InputWrapper>
+        )
+    }
+}
+
+TextArea.defaultProps = {
+    forminput: false,
+};
+
+TextArea.propTypes = {
     forminput: PropTypes.bool
 };
 
