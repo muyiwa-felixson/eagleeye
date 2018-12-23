@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 // third party imports
 import React, { Component } from "react";
-import { BrowserRouter, Route } from "react-router-dom";
+import { BrowserRouter, Route, Redirect } from "react-router-dom";
 
 import logo from "./logo.svg";
 import "./App.css";
