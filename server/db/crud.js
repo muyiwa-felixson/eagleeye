@@ -1,214 +1,203 @@
 /**
  * @file represent the setup params for cloudant
  */
-const Cloudant = require('@cloudant/cloudant');
-const constants = require('./constants');
-const Log = require('../utils/log');
-const tables = require('../config/table');
-const uploadAttachment = require('../aws/s3Credentials');
 
-const Couch = require('couch-db').CouchDB;
-// GLOBAL VARIABLES TYPE
-const G = {
-    databases: [],
-    tablseNames: []
-};
+const constants = require("./constants");
+const Log = require("../utils/log");
+const schema = require("../config/table");
+const Couch = require("couch-db").CouchDB;
+const dbusername = process.env.HOSTEDCOUCH;
+const dbpassword = process.env.HOSTEDCOUCHPASSWORD;
+const dburl = process.env.HOSTEDCOUCHURL;
+const nano = require("nano")({
+  url: dburl,
+  requestDefaults: {
+    pool: {
+      maxSockets: Infinity
+    }
+  }
+});
+const couch = require("couch-db").CouchDB;
+// const cluster = new Couchbase.Cluster(`${couchbase}://${couchbaseHost}`, {LCB_CNTL_DETAILED_ERRCODES: true});
+// cluster.authenticate(username, couchbasePassword);
 
-// Initialize cloudant object
-const {
-    dbhost,
-    dbusername,
-    dbpassword,
-    dbname,
-    dburl
-} = constants();
-const couch = new Couch(dburl);
-couch.auth(dbusername, dbpassword);
-// const cloudant = Cloudant(constants().dburl);
-// cloudant.set_cors({
-//     enable_cors: true,
-//     allow_credentials: true
-// });
-// Specify db to use 
-// const db = cloudant.db.use(constants().dbname);
-const nano = require('nano')(dburl);
-// nano.set_cors({
-//     enable_cors: true,
-//     allow_credentials: true
-// });
-// --------------------------------------------------------------------
-
-
-// --------------------------------------------------------------------
+const { tables } = schema;
 /**
- *       CRUD OPERATIONS
+ * Generates a GUID string.
+ * @returns {String} The generated GUID.
+ * @example af8a8416-6e18-a307-bd9c-f2c947bbb3aa
+ * @author Slavik Meltser (slavik@meltser.info).
+ * @link http://slavik.meltser.info/?p=142
  */
-// --------------------------------------------------------------------
-// Insert a document
+const guid = () => {
+  function _p8(s) {
+    var p = (Math.random().toString(16) + "000000000").substr(2, 8);
+    return s ? "-" + p.substr(0, 4) + "-" + p.substr(4, 4) : p;
+  }
+  return _p8() + _p8(true) + _p8(true) + _p8();
+};
+
+const checkDbValue = value => {
+  if (tables.indexOf(value) < 0) {
+    return false;
+  }
+  return true;
+};
+
 /**
- * @const defines methods to insert items into the
- * database
- * @param {any} documentObject - the document to insert
- * @param { dname: string, docName: string } docParams -
- * parameters for insert
+ * @function safeCreateDoc create a doc safely if it doesnt exist in the table
+ * replace if it exists
+ * @param { string } dbValue the table name
+ * @param { string } doc the key value pair
+ * @param { string<uuid> }  id the id of the object this param is optional
+ * @return { promise<Object> } the object returned
  */
-const insertDocument = (documentObject, docParams) => {
-    return new Promise((resolve, reject) => {
-        const {
-            dbname,
-            docName
-        } = docParams;
-        const db = nano.db.use(dbname);
-        db.insert(documentObject, (err, body) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(body);
-            }
-        });
-    });
-};
-// Insert a document with attachment
+async function safeCreateDoc(dbValue, doc, id = guid()) {
+  dbValue = dbValue.toLowerCase();
+  if (!checkDbValue(dbValue))
+    throw new Error(
+      `Wrong database name passed in please check the value ${dbValue}`
+    );
+  // const bucket = cluster.openBucket('default', process.env.COUCHBASE_BUCKET_PASSWORD);
+  // console.log('Operation not supported', bucket);
+  bucket.insert(dbValue, { ...doc, id }, (err, result) => {
+    if (err) throw new Error(err);
+    return result.result;
+  });
+}
+
 /**
- * @const defines methods to insert items into the
- * database
- * @param {any} documentObject - the document to insert
- * @param { dname: string, docName: string } docParams -
- * parameters for insert
+ * @function createDoc create a doc use this function only when sure the data does not exist in the table
+ * @param { string } dbValue the table name
+ * @param { string } doc the key value pair
+ * @return { promise<Object> } the object returned
  */
-const insertDocumentAndAttach = (docParams) => {
-    return new Promise((resolve, reject) => {
-        const {
-            dbname,
-            docName,
-            image,
-            valueId,
-            _id
-        } = docParams;
-        const db = nano.db.use(dbname);
-        retrieveAdocument({
-            dbname,
-            docFind: {
-                userId: _id
-            }
-        }).then(({
-            docs
-        }) => {
-            let documentObject = null;
-            if (valueId) documentObject = docs.filter(v => v._id === valueId)[0];
-            else documentObject = docs[0];
-            if (!documentObject) reject('No document found');
-            uploadAttachment(image, documentObject._id).then((items) => {
-                let updateDocs = documentObject;
-                items.map((data) => {
-                    updateDocs = { ...updateDocs,
-                        [data.id]: data.location
-                    };
-                });
-                db.insert(updateDocs, docName, (err, body) => {
-                    if (err) {
-                        reject(err);
-                    }
-                    resolve(body);
-                });
-            }).catch((err) => {
-                reject(err);
-            });
+const createDoc = (dbValue, doc) => {
+  return new Promise((resolve, reject) => {
+    dbValue = dbValue.toLowerCase();
+    if (!checkDbValue(dbValue))
+      throw new Error(
+        `Wrong database name passed in please check the value ${dbValue}`
+      );
+    let db;
+    db = nano.db.use(dbValue);
+    db.insert(doc, (err, result) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(result);
+    });
+  });
+};
+
+/**
+ * @function getDoc  get a doc from the database
+ * @param { string } dbValue the table name
+ * @param { string<uuid> }  id the id of the object this param is optional
+ * @return { promise<Object> } the object returned
+ */
+const getDoc = (dbValue = "", id) => {
+  return new Promise((resolve, reject) => {
+    dbValue = dbValue.toLowerCase();
+    if (!checkDbValue(dbValue))
+      throw new Error(
+        `Wrong database name passed in please check the value ${dbValue}`
+      );
+    const db = nano.db.use(dbValue);
+    if (!id) {
+      db.list()
+        .then(result => {
+          resolve(result.rows);
+        })
+        .catch(err => {
+          reject(err);
         });
-    });
+    } else {
+      db.get(id, { include_docs: true })
+        .then(result => {
+          resolve(result);
+        })
+        .catch(err => reject(err));
+    }
+  });
+};
+/**
+ * @function getSomeDoc gets a document from the database using an abitrary key within the object
+ * @param { string } dbValue the table name
+ * @param { string } doc the key value pair
+ * @param { string } key of the object to search
+ * @param { string } val of the object to search
+ * @return { promise<Object> } the object returned
+ */
+
+async function getSomeDoc(dbValue, key, val) {
+  dbValue = dbValue.toLowerCase();
+  if (!checkDbValue(dbValue))
+    throw new Error(
+      `Wrong database name passed in please check the value ${dbValue}`
+    );
+  const n1Query = `SELECT * FROM ${dbValue} WHERE ${key}=${val}`;
+  return query(n1Query);
+}
+
+/**
+ * @function updateDoc updates a document on the database
+ * @param { string } dbValue the table name
+ * @param { string } doc the key value pair
+ * @param { string<uuid> }  id the id of the object this param is optional
+ * @return { promise<Object> } the object returned
+ */
+const updateDoc = (dbValue, doc, id, rev) => {
+  return new Promise((resolve, reject) => {
+    dbValue = dbValue.toLowerCase();
+    if (!checkDbValue(dbValue))
+      throw new Error(
+        `Wrong database name passed in please check the value ${dbValue}`
+      );
+    const db = nano.db.use(dbValue);
+    db.insert({ ...doc, _id: id, _rev: rev })
+      .then(result => {
+        resolve(result.doc);
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
 };
 
-const mapReturnType =(result, all=false)=>{
-    const document = { docs:[] };
-    result.rows.map((item)=>{
-        document.docs.push(item.doc);
+/**
+ * @function deleteDoc deletes a document from the db
+ * @param { string } dbValue the table name
+ * @param { string<uuid> }  id the id of the object this param is optional
+ * @return { promise<Object> } the object returned
+ */
+
+const deleteDoc = (dbValue, id, rev) => {
+  return new Promise((resolve, reject) => {
+    dbValue = dbValue.toLowerCase();
+    if (!checkDbValue(dbValue))
+      throw new Error(
+        `Wrong database name passed in please check the value ${dbValue}`
+      );
+    const db = nano.db.use(dbValue);
+    db.destroy({ _id: id, _rev: rev })
+      .then(result => {
+        resolve(result);
+      })
+      .catch(err => {
+        reject(err);
+      });
+    bucket.remove(dbValue, id, (err, result) => {
+      if (err) throw new Error(err);
+      return result.result;
     });
-    return document;
+  });
 };
-// Retrieve a document
-const retrieveAdocument = (docParams) => {
-    return new Promise((resolve, reject) => {
-        const {
-            dbname,
-            docFind
-        } = docParams;
-        const db = nano.db.use(dbname);
-        if (docFind && typeof (docFind) !== 'string') {
-            const tableItemIndex = Object.keys(tables[dbname].feilds).indexOf(Object.keys(docFind)[0]);
-            if (tableItemIndex > -1) {
-                db.fetch( docFind,
-                    (err, result) => {
-                        if (err) {
-                            reject(`Find  could not find the item -${err}`);
-                        }
-                        resolve(mapReturnType(result));
-                    });
-            } else {
-                reject(`The field '${Object.keys(docFind)[0]}' you provided does not exist on type ${dbname}`);
-            }
-
-        } else {
-            db.get(docFind, {include_docs: true}, (err, result) => {
-                if (err) {
-                    reject(` get could not find the item -${err}`);
-                }
-                resolve(result);
-            });
-        }
-    });
-
-};
-
-// retrievAllDocuments
-
-const retrieveAlldocuments = (docParams) => {
-    return new Promise((resolve, reject) => {
-        const {
-            dbname
-        } = docParams;
-        const db = nano.db.use(dbname); 
-        db.list({
-                include_docs: true
-            },
-            (err, result) => {
-                if (err) {
-                    reject(`could not find the item -${err}`);
-                }
-                resolve(mapReturnType(result));
-            });
-
-    });
-
-};
-
-// Retrieve a document
-const searchForDocuments = (docParams) => {
-    return new Promise((resolve, reject) => {
-        const {
-            dbname,
-            docFind
-        } = docParams;
-        const db = nano.db.use(dbname);
-        db.fetch(docFind, {
-            revs_info: true
-        }, (err, result) => {
-            if (err) {
-                reject(`could not find the item -${err}`);
-            }
-
-            resolve(mapReturnType(result));
-        });
-
-    });
-
-};
-// Delete a document
-
-
 module.exports = {
-    insertDocument,
-    insertDocumentAndAttach,
-    retrieveAdocument,
-    retrieveAlldocuments,
-    searchForDocuments
+  safeCreateDoc,
+  createDoc,
+  getDoc,
+  getSomeDoc,
+  updateDoc,
+  deleteDoc
 };
