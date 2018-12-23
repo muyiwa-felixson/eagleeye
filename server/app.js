@@ -14,11 +14,7 @@ const multer = require("multer");
 
 const Log = require("./utils/log");
 
-const createTables = require("./db/createTables");
-
-const constants = require("./db/constants");
-
-const { query, bucket } = require("./db/index");
+const { createTables } = require("./db/createTables");
 
 app.use(
   bodyParser.urlencoded({
@@ -39,9 +35,14 @@ app.use((req, res, next) => {
 });
 app.use(cors());
 
-// require('./routes')(app);
+require("./routes").routes(app);
 process.on("uncaughtException", function(err) {
   Log.error(err);
 });
-
-app.listen(PORT, () => console.log(`eagle eye Server listening on ${PORT}!`));
+createTables()
+  .then(() => {
+    app.listen(PORT, () =>
+      console.log(`eagle eye Server listening on ${PORT}!`)
+    );
+  })
+  .catch(err => console.error(err));

@@ -3201,6 +3201,14 @@ couchbase@^2.6.2:
     winston "^3.1.0"
     winston-null "^1.0.2"
 
+couchdb@^0.3.8:
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/couchdb/-/couchdb-0.3.8.tgz#71e91de6f52e710bdd424b9c07dce88136bce990"
+  integrity sha1-cekd5vUucQvdQkucB9zogTa86ZA=
+  dependencies:
+    promised-io v0.2.3
+    request "=v2.2.9"
+
 create-ecdh@^4.0.0:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/create-ecdh/-/create-ecdh-4.0.3.tgz#c9111b6f33045c4697f144787f9254cdc77c45ff"
@@ -9203,6 +9211,11 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
+promised-io@v0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/promised-io/-/promised-io-0.2.3.tgz#65b9219cc60c1dda64d3e60f86335368c2e56c96"
+  integrity sha1-ZbkhnMYMHdpk0+YPhjNTaMLlbJY=
+
 prompts@^0.1.9:
   version "0.1.14"
   resolved "https://registry.yarnpkg.com/prompts/-/prompts-0.1.14.tgz#a8e15c612c5c9ec8f8111847df3337c9cbd443b2"
@@ -10069,6 +10082,11 @@ request-promise-native@^1.0.5:
     request-promise-core "1.1.1"
     stealthy-require "^1.1.0"
     tough-cookie ">=2.3.3"
+
+request@=v2.2.9:
+  version "2.2.9"
+  resolved "https://registry.yarnpkg.com/request/-/request-2.2.9.tgz#efbf8afbfe7f1e200d483b99752b6c42b404a0f1"
+  integrity sha1-77+K+/5/HiANSDuZdStsQrQEoPE=
 
 request@^2.81.0, request@^2.85.0, request@^2.87.0, request@^2.88.0:
   version "2.88.0"

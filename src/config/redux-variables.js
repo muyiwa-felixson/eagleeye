@@ -25,5 +25,6 @@
  * all the sublayers required to be loaded 
  */
 export const reduxVariables  = {
-
+    LOAD_PROJECTS: 'LOAD_PROJECTS',
+    LOAD_PROJECT: 'LOAD_PROJECT'
 };

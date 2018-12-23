@@ -2,18 +2,20 @@
  * @file represent the setup params for cloudant
  * create tables from config 
  */
-const Cloudant = require('@cloudant/cloudant');
 const Log = require('../utils/log');
-const tables = require('../config/table');
-const constants = require('./constants');
+const { tables } = require('../config/table');
 // CouchDB version 
 const Couch = require('couch-db').CouchDB;
 
 // GLOBAL VARIABLES TYPE
 const G = {
     databases: [],
-    tableNames: Object.keys(tables)
+    tableNames: tables
 };
+
+const dbusername = process.env.HOSTEDCOUCH;
+const dbpassword =  process.env.HOSTEDCOUCHPASSWORD;
+const dburl = process.env.HOSTEDCOUCHURL;
 
 // Initialize cloudant object
 // --------------------------------------------------------------------
@@ -23,26 +25,12 @@ const G = {
 // --------------------------------------------------------------------
 // Get all existing DB
 const createTables = () => {
-    // const cloudant = Cloudant(url);
-    /** ***********************
-     * COUCHDB IMPLEMENTATION
-     *************************/
-    const {
-        dbhost,
-        dbusername,
-        dbpassword,
-        dbname,
-        dburl
-    } = constants();
+
     const couch = new Couch(dburl);
     const nano = require('nano')(dburl);
     couch.auth(dbusername, dbpassword);
 
-
-
     return new Promise((resolve, reject) => {
-        // cloudant.db.list((err, allDbs) => {
-
         /** ***********************
          * COUCHDB IMPLEMENTATION
          *************************/
@@ -66,27 +54,6 @@ const createTables = () => {
                                     Log.message(`Created Table ${table} successfully`);
                                     const dataset = tables[table];
                                     const dbc = couch.database(table);
-                                    dbc.searchByKeys(Object.keys(dataset.feilds), (err, created) => {
-                                        if (err) {
-                                            reject(`${err} - Could not created the index for table ${table}`);
-                                        } else {
-                                            Log.message(`Created searchByKeys  for table ${table}`);
-                                            const nanoDb = nano.db.use(table);
-                                                const indexDef = {
-                                                    index: { [table]: Object.keys(dataset.feilds) },
-                                                    name: table
-                                                  };
-                                                  nanoDb.createIndex(indexDef, (err, result) => {
-                                                    Log.message(`Created index ${result} for table ${table}`);          
-                                            });
-
-                                            if (G.databases.length >= G.tableNames.length) {
-                                                Log.info('Created all indexes and tables');
-                                                resolve(true);
-                                            }
-
-                                        }
-                                    });
                                 }
                             });
                         }
@@ -106,4 +73,4 @@ const createTables = () => {
         });
     });
 };
-module.exports = createTables;
+module.exports = { createTables };

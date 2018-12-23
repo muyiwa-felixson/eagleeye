@@ -3,11 +3,15 @@ import { createForm, formShape } from 'rc-form';
 // import Autosuggest from 'react-autosuggest';
 import { Relative, TopBar, ListBody, ProjectCard, LineBar, BallLegend, LevelList, AutosuggestItem } from './components';
 import { getLevelAttr, levelAttribute } from '../../utils/levels';
-import { Button, Input, Grid, SimpleSelect, Label, ModalComponent, PaleButton, Boxed, TextArea, P } from '../../components/flex';
+import { Button, Input, Grid, SimpleSelect, Label, ModalComponent, PaleButton, Boxed, TextArea, P, Loader } from '../../components/flex';
 import { Theme } from '../../components/flex/theme';
-
-
-
+import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { urls } from '../../api-requests/urls';
+import { ProjectCardComponent } from './presentation/projectCard';
+import { getData } from '../../api-requests/index';
+import { dispatchActions } from '../../store/actions/action-config.action';
+import { bindActionCreators } from 'redux'
 
 
 const numberList = () => {
@@ -18,27 +22,28 @@ const numberList = () => {
   return list
 }
 
-const ProjectCardComponent = (props) => {
-  return (
-    <ProjectCard layout={props.layout}>
-      <div className="project-year">{props.year}<span>{props.month}</span></div>
-      <div className="project-code">{props.code}</div>
-
-      <div className="project-name">{props.name}</div>
-      <div className="project-completion"><Label>Completion</Label><LineBar percentage={`${props.completed}%`} /></div>
-      <div className="project-payment"><Label>Payment</Label><LineBar color={Theme.PrimaryBlue} percentage={`${props.paid}%`} /></div>
-      {props.completed === 100 ? <div className="project-status"><i className="icon-ok" /></div> : <div className="project-status non">~</div>}
-    </ProjectCard>
-  )
+const defaultState = {
+  current: 1,
+  projectModal: false,
+  viewlayout: "card"
 }
 class ProjectList extends Component {
   constructor() {
     super();
-    this.state = {
-      current: 1,
-      viewlayout: "card",
-      projectModal: false,
-    }
+    this.state = defaultState;
+  }
+  proxyGetUrl = () => {
+    const { allProjects } = urls;
+    return getData({ url: allProjects });
+  }
+  componentDidMount() {
+    this.props.dispatchActions('LOAD_PROJECTS', { func: this.proxyGetUrl });
+  }
+  componentDidUpdate() {
+    //
+  }
+  componentDidCatch() {
+
   }
   submit = () => {
     this.props.form.validateFields((error, value) => {
@@ -46,9 +51,12 @@ class ProjectList extends Component {
     });
   }
   render() {
-
-    let errors;
-    const { getFieldProps, getFieldError } = this.props.form;
+    const { loadProjectsPending, loadProjectsError, loadProjectsPayload } = this.props;
+    if (loadProjectsPending) {
+      return (
+        <Loader />
+      )
+    }
     return (
       <Relative>
         <TopBar>
@@ -234,11 +242,6 @@ class ProjectList extends Component {
 
               <SimpleSelect
 
-                {...getFieldProps('option1', {
-                  onChange() { },
-                  rules: [{ required: true }],
-                })}
-                error={(errors = getFieldError('option1')) ? errors.join(',') : null}
                 type="select"
                 label="Project Nature"
                 required
@@ -246,11 +249,6 @@ class ProjectList extends Component {
               />
               <SimpleSelect
 
-                {...getFieldProps('option1', {
-                  onChange() { },
-                  rules: [{ required: true }],
-                })}
-                error={(errors = getFieldError('option1')) ? errors.join(',') : null}
                 type="select"
                 label="Source of Funding"
                 required
@@ -266,12 +264,6 @@ class ProjectList extends Component {
               />
 
               <SimpleSelect
-
-                {...getFieldProps('option1', {
-                  onChange() { },
-                  rules: [{ required: true }],
-                })}
-                error={(errors = getFieldError('option1')) ? errors.join(',') : null}
                 type="select"
                 label="Target Unit"
                 required
@@ -296,12 +288,6 @@ class ProjectList extends Component {
               />
 
               <SimpleSelect
-
-                {...getFieldProps('option1', {
-                  onChange() { },
-                  rules: [{ required: true }],
-                })}
-                error={(errors = getFieldError('option1')) ? errors.join(',') : null}
                 type="select"
                 label="Contractor"
                 required
@@ -310,11 +296,6 @@ class ProjectList extends Component {
               <Grid default="1fr 2fr" tablet="1fr 2fr" mobile="1fr 2fr" pad="15px">
                 <SimpleSelect
                   options={numberList()}
-                  {...getFieldProps('option1', {
-                    onChange() { },
-                    rules: [{ required: true }],
-                  })}
-                  error={(errors = getFieldError('option1')) ? errors.join(',') : null}
                   type="select"
                   label="Duration"
                   required
@@ -322,11 +303,6 @@ class ProjectList extends Component {
                 />
                 <SimpleSelect
                   options={[{ value: "days", label: "days" }, { value: "weeks", label: "weeks" }, { value: "months", label: "months" }, { value: "years", label: "years" }]}
-                  {...getFieldProps('option1', {
-                    onChange() { },
-                    rules: [{ required: true }],
-                  })}
-                  error={(errors = getFieldError('option1')) ? errors.join(',') : null}
                   type="select"
                   label="Duration Type"
                   required
@@ -344,5 +320,13 @@ class ProjectList extends Component {
     )
   }
 }
+const mapStateToProps = ({ loadProjects }) => ({
+  loadProjectsPending: loadProjects.pending,
+  loadProjectsError: loadProjects.error,
+  loadProjectsPayload: loadProjects.payload
+})
+const mapDispatchToProps = dispatch => (
+  bindActionCreators({ dispatchActions }, dispatch)
+)
 
-export default createForm()(ProjectList);
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(ProjectList));
