@@ -1,6 +1,4 @@
 import React, { Component } from "react";
-// third party imports
-import React, { Component } from "react";
 import { BrowserRouter, Route, Redirect } from "react-router-dom";
 
 import logo from "./logo.svg";
@@ -18,25 +16,27 @@ class App extends Component {
         <BrowserRouter>
           <Route
             render={() => {
-              <React.Fragment>
-                <Route exact path="/projects" component={ProjectList} />
-                <Route
-                  exact
-                  path="/projects/project/:name/:id"
-                  component={Project}
-                />
-                <Route
-                  exact={true}
-                  path={`/`}
-                  render={() => (
-                    <Redirect
-                      to={{
-                        pathname: `/projects`
-                      }}
-                    />
-                  )}
-                />
-              </React.Fragment>;
+              return (
+                <React.Fragment>
+                  <Route exact path="/projects" component={ProjectList} />
+                  <Route
+                    exact
+                    path="/projects/project/:name/:id"
+                    component={Project}
+                  />
+                  <Route
+                    exact={true}
+                    path={`/`}
+                    render={() => (
+                      <Redirect
+                        to={{
+                          pathname: `/projects`
+                        }}
+                      />
+                    )}
+                  />
+                </React.Fragment>
+              );
             }}
           />
         </BrowserRouter>
