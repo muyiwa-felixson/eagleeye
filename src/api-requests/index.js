@@ -31,7 +31,7 @@ const [contentTypeLabel, applicationJson, multipartFormData] = [
  * @return { Promise } returns a promise called with the appropraite response header helper
  */
 const switchResponseData = returned => {
-  const contentType =  returned.headers.get(contentTypeLabel).toLowerCase();
+  const contentType = returned.headers.get(contentTypeLabel).toLowerCase();
   let promiseReturnValue;
   switch (contentType) {
     case "text/xml;charset=UTF-8":
@@ -40,7 +40,12 @@ const switchResponseData = returned => {
     case /^text/.test(contentType):
       promiseReturnValue = returned.text();
       return promiseReturnValue;
-    case applicationJson || 'application/json;charset=UTF-8':
+    case applicationJson ||
+      "application/json;charset=UTF-8" ||
+      "application/json":
+      promiseReturnValue = returned.json();
+      return promiseReturnValue;
+    case "application/json; charset=utf-8":
       promiseReturnValue = returned.json();
       return promiseReturnValue;
     case new RegExp(multipartFormData).test(contentType):

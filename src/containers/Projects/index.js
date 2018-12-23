@@ -1,31 +1,45 @@
 import React, { Component } from 'react';
 import { Relative, TopBar, ListBody, ProjectCard, LineBar } from './components';
-import { Button, Input, Grid, SimpleSelect, Label } from '../../components/flex';
+import { Button, Input, Grid, SimpleSelect, Label, Loader } from '../../components/flex';
 import { Theme } from '../../components/flex/theme';
+import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { urls} from '../../api-requests/urls';
+import { ProjectCardComponent } from './presentation/projectCard';
+import { getData } from '../../api-requests/index';
+import {dispatchActions } from '../../store/actions/action-config.action';
+import { bindActionCreators } from 'redux'
 
-const ProjectCardComponent = (props) => {
-  return (
-    <ProjectCard layout={props.layout}>
-      <div className="project-year">{props.year}<span>{props.month}</span></div>
-      <div className="project-code">{props.code}</div>
-
-      <div className="project-name">{props.name}</div>
-      <div className="project-completion"><Label>Completion</Label><LineBar percentage={`${props.completed}%`} /></div>
-      <div className="project-payment"><Label>Payment</Label><LineBar color={Theme.PrimaryBlue} percentage={`${props.paid}%`} /></div>
-      {props.completed === 100 ? <div className="project-status"><i className="icon-ok" /></div> : <div className="project-status non">~</div>}
-    </ProjectCard>
-  )
+const defaultState = { 
+  current: 1,
+  viewlayout: "card"
 }
 class ProjectList extends Component {
   constructor() {
     super();
-    this.state = {
-      current: 1,
-      viewlayout: "card"
-    }
+    this.state =  defaultState;
+  }
+  proxyGetUrl = () => { 
+    const { allProjects } = urls;
+    return getData({ url: allProjects });
+  }
+  componentDidMount() { 
+    this.props.dispatchActions('LOAD_PROJECTS', {func: this.proxyGetUrl});
+  }
+  componentDidUpdate() { 
+    //
+  }
+  componentDidCatch() { 
+
   }
 
   render() {
+    const { loadProjectsPending, loadProjectsError, loadProjectsPayload} = this.props;
+    if (loadProjectsPending) { 
+      return (
+        <Loader/>
+      )
+    }
     return (
       <Relative>
         <TopBar>
@@ -175,5 +189,13 @@ class ProjectList extends Component {
     )
   }
 }
+const mapStateToProps = ({ loadProjects }) => ({
+  loadProjectsPending: loadProjects.pending,
+  loadProjectsError: loadProjects.error,
+  loadProjectsPayload: loadProjects.payload
+})
+const mapDispatchToProps = dispatch => (
+  bindActionCreators({ dispatchActions }, dispatch)
+)
 
-export default ProjectList;
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(ProjectList));
