@@ -44,7 +44,7 @@ export const Button = styled.button`
             }
     `}
     ${props => props.margin && css`
-        margin: ${props=>props.margin};
+        margin: ${props => props.margin};
     `} 
     ${props => props.width && css`
         min-width: ${props => props.width};
@@ -121,12 +121,16 @@ export const PaleButton = styled.button`
     background: none;
     border: 1px solid ${props => props.color ? props.color : Theme.PrimaryColor};
     color: ${props => props.color ? props.color : Theme.PrimaryColor};
+
+    &+button{
+        margin-left: 10px;
+    }
     
     ${props => props.margin && css`
-        margin: ${props=>props.margin};
+        margin: ${props => props.margin};
     `} 
     ${props => props.width && css`
-        min-width: ${props=>props.width};
+        min-width: ${props => props.width};
     `} 
 
     ${props => props.icon && css`
