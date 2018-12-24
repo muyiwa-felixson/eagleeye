@@ -41,7 +41,7 @@ export const ProjectReport = props => {
       onClose={closeReportModal}
       footer={
         <div>
-          <PaleButton>Cancel</PaleButton>{" "}
+          <PaleButton onClick={closeReportModal}>Cancel</PaleButton>{" "}
           <Button onClick={() => preSubmitForm(ref)}>Save Report</Button>
         </div>
       }

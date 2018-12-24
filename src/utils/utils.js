@@ -84,6 +84,14 @@ const contractors = [
     }
 ];
 
+const month = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+];
+
+const getMonth = (num) => {
+    return month[num];
+}
+
 const getOptions = (element) => {
     let levelAttr = [];
     element.map(elem =>
@@ -97,5 +105,6 @@ export {
     natureOfProject,
     sourceOfFunding,
     contractors,
-    targetUnits
+    targetUnits,
+    getMonth
 };

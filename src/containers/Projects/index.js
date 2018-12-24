@@ -7,7 +7,8 @@ import {
   natureOfProject,
   projectTypes,
   targetUnits,
-  contractors
+  contractors,
+  getMonth
 } from "../../utils/utils";
 // import Autosuggest from 'react-autosuggest';
 import {
@@ -92,7 +93,7 @@ class ProjectList extends Component {
       };
     });
   };
-  componentDidCatch() {}
+  componentDidCatch() { }
 
   submit = ev => {
     ev.preventDefault();
@@ -108,7 +109,7 @@ class ProjectList extends Component {
         [field]: formElements[field].value,
       };
     });
-    obj = {...obj, dateOfAward, completed: 0, paid:0  }
+    obj = { ...obj, dateOfAward, completed: 0, paid: 0 }
     this.setState(
       () => {
         return {
@@ -140,8 +141,8 @@ class ProjectList extends Component {
   navigateToProject = (rev, id) => {
     this.props.history.push(`/projects/project/${id}/${rev}`);
   };
-  handleDateChange = ( date) =>  { 
-    this.setState(()=> { 
+  handleDateChange = (date) => {
+    this.setState(() => {
       return {
         dateOfAward: date
       }
@@ -238,7 +239,7 @@ class ProjectList extends Component {
                         <ProjectCardComponent
                           key={index}
                           year={year}
-                          month={month}
+                          month={getMonth(month)}
                           code={fileNumber}
                           onClick={() => this.navigateToProject(id, rev)}
                           name={name}
@@ -251,8 +252,8 @@ class ProjectList extends Component {
                   })}
                 </React.Fragment>
               ) : (
-                <Loader absolute />
-              )}
+                  <Loader absolute />
+                )}
             </React.Fragment>
           </Grid>
         </ListBody>

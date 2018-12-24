@@ -43,7 +43,7 @@ export const PayReport = props => {
       onClose={closePaymentModal}
       footer={
         <div>
-          <PaleButton>Cancel</PaleButton>{" "}
+          <PaleButton onClick={closePaymentModal}>Cancel</PaleButton>{" "}
           <Button onClick={() => preSubmitFormPay(ref)}>Approve</Button>
         </div>
       }
@@ -85,7 +85,7 @@ export const PayReport = props => {
             forminput
           />
 
-          <Input
+          {/* <Input
             disabled
             placeholder="Project Cost"
             value={`${formatter.format(cost)}`}
@@ -93,7 +93,7 @@ export const PayReport = props => {
             name={"payableAmount"}
             label="Payment Amount"
             forminput
-          />
+          /> */}
           <Input
             placeholder="Enter Password"
             type="password"
