@@ -5,6 +5,9 @@ import { Theme } from '../theme';
 import { lighten, transparentize, darken } from 'polished';
 import { Label } from '../Typography/Typography.components';
 
+
+import "react-datepicker/dist/react-datepicker.css";
+
 // const SearchInput = styled.input.attrs({
 //     type: "password"
 // })`
@@ -222,6 +225,15 @@ export const InputWrapper = styled.div`
                 }   
             }
         }
+    }
+    & .react-datepicker-wrapper{
+        display: block;
+    }
+    & .react-datepicker__input-container{
+        display: block;
+    }
+    & .react-datepicker-popper{
+        z-index: 2000;
     }
 `;
 

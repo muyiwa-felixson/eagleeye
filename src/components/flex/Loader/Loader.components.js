@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import React from 'react';
 import { Theme } from '../theme';
 
@@ -9,6 +9,13 @@ export const Spinner = styled.div`
     margin: 10% auto;
     -webkit-animation: contanim 2s linear infinite;
         animation: contanim 2s linear infinite;
+
+    ${props => props.absolute && css`
+        position: fixed;
+        left: calc(50% - 33px);
+        top: calc(50% - 33px);
+        z-index: 2000;
+    `}
 `;
 
 export const Svg = styled.svg`
@@ -110,7 +117,7 @@ export class Loader extends React.Component {
     constructor(props) {
         super(props)
     }
-    
+
     render() {
         return (
             <Spinner>
