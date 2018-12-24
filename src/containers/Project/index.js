@@ -74,9 +74,15 @@ class Project extends Component {
   }
   sortByDate = (mergedList, reports, payments) => {
     const sortFunction = (a, b) => {
+      console.log(new Date(a.submittedOn), new Date(b.submittedOn) )
+      const date1 = new Date(a.submittedOn);
+      const date2 = new Date(b.submittedOn)
       // Turn your strings into dates, and then subtract them
       // to get a value that is either negative, positive, or zero.
-      return new Date(a.submittedOn) - new Date(b.submmitedOn) > 1 ? -1 : 1;
+      if (date1 < date2) return 1;
+      if (date1 > date2) return -1;
+      return 0;
+
     };
     const sorted = mergedList.sort(sortFunction);
     const sortedReports = reports.sort(sortFunction);
