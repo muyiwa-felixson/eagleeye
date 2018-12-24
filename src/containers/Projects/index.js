@@ -1,7 +1,14 @@
 import React, { Component } from "react";
 import { createForm, formShape } from "rc-form";
 import DatePicker from "react-datepicker";
-import { getOptions, sourceOfFunding, natureOfProject, projectTypes, targetUnits, contractors } from "../../utils/utils";
+import {
+  getOptions,
+  sourceOfFunding,
+  natureOfProject,
+  projectTypes,
+  targetUnits,
+  contractors
+} from "../../utils/utils";
 // import Autosuggest from 'react-autosuggest';
 import {
   Relative,
@@ -85,54 +92,60 @@ class ProjectList extends Component {
       };
     });
   };
-  componentDidCatch() { }
+  componentDidCatch() {}
 
   submit = ev => {
     ev.preventDefault();
-    const { submitButtonLoading } = this.state;
+    const { submitButtonLoading, dateOfAward } = this.state;
     const formElements = ev.target.elements;
     // this.props.form.validateFields((error, value) => {
     //   console.log(error, value);
     // });
     let obj = {};
     projectFields.map(field => {
-      console.log(formElements[field]);
       obj = {
         ...obj,
         [field]: formElements[field].value,
-        completed: 0,
-        paid: 0,
-        reports: [],
-        payments: []
       };
     });
-    this.setState(() => {
-      return {
-        submitButtonLoading: true
-      }
-    }, () => {
-      getData({
-        url: baseurl,
-        inputData: { doc: obj, dbname: "project" },
-        context: "POST"
-      })
-        .then(data => {
-          this.setState(() => {
-            this.form.reset();
-            return {
-              postData: data,
-              submitButtonLoading: false,
-              projectModal: false
-            };
-          });
+    obj = {...obj, dateOfAward, completed: 0, paid:0  }
+    this.setState(
+      () => {
+        return {
+          submitButtonLoading: true
+        };
+      },
+      () => {
+        getData({
+          url: baseurl,
+          inputData: { doc: obj, dbname: "project" },
+          context: "POST"
         })
-        .catch(err => {
-          console.log(err);
-        });
-    })
+          .then(data => {
+            this.setState(() => {
+              this.form.reset();
+              return {
+                postData: data,
+                submitButtonLoading: false,
+                projectModal: false
+              };
+            });
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      }
+    );
   };
   navigateToProject = (rev, id) => {
-    this.props.history.push(`/projects/project/${id}/${rev}`)
+    this.props.history.push(`/projects/project/${id}/${rev}`);
+  };
+  handleDateChange = ( date) =>  { 
+    this.setState(()=> { 
+      return {
+        dateOfAward: date
+      }
+    })
   }
   toggleClickAction = () => {
     const { projectModal } = this.state;
@@ -205,7 +218,9 @@ class ProjectList extends Component {
                 <React.Fragment>
                   {loadProjectsPayload.map((project, index) => {
                     const { doc, id, value } = project;
-                    const { rev } = value;
+                    console.log(doc, id, value);
+                    let { rev } = value;
+                    if (!rev) rev = doc._rev;
                     const {
                       dateOfAward,
                       fileNumber,
@@ -214,14 +229,16 @@ class ProjectList extends Component {
                       paid
                     } = doc;
                     const splittedDate = dateOfAward.split(" ");
-
+                    const date = new Date(dateOfAward) || new Date();
+                    const year = date.getFullYear();
+                    const month = date.getMonth();
                     return (
                       <React.Fragment>
                         {loadProjectsPending ? <Loader absolute /> : null}
                         <ProjectCardComponent
                           key={index}
-                          year={splittedDate[0] ? splittedDate[0] : ""}
-                          month={splittedDate[1] ? splittedDate[1] : ""}
+                          year={year}
+                          month={month}
                           code={fileNumber}
                           onClick={() => this.navigateToProject(id, rev)}
                           name={name}
@@ -234,8 +251,8 @@ class ProjectList extends Component {
                   })}
                 </React.Fragment>
               ) : (
-                  <Loader absolute />
-                )}
+                <Loader absolute />
+              )}
             </React.Fragment>
           </Grid>
         </ListBody>
@@ -308,7 +325,6 @@ class ProjectList extends Component {
                   options={getOptions(projectTypes)}
                 />
 
-
                 <SimpleSelect
                   type="select"
                   label="Target Unit"
@@ -337,10 +353,13 @@ class ProjectList extends Component {
                 <div style={{ paddingTop: "10px" }}>
                   <InputWrapper required>
                     <Label>Date of Award</Label>
-                    <DatePicker name="dateOfAward" />
+                    <DatePicker
+                      name="dateOfAward"
+                      selected={this.state.dateOfAward || new Date()}
+                      onChange={this.handleDateChange}
+                    />
                   </InputWrapper>
                 </div>
-
 
                 <SimpleSelect
                   type="select"

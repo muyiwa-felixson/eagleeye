@@ -3,13 +3,13 @@
  */
 export const projectFields = [
    'name' , 'description','fileNumber', 'nature', 'funding', 'type', 'unit', 'cost', 
-   'dateOfAward', 'contractor', 'duration', 'durationType'
+  'contractor', 'duration', 'durationType'
 ];
 
 export const projectReportFields = [
-    'name', 'completionLevel', 'submittedBy', 'submittedOn'
+    'name', 'completionLevel', 'reportComment', 'submittedBy'
 ];
 
 export const paymentFields = [
-    'name', 'percentage', 'cost', 'payableAmount', 'password'
+    'name', 'percentage', 'cost',  'reportComment', 'payableAmount', 'password'
 ]
