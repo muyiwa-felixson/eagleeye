@@ -99,7 +99,9 @@ class ProjectList extends Component {
         ...obj,
         [field]: formElements[field].value,
         completed: 0,
-        paid: 0
+        paid: 0,
+        reports: [],
+        payments:[]
       };
     });
     this.setState(() => { 
