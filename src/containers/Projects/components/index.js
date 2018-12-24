@@ -297,3 +297,121 @@ export const LineBar = styled.div`
   }
 
 `;
+
+export const BallLegend = styled.div`
+    display: inline-grid;
+    grid-template-columns: 35px auto;
+    font-size: ${Theme.BaseFontSize};
+    align-items: center;
+    margin-right: 15px;
+    text-transform: capitalize;
+    
+    &::before{
+        display: inline-block;
+        box-sizing: border-box;
+        text-align: center;
+        text-transform: uppercase;
+        content: '${props => props.legend}';
+        width: 28px;
+        height: 28px;
+        background: #333;
+        border: 1px solid #333;
+        ${props => props.color && css`
+            background: ${props => transparentize(0.1, props.color)};
+            border: 1px solid ${props => props.color};
+            text-shadow: 0 1px 1px ${props => props.color};
+        `};
+        border-radius: 50%;
+        padding: 6px 0;
+        line-height: 14px;
+        color: #fff;
+        font-size: 12px;
+        font-family: ${Theme.SecondaryFont};
+    }
+`;
+
+export const AutosuggestItem = styled.div`
+    display: grid;
+    grid-template-columns: 35px auto;
+    font-size: ${Theme.BaseFontSize};
+    align-items: center;
+    text-transform: capitalize;
+    position: relative;
+    
+    &::before{
+        display: inline-block;
+        box-sizing: border-box;
+        text-align: center;
+        text-transform: uppercase;
+        content: '${props => props.legend}';
+        width: 24px;
+        height: 24px;
+        margin-top: 5px;
+        background: #333;
+        border: 1px solid #333;
+        ${props => props.color && css`
+            background: ${props => transparentize(0.1, props.color)};
+            border: 1px solid ${props => props.color};
+            text-shadow: 0 1px 1px ${props => props.color};
+        `};
+        border-radius: 50%;
+        padding: 5px 0;
+        line-height: 12px;
+        color: #fff;
+        font-size: 10px;
+        font-family: ${Theme.SecondaryFont};
+    }
+`;
+
+export const LevelBadge = styled.div`
+    display: grid;
+    grid-template-columns: 35px;
+    font-size: ${Theme.BaseFontSize};
+    align-items: center;
+    text-transform: capitalize;
+    position: relative;
+    
+    &::before{
+        display: inline-block;
+        box-sizing: border-box;
+        text-align: center;
+        text-transform: uppercase;
+        content: '${props => props.legend}';
+        width: 24px;
+        height: 24px;
+        background: #333;
+        border: 1px solid #333;
+        ${props => props.color && css`
+            background: ${props => transparentize(0.1, props.color)};
+            border: 1px solid ${props => props.color};
+            text-shadow: 0 1px 1px ${props => props.color};
+        `};
+        border-radius: 50%;
+        padding: 5px 0;
+        line-height: 12px;
+        color: #fff;
+        font-size: 10px;
+        font-family: ${Theme.SecondaryFont};
+    }
+`;
+
+export const LevelList = styled.div`
+    position: absolute;
+    font-size: 10px;
+    opacity: 0.6;
+    bottom:-15px;
+    left: 35px;
+    text-align: right;
+    & span{
+        display: inline-block;
+        padding: 3px;
+        &:before{
+            content: '*';
+            display: inline-block;
+            padding-right: 3px;
+        }
+        &:first-child:before{
+            display: none;
+        }
+    }
+`;

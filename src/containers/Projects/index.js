@@ -1,31 +1,62 @@
 import React, { Component } from "react";
-import { Relative, TopBar, ListBody, ProjectCard, LineBar } from "./components";
+import { createForm, formShape } from "rc-form";
+// import Autosuggest from 'react-autosuggest';
+import {
+  Relative,
+  TopBar,
+  ListBody,
+  ProjectCard,
+  LineBar,
+  BallLegend,
+  LevelList,
+  AutosuggestItem
+} from "./components";
+import { getLevelAttr, levelAttribute } from "../../utils/levels";
 import {
   Button,
   Input,
   Grid,
   SimpleSelect,
   Label,
+  ModalComponent,
+  PaleButton,
+  Boxed,
+  TextArea,
+  P,
   Loader
 } from "../../components/flex";
 import { Theme } from "../../components/flex/theme";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import { urls } from "../../api-requests/urls";
+import { urls, baseurl } from "../../api-requests/urls";
 import { ProjectCardComponent } from "./presentation/projectCard";
 import { getData } from "../../api-requests/index";
 import { dispatchActions } from "../../store/actions/action-config.action";
 import { bindActionCreators } from "redux";
 import { ProjectAdd } from "../../commons/index";
+import { projectFields } from "../../config/form-fields";
+
+const numberList = () => {
+  let list = [];
+  for (let i = 1; i <= 100; i++) {
+    list.push({ value: i, label: i });
+  }
+  return list;
+};
 
 const defaultState = {
   current: 1,
-  viewlayout: "card"
+  projectModal: false,
+  viewlayout: "card",
+  newProject: null,
+  postData: null,
+  submitButtonLoading: false
 };
 class ProjectList extends Component {
   constructor() {
     super();
     this.state = defaultState;
+    this.form = React.createRef();
   }
   proxyGetUrl = () => {
     const { allProjects } = urls;
@@ -34,20 +65,92 @@ class ProjectList extends Component {
   componentDidMount() {
     this.props.dispatchActions("LOAD_PROJECTS", { func: this.proxyGetUrl });
   }
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
+    const nextProps = this.props;
+    const nextState = this.state;
+    if (!prevState.postData && nextState.postData) {
+      this.resetPostData();
+    }
+
     //
   }
+  resetPostData = () => {
+    this.props.dispatchActions("LOAD_PROJECTS", { func: this.proxyGetUrl });
+    this.setState(() => {
+      return {
+        postData: null
+      };
+    });
+  };
   componentDidCatch() {}
 
+  submit = ev => {
+    ev.preventDefault();
+    const { submitButtonLoading } = this.state;
+    const formElements = ev.target.elements;
+    // this.props.form.validateFields((error, value) => {
+    //   console.log(error, value);
+    // });
+    let obj = {};
+    console.log(projectFields);
+    projectFields.map(field => {
+      console.log(formElements[field]);
+      obj = {
+        ...obj,
+        [field]: formElements[field].value,
+        completed: 0,
+        paid: 0
+      };
+    });
+    this.setState(() => { 
+      return { 
+        submitButtonLoading: true
+      }
+    }, ()=> {
+    getData({
+      url: baseurl,
+      inputData: { doc: obj, dbname: "project" },
+      context: "POST"
+    })
+      .then(data => {
+        this.setState(() => {
+          this.form.reset();
+          return {
+            postData: data,
+            submitButtonLoading: false,
+            projectModal: false
+          };
+        });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+    })
+  };
+
+  toggleClickAction = () => {
+    const { projectModal } = this.state;
+    this.setState(() => {
+      return {
+        projectModal: !projectModal
+      };
+    });
+  };
+  submitForm = () => {
+    if (this.form) {
+      this.form.dispatchEvent(new Event("submit"));
+    }
+  };
   render() {
     const {
       loadProjectsPending,
       loadProjectsError,
-      loadProjectsPayload
+      loadProjectsPayload = []
     } = this.props;
+    const { submitButtonLoading } = this.state;
     return (
       <Relative>
-        <ProjectAdd clickAction={() => console.log("click action")} />
+        <ProjectAdd clickAction={this.toggleClickAction} />
         <ListBody>
           <Grid className="filter-lane" default="200px 1fr 1.5fr" tablet="1fr">
             <div>
@@ -91,122 +194,202 @@ class ProjectList extends Component {
             }
             pad={this.state.viewlayout === "card" ? "30px" : "5px"}
           >
-            {loadProjectsPending ? (
-              <Loader />
-            ) : (
-              <React.Fragment>
-                <ProjectCardComponent
-                  year="2018"
-                  month="Sep"
-                  code="PM/2018/JUN/LAG/IKG/001"
-                  name="Design a Solution for the Federal Agric Department"
-                  completed={75}
-                  paid={50}
-                  layout={this.state.viewlayout}
-                />
-                <ProjectCardComponent
-                  year="2018"
-                  month="Sep"
-                  code="PM/2018/JUN/LAG/IKG/001"
-                  name="Design a Solution for the Federal Agric Department"
-                  completed={100}
-                  paid={100}
-                  layout={this.state.viewlayout}
-                />
-                <ProjectCardComponent
-                  year="2018"
-                  month="Sep"
-                  code="PM/2018/JUN/LAG/IKG/001"
-                  name="Design a Solution for the Federal Agric Department"
-                  completed={75}
-                  paid={50}
-                  layout={this.state.viewlayout}
-                />
-                <ProjectCardComponent
-                  year="2018"
-                  month="Sep"
-                  code="PM/2018/JUN/LAG/IKG/001"
-                  name="Design a Solution for the Federal Agric Department"
-                  completed={100}
-                  paid={100}
-                  layout={this.state.viewlayout}
-                />
-                <ProjectCardComponent
-                  year="2018"
-                  month="Sep"
-                  code="PM/2018/JUN/LAG/IKG/001"
-                  name="Design a Solution for the Federal Agric Department"
-                  completed={75}
-                  paid={50}
-                  layout={this.state.viewlayout}
-                />
-                <ProjectCardComponent
-                  year="2018"
-                  month="Sep"
-                  code="PM/2018/JUN/LAG/IKG/001"
-                  name="Design a Solution for the Federal Agric Department"
-                  completed={100}
-                  paid={100}
-                  layout={this.state.viewlayout}
-                />
-                <ProjectCardComponent
-                  year="2018"
-                  month="Sep"
-                  code="PM/2018/JUN/LAG/IKG/001"
-                  name="Design a Solution for the Federal Agric Department"
-                  completed={75}
-                  paid={50}
-                  layout={this.state.viewlayout}
-                />
-                <ProjectCardComponent
-                  year="2018"
-                  month="Sep"
-                  code="PM/2018/JUN/LAG/IKG/001"
-                  name="Design a Solution for the Federal Agric Department"
-                  completed={100}
-                  paid={100}
-                  layout={this.state.viewlayout}
-                />
-                <ProjectCardComponent
-                  year="2018"
-                  month="Sep"
-                  code="PM/2018/JUN/LAG/IKG/001"
-                  name="Design a Solution for the Federal Agric Department"
-                  completed={75}
-                  paid={50}
-                  layout={this.state.viewlayout}
-                />
-                <ProjectCardComponent
-                  year="2018"
-                  month="Sep"
-                  code="PM/2018/JUN/LAG/IKG/001"
-                  name="Design a Solution for the Federal Agric Department"
-                  completed={100}
-                  paid={100}
-                  layout={this.state.viewlayout}
-                />
-                <ProjectCardComponent
-                  year="2018"
-                  month="Sep"
-                  code="PM/2018/JUN/LAG/IKG/001"
-                  name="Design a Solution for the Federal Agric Department"
-                  completed={75}
-                  paid={50}
-                  layout={this.state.viewlayout}
-                />
-                <ProjectCardComponent
-                  year="2018"
-                  month="Sep"
-                  code="PM/2018/JUN/LAG/IKG/001"
-                  name="Design a Solution for the Federal Agric Department"
-                  completed={100}
-                  paid={100}
-                  layout={this.state.viewlayout}
-                />
-              </React.Fragment>
-            )}
+            <React.Fragment>
+              {loadProjectsPayload && loadProjectsPayload.length > 0 ? (
+                <React.Fragment>
+                  {loadProjectsPayload.map((project, index) => {
+                    const { doc, id, value } = project;
+                    const { rev } = value;
+                    const {
+                      dateOfAward,
+                      fileNumber,
+                      name,
+                      completed,
+                      paid
+                    } = doc;
+                    const splittedDate = dateOfAward.split(" ");
+
+                    return (
+                      <React.Fragment>
+                        {loadProjectsPending ? <Loader /> : null}
+                        <ProjectCardComponent
+                          key={index}
+                          year={splittedDate[0] ? splittedDate[0] : ""}
+                          month={splittedDate[1] ? splittedDate[1] : ""}
+                          code={fileNumber}
+                          name={name}
+                          completed={completed}
+                          paid={paid}
+                          layout={this.state.viewlayout}
+                        />
+                      </React.Fragment>
+                    );
+                  })}
+                </React.Fragment>
+              ) : (
+                <Loader/>
+              )}
+            </React.Fragment>
           </Grid>
         </ListBody>
+
+        <ModalComponent
+          title="Project"
+          subTitle="Add A New"
+          open={this.state.projectModal}
+          onClose={this.toggleClickAction}
+          footer={
+            <div>
+              <PaleButton>Cancel</PaleButton>{" "}
+              <Button onClick={this.submitForm}>
+                {" "}
+                {!submitButtonLoading ? "Save Report" : "Loading ..."}
+              </Button>
+            </div>
+          }
+          expandable
+          fluid
+        >
+          <form ref={el => (this.form = el)} onSubmit={this.submit}>
+            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+            officia deserunt.
+            <Boxed padVertical="30px">
+              <Grid pad="15px" default="3fr 1fr" tablet="2fr 1fr">
+                <Input
+                  placeholder="Project Name"
+                  type="text"
+                  label="Project"
+                  forminput
+                  name="name"
+                />
+
+                <Input
+                  placeholder="File Number"
+                  type="text"
+                  label="File Number"
+                  forminput
+                  name="fileNumber"
+                />
+              </Grid>
+              <p />
+              <TextArea name="description" label="Project Description" />
+              <p />
+              <Grid pad="15px" default="1fr 1fr 1fr 1fr" tablet="1fr 1fr 1fr">
+                <SimpleSelect
+                  type="select"
+                  label="Project Nature"
+                  required
+                  forminput
+                  name="nature"
+                  options={[
+                    { value: "Intervention", label: "Intervention" },
+                    { value: "Rebuild", label: "Rebuild" }
+                  ]}
+                />
+                <SimpleSelect
+                  type="select"
+                  label="Source of Funding"
+                  required
+                  forminput
+                  name="funding"
+                  options={[
+                    { value: "Govenrment", label: "Govenrment" },
+                    { value: "Private", label: "Private" }
+                  ]}
+                />
+
+                <Input
+                  placeholder="Project Type"
+                  type="number"
+                  label="Project Type"
+                  forminput
+                  name="type"
+                />
+
+                <SimpleSelect
+                  type="select"
+                  label="Target Unit"
+                  required
+                  forminput
+                  name="unit"
+                  options={[
+                    { value: "1", label: "1" },
+                    { value: "2", label: "2" },
+                    { value: "3", label: "3" },
+                    { value: "4", label: "4" },
+                    { value: "5", label: "5" }
+                  ]}
+                />
+
+                <Input
+                  placeholder="Project Cost"
+                  type="number"
+                  label="Project Cost"
+                  forminput
+                  name="cost"
+                />
+
+                <Input
+                  placeholder="Date of Award"
+                  // This Input should be a date selector //
+                  type="text"
+                  label="Date of Award"
+                  forminput
+                  name="dateOfAward"
+                />
+
+                <SimpleSelect
+                  type="select"
+                  label="Contractor"
+                  required
+                  forminput
+                  name="contractor"
+                  options={[
+                    { value: "ABC Contractors", label: "ABC Contractors" },
+                    { value: "CBD Contractors", label: "CBD Contractors" },
+                    {
+                      value: "Environmental Scervices",
+                      label: "Environmental Services"
+                    },
+                    {
+                      value: "Background Services",
+                      label: "Background Services"
+                    }
+                  ]}
+                />
+                <Grid
+                  default="1fr 2fr"
+                  tablet="1fr 2fr"
+                  mobile="1fr 2fr"
+                  pad="15px"
+                >
+                  <SimpleSelect
+                    options={numberList()}
+                    type="select"
+                    label="Duration"
+                    required
+                    forminput
+                    name="duration"
+                  />
+                  <SimpleSelect
+                    options={[
+                      { value: "days", label: "days" },
+                      { value: "weeks", label: "weeks" },
+                      { value: "months", label: "months" },
+                      { value: "years", label: "years" }
+                    ]}
+                    type="select"
+                    label="Duration Type"
+                    name="durationType"
+                    required
+                    forminput
+                  />
+                </Grid>
+              </Grid>
+              <p />
+            </Boxed>
+          </form>
+        </ModalComponent>
       </Relative>
     );
   }

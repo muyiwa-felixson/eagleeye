@@ -19,8 +19,8 @@ export const ProjectAdd = ({ clickAction  }) => {
         <Input type="search" />
       </div>
       <div>
-        <Button iconLeft>
-          <i className="icon-folder" onClick={clickAction} />
+        <Button iconLeft onClick={clickAction} >
+          <i className="icon-folder" />
           New Project
         </Button>
       </div>
