@@ -1,24 +1,9 @@
 import React from "react";
 import {
-  TopSection,
-  LowerSection,
-  TimeLine,
-  TimeBox,
-  TimeDate,
-  TimeContent,
-  TimeDiv,
-  Picture,
-  Video,
-  PayContent,
-  DragZone
-} from "../components";
-import {
   Button,
   Input,
   Grid,
   SimpleSelect,
-  Label,
-  Panel,
   PaleButton,
   Aligner,
   H4,
@@ -29,7 +14,14 @@ import {
   TextArea,
   InputWrapper
 } from "../../../components/flex";
-import { CurrencyFormat } from 'react-currency-format';
+import { CurrencyFormat } from "react-currency-format";
+const formatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "NGN",
+  minimumFractionDigits: 2
+  // the default value for minimumFractionDigits depends on the currency
+  // and is usually already 2
+});
 export const PayReport = props => {
   const {
     paymentModal,
@@ -37,8 +29,11 @@ export const PayReport = props => {
     preSubmitFormPay,
     submitFormPay,
     percentages,
-    getFieldProps
+    getFieldProps,
+    name,
+    cost
   } = props;
+
   let ref = React.createRef();
   return (
     <ModalComponent
@@ -60,15 +55,15 @@ export const PayReport = props => {
           <Input
             disabled
             placeholder="Project Name"
-            value="Very Long Project Name, Thats Spans Multiple Lines Like State Names And Local Government Names and Much More."
-            name="dddname"
+            value={name}
+            name="name"
             type="text"
             label="Project"
             forminput
           />
 
           <SimpleSelect
-            options={percentages}
+            options={percentages()}
             type="select"
             label="Select Payment Percentage"
             name="percentage"
@@ -76,42 +71,29 @@ export const PayReport = props => {
             forminput
           />
         </Grid>
+        <p />
+        <TextArea name="reportComment" label="Report Comment" />
+        <p>Esunt in culpa qui officia deserunt.</p>
         <Grid default="1fr 1fr 1fr" pad="20px">
-          <CurrencyFormat
-            // value={this.state.projectCost}
-            displayType={"text"}
-            thousandSeparator={true}
-            prefix={"N"}
-            renderText={value => (
-              <Input
-                disabled
-                placeholder="Project Cost"
-                value={value}
-                type="text"
-                name="cost"
-                label="Project Cost"
-                forminput
-              />
-            )}
-          />
-          <CurrencyFormat
-            // value={this.state.expectedCost}
-            displayType={"text"}
-            thousandSeparator={true}
-            prefix={"N"}
-            renderText={value => (
-              <Input
-                disabled
-                placeholder="Project Cost"
-                value={value}
-                type="text"
-                name={"payableAmount"}
-                label="Payment Amount"
-                forminput
-              />
-            )}
+          <Input
+            disabled
+            placeholder="Project Cost"
+            value={`${formatter.format(cost)}`}
+            type="text"
+            name="cost"
+            label="Project Cost"
+            forminput
           />
 
+          <Input
+            disabled
+            placeholder="Project Cost"
+            value={`${formatter.format(cost)}`}
+            type="text"
+            name={"payableAmount"}
+            label="Payment Amount"
+            forminput
+          />
           <Input
             placeholder="Enter Password"
             type="password"

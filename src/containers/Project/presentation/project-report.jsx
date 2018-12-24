@@ -31,7 +31,7 @@ import {
 } from "../../../components/flex";
 
 export const ProjectReport = props => {
-  const { reportModal, closeReportModal, preSubmitForm, submitForm, percentages } = props;
+  const { reportModal, closeReportModal, preSubmitForm, submitForm, percentages, name } = props;
   let ref = React.createRef();
   return (
     <ModalComponent
@@ -55,7 +55,7 @@ export const ProjectReport = props => {
           <Input
             disabled
             placeholder="Project Name"
-            value="name"
+            value={name}
             name="name"
             type="text"
             label="Project"
@@ -64,7 +64,7 @@ export const ProjectReport = props => {
           <p />
           <Grid pad="15px" default="1fr 1fr 1fr" tablet="1fr 1fr">
             <SimpleSelect
-              // options={percentages()}
+              options={percentages()}
               // {...getFieldProps("option1", {
               //   onChange() {},
               //   rules: [{ required: true }]
@@ -91,7 +91,6 @@ export const ProjectReport = props => {
               disabled
               placeholder="Submitted On"
               value="Mon, 24th Dec 2018"
-              name="submittedOn"
               type="text"
               label="Submitted By"
               forminput

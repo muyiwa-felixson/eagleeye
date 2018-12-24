@@ -47,6 +47,7 @@ const routes = app => {
   // PATCH
   app.patch(`/${appName}/api/item`, (req, res) => {
     const { id, doc, dbname, rev } = req.body;
+    console.log(doc, ' ====> doc')
     try {
       updateDocument(dbname, doc, id, rev)
         .then(retVal => res.status(200).json(retVal))

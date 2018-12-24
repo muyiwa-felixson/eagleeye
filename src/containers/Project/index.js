@@ -12,11 +12,8 @@ import { ProjectReport } from "./presentation/project-report";
 import { PayReport } from "./presentation/pay-report";
 import { projectReportFields, paymentFields } from "../../config/form-fields";
 
-import {
-  TopSection,
-  LowerSection,
-} from "./components";
-import {  LineBar } from "../Projects/components";
+import { TopSection, LowerSection } from "./components";
+import { LineBar } from "../Projects/components";
 import {
   Button,
   Grid,
@@ -32,13 +29,14 @@ import {
 import { Theme } from "../../components/flex/theme";
 import { getData } from "../../api-requests/index";
 import { bindActionCreators } from "redux";
-import { TimelineList} from './presentation/timeline';
+import { TimelineList } from "./presentation/timeline";
 
 const defaultState = {
   reportModal: false,
   paymentModal: false,
   projectCost: 34500200,
-  expectedCost: 0
+  expectedCost: 0,
+  mergedList: null
 };
 
 class Project extends Component {
@@ -46,8 +44,8 @@ class Project extends Component {
     super();
     this.state = defaultState;
   }
-  componentDidMount  () {
-    console.log('component mounting ..')
+  componentDidMount() {
+    console.log("component mounting ..");
     const { match } = this.props;
     const { params } = match;
     const { id, rev } = params;
@@ -55,16 +53,39 @@ class Project extends Component {
       return getData({ url: urls.getProject({ id, rev }) });
     };
     this.props.dispatchActions("LOAD_PROJECT", { func: proxyLoadProject });
-  };
+  }
   componentDidUpdate(prevProps, prevState) {
     const nextProps = this.props;
     const nextState = this.state;
     if (!prevState.postData && nextState.postData) {
       this.resetPostData();
     }
+    if (prevProps.loadProjectPending && nextProps.loadProjectPayload) {
+      const { loadProjectPayload } = nextProps;
+      let { reports, payments } = loadProjectPayload;
+      if (!reports) reports = [];
+      if (!payments) payments = [];
+      const mergedList = [...reports, ...payments];
+      this.sortByDate(mergedList, reports, payments);
+    }
 
     //
   }
+  sortByDate = (mergedList, reports, payments) => {
+    const sortFunction = (a, b) => {
+      // Turn your strings into dates, and then subtract them
+      // to get a value that is either negative, positive, or zero.
+      return new Date(b.submmitedOn) - new Date(a.submittedOn);
+    };
+    const sorted = mergedList.sort(sortFunction);
+    const sortedReports = reports.sort(sortFunction);
+    const sortedPayments = payments.sort(sortFunction);
+    this.setState({
+      mergedList: sorted,
+      sortedReports,
+      sortedPayments
+    });
+  };
   percentages = () => {
     let list = [];
     for (let i = 1; i <= 100; i++) {
@@ -117,15 +138,23 @@ class Project extends Component {
     const formElements = ev.target.elements;
     const { match, loadProjectPayload = {} } = this.props;
     const { params } = match;
-    const { id, rev } = params;
+    const { id } = params;
+    const rev = loadProjectPayload._rev;
     let obj2 = {};
+    const { reports = [] } = loadProjectPayload;
     projectReportFields.map(field => {
       obj2[field] = formElements[field].value;
     });
+    obj2.submittedOn = new Date();
+    obj2.category = "reports";
+    obj2.approved = false;
+    delete loadProjectPayload._id;
+    delete loadProjectPayload._rev;
     let obj = {
       ...loadProjectPayload,
-      reports: [...loadProjectPayload.reports, obj2]
+      reports: [...reports, obj2]
     };
+    console.log(obj, " objects with reports");
 
     this.setState(
       () => {
@@ -136,12 +165,11 @@ class Project extends Component {
       () => {
         getData({
           url: baseurl,
-          inputData: { doc: obj, dbname: "project", id, rev },
+          inputData: { doc: obj, dbname: "project", id, rev, confirmed: false },
           context: "PATCH"
         })
           .then(data => {
             this.setState(() => {
-              this.form.reset();
               return {
                 postData: data,
                 submitButtonLoading: false,
@@ -150,27 +178,37 @@ class Project extends Component {
             });
           })
           .catch(err => {
-            console.log(err);
+            this.setState(() => {
+              return {
+                postData: {},
+                submitButtonLoading: false,
+                reportModal: false
+              };
+            });
           });
       }
     );
   };
   submitFormPay = ev => {
     ev.preventDefault();
+    console.log('payment scheduled ...')
     const { submitButtonLoading } = this.state;
     const formElements = ev.target.elements;
     const { match, loadProjectPayload = {} } = this.props;
     const { params } = match;
-    const { id, rev } = params;
+    const { id } = params;
+    const rev = loadProjectPayload._rev;
     let obj2 = {};
+    const { payments = [] } = loadProjectPayload;
     paymentFields.map(field => {
-      obj[field] = formElements[field].value;
+      obj2[field] = formElements[field].value;
     });
+    obj2.submittedOn = new Date();
+    obj2.category = "payments";
     let obj = {
       ...loadProjectPayload,
-      payments: [...loadProjectPayload.payments, obj2],
+      payments: [...payments, obj2]
     };
-
     this.setState(
       () => {
         return {
@@ -195,20 +233,36 @@ class Project extends Component {
           })
           .catch(err => {
             console.log(err);
+            this.setState(() => {
+              this.form.reset();
+              return {
+                postData: {},
+                submitButtonLoading: false,
+                reportModal: false
+              };
+            });
           });
       }
     );
   };
   preSubmitForm = ref => {
     if (ref) {
-      ref.dispatchEvent(new Event("submit"));
+      console.log(ref);
+      ref.current.dispatchEvent(new Event("submit"));
     }
   };
   preSubmitFormPay = ref => {
     if (ref) {
-      ref.dispatchEvent(new Event("submit"));
+      ref.current.dispatchEvent(new Event("submit"));
     }
   };
+  formatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "NGN",
+    minimumFractionDigits: 2
+    // the default value for minimumFractionDigits depends on the currency
+    // and is usually already 2
+  });
   render() {
     let errors;
     // const { getFieldProps, getFieldError } = this.props.form;
@@ -218,21 +272,38 @@ class Project extends Component {
       loadProjectError
     } = this.props;
     const {
-      code = '',
-      name = '',
-      description = '',
-      funding = '',
-      nature = '',
-      type = '',
-      duration= '',
-      durationType= '',
-      contractor ='',
-      cost = ''
+      code = "",
+      name = "",
+      description = "",
+      funding = "",
+      nature = "",
+      type = "",
+      duration = "",
+      durationType = "",
+      contractor = "",
+      cost = ""
     } = this.props.loadProjectPayload || {};
-    const { reportModal, paymentModal } = this.state;
+    const {
+      reportModal,
+      paymentModal,
+      mergedList,
+      sortedReports,
+      sortedPayments
+    } = this.state;
+    const lastPayment =
+      sortedPayments && sortedPayments.length > 0
+        ? sortedPayments[0].percentage
+        : 0;
+    const lastCost =
+      sortedPayments && sortedPayments.length > 0 ? sortedPayments[0].cost : 0;
+    const lastReportCompletion =
+      sortedReports && sortedReports.length > 0
+        ? sortedReports[0].completionLevel
+        : 0;
+        console.log(mergedList,  ' and etc' )
     return (
       <div>
-        {loadProjectPending  && !loadProjectPayload ? (
+        {loadProjectPending && !loadProjectPayload ? (
           <Loader />
         ) : (
           <React.Fragment>
@@ -307,7 +378,7 @@ class Project extends Component {
                   </div>
                   <Aligner center>
                     <P>PAYMENTS</P>
-                    <H4 className="paid">23%</H4>
+                    <H4 className="paid">{`${lastPayment}%`}</H4>
                     <P>Of Project Cost has been approved for payment</P>
                     <Button
                       onClick={() => this.setState({ paymentModal: true })}
@@ -325,21 +396,21 @@ class Project extends Component {
                     <div>
                       <Grid default="50px auto 50px auto" padHorizontal="10px">
                         <div>
-                          <span className="perval">76%</span>
+                          <span className="perval">{`${lastReportCompletion}%`}</span>
                         </div>
                         <div>
                           <Label>Reported Coverage</Label>
                           <LineBar
-                            percentage="76%"
+                            percentage={`${lastReportCompletion}%`}
                             color={Theme.PrimaryGreyDark}
                           />
                         </div>
                         <div>
-                          <span className="perval">50%</span>
+                          <span className="perval">{`${lastReportCompletion}%`}</span>
                         </div>
                         <div>
-                          <Label>Approved Reports</Label>
-                          <LineBar percentage="50%" />
+                          <Label>{`${lastReportCompletion}%`}</Label>
+                          <LineBar percentage={`${lastReportCompletion}%`}/>
                         </div>
                       </Grid>
                     </div>
@@ -355,22 +426,29 @@ class Project extends Component {
                 </div>
               </Panel>
             </LowerSection>
-            <TimelineList />
-            <ProjectReport
-              preSubmitForm={this.preSubmitForm}
-              submitForm={this.submitForm}
-              closeReportModal={this.closeReportModal}
-              reportModal={reportModal}
-            />
-            {/* <PayReport
-              paymentModal={paymentModal}
-              presubmitForm={this.preSubmitFormPay}
-              closePaymentModal={this.closePaymentModal}
-              percentage={this.percentages}
-              submitForm={this.submitFormPay}
-              getFieldsProps={this.props.getFieldProps}
-            /> */}
-            :{" "}
+            <TimelineList mergedList={mergedList} />
+            {reportModal ? (
+              <ProjectReport
+                preSubmitForm={this.preSubmitForm}
+                submitForm={this.submitForm}
+                closeReportModal={this.closeReportModal}
+                reportModal={reportModal}
+                name={name}
+                percentages={this.percentages}
+              />
+            ) : null}
+            {paymentModal ? (
+              <PayReport
+                paymentModal={paymentModal}
+                presubmitForm={this.preSubmitFormPay}
+                closePaymentModal={this.closePaymentModal}
+                percentages={this.percentages}
+                name={name}
+                cost={cost}
+                submitForm={this.submitFormPay}
+                getFieldsProps={this.props.getFieldProps}
+              />
+            ) : null}
           </React.Fragment>
         )}
       </div>

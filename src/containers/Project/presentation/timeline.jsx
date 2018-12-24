@@ -1,60 +1,73 @@
 import React from "react";
-import {
-  TimeLine,
-
-} from "../components";
-import {
-  Panel,
-} from "../../../components/flex";
+import { TimeLine } from "../components";
+import { Panel } from "../../../components/flex";
 import { Theme } from "../../../components/flex/theme";
-import { TimeComponent } from './time-component';
-import { PayComponent } from './pay-component';
+import { TimeComponent } from "./time-component";
+import { PayComponent } from "./pay-component";
+import * as moment from 'moment';
 export const TimelineList = props => {
-  const { reportModal, closeReportModal } = props;
+  const { mergedList } = props;
+  console.log(mergedList,   ' and etc' )
   return (
     <Panel>
       <TimeLine>
-        <TimeComponent
-          type="report"
-          confirmed={false}
-          day="24"
-          month="NOV"
-          year="2018"
-          level={55}
-          submittedBy="Damina Ibra"
-          fullDate="01:34PM Tue, 24th Nov 2018"
-          comment="Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores"
-          media={[
-            { type: "picture" },
-            { type: "picture" },
-            { type: "video" },
-            { type: "picture" }
-          ]}
-        />
-
-        <PayComponent
-          approvedBy="Mr Salki Abdul"
-          day="2"
-          month="JUN"
-          year="2018"
-          ullDate="01:34PM Tue, 2nd Jun 2018"
-          level={25}
-          comment="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis"
-        />
-
-        <TimeComponent
-          type="report"
-          confirmed={true}
-          confirmedBy="Mikhail Olufadi"
-          day="2"
-          month="JUN"
-          year="2018"
-          level={25}
-          submittedBy="Damina Ibra"
-          fullDate="01:34PM Tue, 2nd Jun 2018"
-          comment="Tit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores"
-          media={[{ type: "video" }, { type: "picture" }]}
-        />
+        {mergedList && mergedList.length > 0 ? (
+          mergedList.map((item, index) => {
+            const {
+              type,
+              submittedOn,
+              submittedBy,
+              percentage,
+              reportComment,
+              completionLevel,
+              approved,
+              category
+            } = item;
+            const date = new Date(submittedOn);
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const day = date.getDate();
+            if (category == "reports") {
+              return (
+                <TimeComponent
+                  type="report"
+                  key={index}
+                  confirmed={approved}
+                  day={day}
+                  month={month}
+                  year={year}
+                  level={completionLevel}
+                  submittedBy={submittedBy}
+                  fullDate={moment(date).format('DD MMMM YYYY')}
+                  comment={reportComment}
+                  media={[
+                    { type: "picture" },
+                    { type: "picture" },
+                    { type: "video" },
+                    { type: "picture" }
+                  ]}
+                />
+              );
+            } else {
+              return (
+                <PayComponent
+                  approvedBy="Mr Salki Abdul"
+                  day={day}
+                  key={index}
+                  month={month}
+                  year={year}
+                  fullDate={moment(date).format('DD MMMM YYYY')}
+                  level={percentage}
+                  comment={reportComment}
+                />
+              );
+            }
+          })
+        ) : (
+          <div>
+            <h1>There are no reports or payment records to show</h1>
+          </div>
+        )}
       </TimeLine>
     </Panel>
   );
