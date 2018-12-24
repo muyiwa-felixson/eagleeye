@@ -26,5 +26,6 @@
  */
 export const reduxVariables  = {
     LOAD_PROJECTS: 'LOAD_PROJECTS',
-    LOAD_PROJECT: 'LOAD_PROJECT'
+    LOAD_PROJECT: 'LOAD_PROJECT',
+    POST_PROJECT: 'POST_PROJECT'
 };

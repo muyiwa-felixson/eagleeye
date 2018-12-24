@@ -105,7 +105,7 @@ const getDoc = (dbValue = "", id) => {
       );
     const db = nano.db.use(dbValue);
     if (!id) {
-      db.list()
+      db.list({ include_docs: true })
         .then(result => {
           resolve(result.rows);
         })
