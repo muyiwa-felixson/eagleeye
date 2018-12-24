@@ -129,7 +129,7 @@ class ProjectList extends Component {
     })
   };
   navigateToProject = (rev, id) => { 
-    // this.props.history.push(`/projects/project/${id}/${rev}`)
+    this.props.history.push(`/projects/project/${id}/${rev}`)
   }
   toggleClickAction = () => {
     const { projectModal } = this.state;
@@ -220,7 +220,7 @@ class ProjectList extends Component {
                           year={splittedDate[0] ? splittedDate[0] : ""}
                           month={splittedDate[1] ? splittedDate[1] : ""}
                           code={fileNumber}
-                          onClick={this.navigateToProject(id, rev)}
+                          onClick={()=>this.navigateToProject(id, rev)}
                           name={name}
                           completed={completed}
                           paid={paid}

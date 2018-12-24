@@ -46,14 +46,15 @@ class Project extends Component {
     super();
     this.state = defaultState;
   }
-  componentDidMount = () => {
+  componentDidMount  () {
+    console.log('component mounting ..')
     const { match } = this.props;
     const { params } = match;
     const { id, rev } = params;
     const proxyLoadProject = () => {
       return getData({ url: urls.getProject({ id, rev }) });
     };
-    this.props.dispatActions("LOAD_PROJECT", { func: proxyLoadProject });
+    this.props.dispatchActions("LOAD_PROJECT", { func: proxyLoadProject });
   };
   componentDidUpdate(prevProps, prevState) {
     const nextProps = this.props;
@@ -210,28 +211,28 @@ class Project extends Component {
   };
   render() {
     let errors;
-    const { getFieldProps, getFieldError } = this.props.form;
+    // const { getFieldProps, getFieldError } = this.props.form;
     const {
-      loadProjectPayload,
+      loadProjectPayload = {},
       loadProjectPending,
       loadProjectError
     } = this.props;
     const {
-      code,
-      name,
-      description,
-      funding,
-      nature,
-      type,
-      duration,
-      durationType,
-      contractor,
-      cost
-    } = loadProjectPayload;
+      code = '',
+      name = '',
+      description = '',
+      funding = '',
+      nature = '',
+      type = '',
+      duration= '',
+      durationType= '',
+      contractor ='',
+      cost = ''
+    } = this.props.loadProjectPayload || {};
     const { reportModal, paymentModal } = this.state;
     return (
       <div>
-        {loadProjectPending ? (
+        {loadProjectPending  && !loadProjectPayload ? (
           <Loader />
         ) : (
           <React.Fragment>
@@ -361,14 +362,14 @@ class Project extends Component {
               closeReportModal={this.closeReportModal}
               reportModal={reportModal}
             />
-            <PayReport
+            {/* <PayReport
               paymentModal={paymentModal}
               presubmitForm={this.preSubmitFormPay}
               closePaymentModal={this.closePaymentModal}
               percentage={this.percentages}
               submitForm={this.submitFormPay}
               getFieldsProps={this.props.getFieldProps}
-            />
+            /> */}
             :{" "}
           </React.Fragment>
         )}
@@ -380,7 +381,7 @@ class Project extends Component {
 const mapStateToProps = ({ loadProject }) => ({
   loadProjectPending: loadProject.pending,
   loadProjectError: loadProject.error,
-  loadProjectPayload: loadProject.payload ? loadProject.payload : null
+  loadProjectPayload: loadProject.payload
 });
 const mapDispatchToProps = dispatch =>
   bindActionCreators({ dispatchActions }, dispatch);
@@ -388,4 +389,4 @@ const mapDispatchToProps = dispatch =>
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withRouter(createForm()(PayComponent)));
+)(withRouter(createForm()(Project)));

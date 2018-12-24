@@ -39,7 +39,7 @@ export const PayReport = props => {
     percentages,
     getFieldProps
   } = props;
-  let ref = React.createElecment();
+  let ref = React.createRef();
   return (
     <ModalComponent
       title="Approve Payment"
@@ -68,25 +68,17 @@ export const PayReport = props => {
           />
 
           <SimpleSelect
-            options={percentages()}
-            {...getFieldProps("option1", {
-              onChange() {},
-              rules: [{ required: true }]
-            })}
-            // error={
-            //   (errors = getFieldError("option1")) ? errors.join(",") : null
-            // }
+            options={percentages}
             type="select"
             label="Select Payment Percentage"
             name="percentage"
             required
-            onChange={this.onChangePercentage}
             forminput
           />
         </Grid>
         <Grid default="1fr 1fr 1fr" pad="20px">
           <CurrencyFormat
-            value={this.state.projectCost}
+            // value={this.state.projectCost}
             displayType={"text"}
             thousandSeparator={true}
             prefix={"N"}
@@ -102,9 +94,8 @@ export const PayReport = props => {
               />
             )}
           />
-
           <CurrencyFormat
-            value={this.state.expectedCost}
+            // value={this.state.expectedCost}
             displayType={"text"}
             thousandSeparator={true}
             prefix={"N"}
