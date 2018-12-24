@@ -36,7 +36,8 @@ const defaultState = {
   paymentModal: false,
   projectCost: 34500200,
   expectedCost: 0,
-  mergedList: null
+  mergedList: null,
+  totalPayable: 0
 };
 
 class Project extends Component {
@@ -90,7 +91,7 @@ class Project extends Component {
     let ceilVal = 100;
     if (stat == "payment") {
       ceilVal = 100 - this.getPercentPaid();
-    } else { 
+    } else {
       ceilVal = 100 - this.getPercentCompleted();
     }
     let list = [];
@@ -137,6 +138,20 @@ class Project extends Component {
         paymentModal: false
       };
     });
+  };
+  calculatePayable = (ev, cost) => {
+    const percentage = ev.value;
+    if (percentage) {
+      console.log(percentage)
+      let num = percentage;
+      num = parseInt(num, 10);
+      const payable = (percentage / 100) * cost;
+      this.setState(() => {
+        return {
+          totalPayable: payable
+        };
+      });
+    }
   };
   submitForm = ev => {
     ev.preventDefault();
@@ -204,7 +219,7 @@ class Project extends Component {
   submitFormPay = ev => {
     ev.preventDefault();
     console.log("payment scheduled ...");
-    const { submitButtonLoading } = this.state;
+    const { submitButtonLoading, totalPayable } = this.state;
     const formElements = ev.target.elements;
     const { match, loadProjectPayload = {} } = this.props;
     const { params } = match;
@@ -284,8 +299,11 @@ class Project extends Component {
       let totalCoverage = 0;
       sortedPayments.map(payment => {
         let { percentage } = payment;
-        totalCoverage += parseInt(percentage);
+        if (!isNaN(parseInt(percentage, 10))) {
+          totalCoverage += parseInt(percentage);
+        }
       });
+      if (!totalCoverage) totalCoverage = 0;
       return totalCoverage;
     }
   };
@@ -306,6 +324,7 @@ class Project extends Component {
           }
         });
       }
+      if (!totalCoverage) totalCoverage = 0;
       return totalCoverage;
     }
   };
@@ -334,7 +353,8 @@ class Project extends Component {
       paymentModal,
       mergedList,
       sortedReports,
-      sortedPayments
+      sortedPayments,
+      totalPayable
     } = this.state;
     const lastPayment =
       sortedPayments && sortedPayments.length > 0
@@ -496,6 +516,8 @@ class Project extends Component {
                 closePaymentModal={this.closePaymentModal}
                 percentages={this.percentages}
                 paidPercent={this.getPercentPaid}
+                totalPayable={totalPayable}
+                calculatePayable={this.calculatePayable}
                 name={name}
                 cost={cost}
                 submitFormPay={this.submitFormPay}
