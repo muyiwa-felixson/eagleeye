@@ -44,7 +44,7 @@ export const PayReport = props => {
       footer={
         <div>
           <PaleButton>Cancel</PaleButton>{" "}
-          <Button onClcik={() => preSubmitFormPay(ref)}>Approve</Button>
+          <Button onClick={() => preSubmitFormPay(ref)}>Approve</Button>
         </div>
       }
       expandable

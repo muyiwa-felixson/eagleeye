@@ -75,7 +75,7 @@ class Project extends Component {
     const sortFunction = (a, b) => {
       // Turn your strings into dates, and then subtract them
       // to get a value that is either negative, positive, or zero.
-      return new Date(b.submmitedOn) - new Date(a.submittedOn);
+      return new Date(a.submittedOn) - new Date(b.submmitedOn) > 1 ? -1 : 1;
     };
     const sorted = mergedList.sort(sortFunction);
     const sortedReports = reports.sort(sortFunction);
@@ -170,6 +170,7 @@ class Project extends Component {
         })
           .then(data => {
             this.setState(() => {
+              this.closeReportModal();
               return {
                 postData: data,
                 submitButtonLoading: false,
@@ -179,6 +180,7 @@ class Project extends Component {
           })
           .catch(err => {
             this.setState(() => {
+              this.closeReportModal();
               return {
                 postData: {},
                 submitButtonLoading: false,
@@ -209,6 +211,7 @@ class Project extends Component {
       ...loadProjectPayload,
       payments: [...payments, obj2]
     };
+    console.log(obj, ' Object is here and here ')
     this.setState(
       () => {
         return {
@@ -223,22 +226,21 @@ class Project extends Component {
         })
           .then(data => {
             this.setState(() => {
-              this.form.reset();
+              this.closePaymentModal();
               return {
                 postData: data,
                 submitButtonLoading: false,
-                reportModal: false
+               paymentModal: false
               };
             });
           })
           .catch(err => {
-            console.log(err);
+            this.closePaymentModal();
             this.setState(() => {
-              this.form.reset();
               return {
                 postData: {},
                 submitButtonLoading: false,
-                reportModal: false
+                paymentModal: false
               };
             });
           });
@@ -247,7 +249,6 @@ class Project extends Component {
   };
   preSubmitForm = ref => {
     if (ref) {
-      console.log(ref);
       ref.current.dispatchEvent(new Event("submit"));
     }
   };
@@ -440,12 +441,12 @@ class Project extends Component {
             {paymentModal ? (
               <PayReport
                 paymentModal={paymentModal}
-                presubmitForm={this.preSubmitFormPay}
+                preSubmitFormPay={this.preSubmitFormPay}
                 closePaymentModal={this.closePaymentModal}
                 percentages={this.percentages}
                 name={name}
                 cost={cost}
-                submitForm={this.submitFormPay}
+                submitFormPay={this.submitFormPay}
                 getFieldsProps={this.props.getFieldProps}
               />
             ) : null}

@@ -202,7 +202,9 @@ class ProjectList extends Component {
                 <React.Fragment>
                   {loadProjectsPayload.map((project, index) => {
                     const { doc, id, value } = project;
-                    const { rev } = value;
+                    console.log(doc, id, value)
+                    let { rev } = value;
+                    if(!rev) rev  = doc._rev;
                     const {
                       dateOfAward,
                       fileNumber,
