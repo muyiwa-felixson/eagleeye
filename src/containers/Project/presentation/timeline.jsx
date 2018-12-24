@@ -5,8 +5,9 @@ import { Theme } from "../../../components/flex/theme";
 import { TimeComponent } from "./time-component";
 import { PayComponent } from "./pay-component";
 import * as moment from 'moment';
+import { getMonth } from '../../../utils/utils';
 export const TimelineList = props => {
-  const { mergedList } = props;
+  const { mergedList} = props;
   console.log(mergedList,   ' and etc' )
   return (
     <Panel>
@@ -25,7 +26,7 @@ export const TimelineList = props => {
             } = item;
             const date = new Date(submittedOn);
             const year = date.getFullYear();
-            const month = date.getMonth();
+            const month = getMonth(date.getMonth());
             const day = date.getDate();
             if (category == "reports") {
               return (

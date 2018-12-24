@@ -64,7 +64,7 @@ export const ProjectReport = props => {
           <p />
           <Grid pad="15px" default="1fr 1fr 1fr" tablet="1fr 1fr">
             <SimpleSelect
-              options={percentages()}
+              options={percentages('reports')}
               // {...getFieldProps("option1", {
               //   onChange() {},
               //   rules: [{ required: true }]
