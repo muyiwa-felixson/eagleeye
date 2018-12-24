@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import { createForm, formShape } from "rc-form";
+import DatePicker from "react-datepicker";
+import { getOptions, sourceOfFunding, natureOfProject, projectTypes, targetUnits, contractors } from "../../utils/utils";
 // import Autosuggest from 'react-autosuggest';
 import {
   Relative,
@@ -23,7 +25,8 @@ import {
   Boxed,
   TextArea,
   P,
-  Loader
+  Loader,
+  InputWrapper
 } from "../../components/flex";
 import { Theme } from "../../components/flex/theme";
 import { withRouter } from "react-router-dom";
@@ -82,7 +85,7 @@ class ProjectList extends Component {
       };
     });
   };
-  componentDidCatch() {}
+  componentDidCatch() { }
 
   submit = ev => {
     ev.preventDefault();
@@ -100,35 +103,35 @@ class ProjectList extends Component {
         completed: 0,
         paid: 0,
         reports: [],
-        payments:[]
+        payments: []
       };
     });
-    this.setState(() => { 
-      return { 
+    this.setState(() => {
+      return {
         submitButtonLoading: true
       }
-    }, ()=> {
-    getData({
-      url: baseurl,
-      inputData: { doc: obj, dbname: "project" },
-      context: "POST"
-    })
-      .then(data => {
-        this.setState(() => {
-          this.form.reset();
-          return {
-            postData: data,
-            submitButtonLoading: false,
-            projectModal: false
-          };
-        });
+    }, () => {
+      getData({
+        url: baseurl,
+        inputData: { doc: obj, dbname: "project" },
+        context: "POST"
       })
-      .catch(err => {
-        console.log(err);
-      });
+        .then(data => {
+          this.setState(() => {
+            this.form.reset();
+            return {
+              postData: data,
+              submitButtonLoading: false,
+              projectModal: false
+            };
+          });
+        })
+        .catch(err => {
+          console.log(err);
+        });
     })
   };
-  navigateToProject = (rev, id) => { 
+  navigateToProject = (rev, id) => {
     this.props.history.push(`/projects/project/${id}/${rev}`)
   }
   toggleClickAction = () => {
@@ -214,13 +217,13 @@ class ProjectList extends Component {
 
                     return (
                       <React.Fragment>
-                        {loadProjectsPending ? <Loader /> : null}
+                        {loadProjectsPending ? <Loader absolute /> : null}
                         <ProjectCardComponent
                           key={index}
                           year={splittedDate[0] ? splittedDate[0] : ""}
                           month={splittedDate[1] ? splittedDate[1] : ""}
                           code={fileNumber}
-                          onClick={()=>this.navigateToProject(id, rev)}
+                          onClick={() => this.navigateToProject(id, rev)}
                           name={name}
                           completed={completed}
                           paid={paid}
@@ -231,8 +234,8 @@ class ProjectList extends Component {
                   })}
                 </React.Fragment>
               ) : (
-                <Loader/>
-              )}
+                  <Loader absolute />
+                )}
             </React.Fragment>
           </Grid>
         </ListBody>
@@ -285,10 +288,7 @@ class ProjectList extends Component {
                   required
                   forminput
                   name="nature"
-                  options={[
-                    { value: "Intervention", label: "Intervention" },
-                    { value: "Rebuild", label: "Rebuild" }
-                  ]}
+                  options={getOptions(natureOfProject)}
                 />
                 <SimpleSelect
                   type="select"
@@ -296,19 +296,18 @@ class ProjectList extends Component {
                   required
                   forminput
                   name="funding"
-                  options={[
-                    { value: "Govenrment", label: "Govenrment" },
-                    { value: "Private", label: "Private" }
-                  ]}
+                  options={getOptions(sourceOfFunding)}
                 />
 
-                <Input
-                  placeholder="Project Type"
-                  type="number"
+                <SimpleSelect
+                  type="select"
                   label="Project Type"
+                  required
                   forminput
                   name="type"
+                  options={getOptions(projectTypes)}
                 />
+
 
                 <SimpleSelect
                   type="select"
@@ -316,13 +315,7 @@ class ProjectList extends Component {
                   required
                   forminput
                   name="unit"
-                  options={[
-                    { value: "1", label: "1" },
-                    { value: "2", label: "2" },
-                    { value: "3", label: "3" },
-                    { value: "4", label: "4" },
-                    { value: "5", label: "5" }
-                  ]}
+                  options={getOptions(targetUnits)}
                 />
 
                 <Input
@@ -333,14 +326,21 @@ class ProjectList extends Component {
                   name="cost"
                 />
 
-                <Input
+                {/* <Input
                   placeholder="Date of Award"
                   // This Input should be a date selector //
                   type="text"
                   label="Date of Award"
                   forminput
-                  name="dateOfAward"
-                />
+                  
+                /> */}
+                <div style={{ paddingTop: "10px" }}>
+                  <InputWrapper required>
+                    <Label>Date of Award</Label>
+                    <DatePicker name="dateOfAward" />
+                  </InputWrapper>
+                </div>
+
 
                 <SimpleSelect
                   type="select"
@@ -348,18 +348,7 @@ class ProjectList extends Component {
                   required
                   forminput
                   name="contractor"
-                  options={[
-                    { value: "ABC Contractors", label: "ABC Contractors" },
-                    { value: "CBD Contractors", label: "CBD Contractors" },
-                    {
-                      value: "Environmental Scervices",
-                      label: "Environmental Services"
-                    },
-                    {
-                      value: "Background Services",
-                      label: "Background Services"
-                    }
-                  ]}
+                  options={getOptions(contractors)}
                 />
                 <Grid
                   default="1fr 2fr"

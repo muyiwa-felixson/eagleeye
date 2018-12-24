@@ -3,7 +3,7 @@ import { css } from 'styled-components';
 import './fonts/fonts/fonts.css';
 
 
-const BrandColor = "#AEBFA0";
+const BrandColor = "#017d34";
 const BrandGrey = "#9DA2AD";
 
 export const Theme = {

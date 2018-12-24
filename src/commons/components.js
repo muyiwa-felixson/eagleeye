@@ -27,6 +27,10 @@ export const TopBar = styled.div`
   & .logo{
     text-align: center;
     font-size: 30px;
+    & img{
+      height: 60px;
+      margin: 0 20px;
+    }
   }
   & .login-user{
     display: flex;

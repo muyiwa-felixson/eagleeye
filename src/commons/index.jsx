@@ -6,13 +6,15 @@
 import React from "react";
 import { TopBar } from './components';
 import { Button, Input } from '../components/flex';
+
+import Logo from '../components/assets/logo.png';
 // Local importa
 // N/A
-export const ProjectAdd = ({ clickAction  }) => {
+export const ProjectAdd = ({ clickAction }) => {
   return (
     <TopBar>
       <div className="logo">
-        <i className="icon-headphones" />
+        <img src={Logo} />
       </div>
       <div />
       <div>
