@@ -92,7 +92,6 @@ class ProjectList extends Component {
     //   console.log(error, value);
     // });
     let obj = {};
-    console.log(projectFields);
     projectFields.map(field => {
       console.log(formElements[field]);
       obj = {
@@ -129,7 +128,9 @@ class ProjectList extends Component {
       });
     })
   };
-
+  navigateToProject = (rev, id) => { 
+    this.props.history.push(`/projects/project/${id}/${rev}`)
+  }
   toggleClickAction = () => {
     const { projectModal } = this.state;
     this.setState(() => {
@@ -219,6 +220,7 @@ class ProjectList extends Component {
                           year={splittedDate[0] ? splittedDate[0] : ""}
                           month={splittedDate[1] ? splittedDate[1] : ""}
                           code={fileNumber}
+                          onClick={()=>this.navigateToProject(id, rev)}
                           name={name}
                           completed={completed}
                           paid={paid}
