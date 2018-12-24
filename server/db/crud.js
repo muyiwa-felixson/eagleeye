@@ -155,7 +155,7 @@ const updateDoc = (dbValue, doc, id, rev) => {
         `Wrong database name passed in please check the value ${dbValue}`
       );
     const db = nano.db.use(dbValue);
-    db.insert({ ...doc, _rev: rev })
+    db.insert({ ...doc, _id: id, _rev: rev })
       .then(result => {
         resolve(result);
       })
