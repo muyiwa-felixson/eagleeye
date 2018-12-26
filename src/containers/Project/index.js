@@ -1,19 +1,16 @@
 import React, { Component } from "react";
-import CurrencyFormat from "react-currency-format";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { urls, baseurl } from "../../api-requests/urls";
 import { createForm, formShape } from "rc-form";
 import { dispatchActions } from "../../store/actions/action-config.action";
 import { ProjectAdd } from "../../commons/index";
-import { PayComponent } from "./presentation/pay-component";
-import { TimeComponent } from "./presentation/time-component";
 import { ProjectReport } from "./presentation/project-report";
 import { PayReport } from "./presentation/pay-report";
 import { projectReportFields, paymentFields } from "../../config/form-fields";
-
 import { TopSection, LowerSection } from "./components";
 import { LineBar } from "../Projects/components";
+import axios from "axios";
 import {
   Button,
   Grid,
@@ -30,6 +27,7 @@ import { Theme } from "../../components/flex/theme";
 import { getData } from "../../api-requests/index";
 import { bindActionCreators } from "redux";
 import { TimelineList } from "./presentation/timeline";
+import { guid } from "../../utils/utils";
 
 const defaultState = {
   reportModal: false,
@@ -37,7 +35,9 @@ const defaultState = {
   projectCost: 34500200,
   expectedCost: 0,
   mergedList: null,
-  totalPayable: 0
+  totalPayable: 0,
+  image: null,
+  displayImages: []
 };
 
 class Project extends Component {
@@ -74,15 +74,13 @@ class Project extends Component {
   }
   sortByDate = (mergedList, reports, payments) => {
     const sortFunction = (a, b) => {
-      console.log(new Date(a.submittedOn), new Date(b.submittedOn) )
       const date1 = new Date(a.submittedOn);
-      const date2 = new Date(b.submittedOn)
+      const date2 = new Date(b.submittedOn);
       // Turn your strings into dates, and then subtract them
       // to get a value that is either negative, positive, or zero.
       if (date1 < date2) return 1;
       if (date1 > date2) return -1;
       return 0;
-
     };
     const sorted = mergedList.sort(sortFunction);
     const sortedReports = reports.sort(sortFunction);
@@ -95,11 +93,21 @@ class Project extends Component {
   };
   percentages = (stat = "payment") => {
     let ceilVal = 100;
+    let percent = 0;
     if (stat == "payment") {
-      ceilVal = 100 - this.getPercentPaid();
+      if (!this.getPercentPaid()) {
+        percent = 0;
+      } else {
+        percent = this.getPercentPaid();
+      }
     } else {
-      ceilVal = 100 - this.getPercentCompleted();
+      if (!this.getPercentCompleted()) {
+        percent = 0;
+      } else {
+        percent = this.getPercentCompleted();
+      }
     }
+    ceilVal = 100 - percent;
     let list = [];
     for (let i = 1; i <= ceilVal; i++) {
       list.push({ value: i, label: `${i}%` });
@@ -121,9 +129,41 @@ class Project extends Component {
     });
   };
 
+  readFiles = (file, target) => {
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const newImage = e.target.result;
+        this.setState(() => {
+          const { displayImages } = this.state;
+          displayImages.push(newImage);
+          return {
+            displayImages
+          };
+        });
+        reader.removeEventListener("load", () => {});
+        // target.reset();
+      };
+
+      reader.readAsDataURL(file);
+    }
+  };
+
+  imageChanged = ev => {
+    const target = ev.target;
+    const files = ev.target.files;
+    this.readFiles(files["0"], target);
+    if (files.length < 2) {
+      this.setState(() => {
+        return {
+          image: files["0"]
+        };
+      });
+    }
+  };
   submit = () => {
     this.props.form.validateFields((error, value) => {
-      console.log(error, value);
+      // Do nothing
     });
   };
   onChangePercentage = selectedOption => {
@@ -148,7 +188,7 @@ class Project extends Component {
   calculatePayable = (ev, cost) => {
     const percentage = ev.value;
     if (percentage) {
-      console.log(percentage)
+      console.log(percentage);
       let num = percentage;
       num = parseInt(num, 10);
       const payable = (percentage / 100) * cost;
@@ -161,6 +201,7 @@ class Project extends Component {
   };
   submitForm = ev => {
     ev.preventDefault();
+    let doc = null;
     const { submitButtonLoading } = this.state;
     const formElements = ev.target.elements;
     const { match, loadProjectPayload = {} } = this.props;
@@ -176,17 +217,18 @@ class Project extends Component {
         // Do nothing
       }
     });
+    const reportId = guid();
     obj2.submittedOn = new Date();
     obj2.category = "reports";
     obj2.approved = false;
+    obj2.id = reportId;
     delete loadProjectPayload._id;
     delete loadProjectPayload._rev;
     let obj = {
       ...loadProjectPayload,
       reports: [...reports, obj2]
     };
-    console.log(obj, " objects with reports");
-
+    doc = obj;
     this.setState(
       () => {
         return {
@@ -195,19 +237,57 @@ class Project extends Component {
       },
       () => {
         getData({
-          url: baseurl,
+          url: urls.postProject,
           inputData: { doc: obj, dbname: "project", id, rev, confirmed: false },
           context: "PATCH"
         })
           .then(data => {
-            this.setState(() => {
+            const { image } = this.state;
+            const dataF = new FormData();
+            const media = [image];
+            if (image) {
+              console.log("Image is here = == >");
+              let url = "";
+              let m = null;
+              url = urls.postSingleMedia;
+              m = image;
+              dataF.append("reports", m, m.filename);
+              dataF.append("doc", obj);
+              dataF.append("reportId", reportId);
+              dataF.append("rev", data.rev);
+              dataF.append("id", data.id);
+
+              axios
+                .post(url, dataF, {
+                  onUploadProgress: progressEvent => {
+                    // do something
+                    const stat =
+                      (progressEvent.loaded / progressEvent.total) * 100;
+                  }
+                })
+                .then(data2 => {
+                  console.log(data2);
+                  this.closeReportModal();
+                  this.setState(() => {
+                    return {
+                      postData: data,
+                      media: false,
+                      submitButtonLoading: false,
+                      reportModal: false
+                    };
+                  });
+                })
+                .catch(err => console.error(err));
+            } else {
               this.closeReportModal();
-              return {
-                postData: data,
-                submitButtonLoading: false,
-                reportModal: false
-              };
-            });
+              this.setState(() => {
+                return {
+                  postData: data,
+                  submitButtonLoading: false,
+                  reportModal: false
+                };
+              });
+            }
           })
           .catch(err => {
             this.setState(() => {
@@ -224,8 +304,6 @@ class Project extends Component {
   };
   submitFormPay = ev => {
     ev.preventDefault();
-    console.log("payment scheduled ...");
-    const { submitButtonLoading, totalPayable } = this.state;
     const formElements = ev.target.elements;
     const { match, loadProjectPayload = {} } = this.props;
     const { params } = match;
@@ -242,11 +320,11 @@ class Project extends Component {
     });
     obj2.submittedOn = new Date();
     obj2.category = "payments";
+    obj2.id = guid();
     let obj = {
       ...loadProjectPayload,
       payments: [...payments, obj2]
     };
-    console.log(obj, " Object is here and here ");
     this.setState(
       () => {
         return {
@@ -255,7 +333,7 @@ class Project extends Component {
       },
       () => {
         getData({
-          url: baseurl,
+          url: urls.postProject,
           inputData: { doc: obj, dbname: "project", id, rev },
           context: "PATCH"
         })
@@ -352,7 +430,8 @@ class Project extends Component {
       duration = "",
       durationType = "",
       contractor = "",
-      cost = ""
+      cost = "",
+      media = []
     } = this.props.loadProjectPayload || {};
     const {
       reportModal,
@@ -360,7 +439,8 @@ class Project extends Component {
       mergedList,
       sortedReports,
       sortedPayments,
-      totalPayable
+      totalPayable,
+      displayImages
     } = this.state;
     const lastPayment =
       sortedPayments && sortedPayments.length > 0
@@ -412,7 +492,7 @@ class Project extends Component {
                       <div>
                         <Label>Project Duration</Label>
                         <span className="answer">
-                          <i className="icon-clock"> </i> {duration} " "{" "}
+                          <i className="icon-clock"> </i> {duration}{" "}
                           {durationType}
                         </span>
                       </div>
@@ -451,7 +531,9 @@ class Project extends Component {
                   </div>
                   <Aligner center>
                     <P>PAYMENTS</P>
-                    <H4 className="paid">{`${this.getPercentPaid()}%`}</H4>
+                    <H4 className="paid">{`${
+                      this.getPercentPaid() ? this.getPercentPaid() : 0
+                    }%`}</H4>
                     <P>Of Project Cost has been approved for payment</P>
                     <Button
                       onClick={() => this.setState({ paymentModal: true })}
@@ -469,24 +551,42 @@ class Project extends Component {
                     <div>
                       <Grid default="50px auto 50px auto" padHorizontal="10px">
                         <div>
-                          <span className="perval">{`${this.getPercentCompleted()}%`}</span>
+                          <span className="perval">{`${
+                            this.getPercentCompleted()
+                              ? this.getPercentCompleted()
+                              : 0
+                          }%`}</span>
                         </div>
                         <div>
                           <Label>Reported Coverage</Label>
                           <LineBar
-                            percentage={`${this.getPercentCompleted()}%`}
+                            percentage={`${
+                              this.getPercentCompleted()
+                                ? this.getPercentCompleted()
+                                : 0
+                            }%`}
                             color={Theme.PrimaryGreyDark}
                           />
                         </div>
                         <div>
-                          <span className="perval">{`${this.getPercentCompleted(
-                            true
-                          )}%`}</span>
+                          <span className="perval">{`${
+                            this.getPercentCompleted(true)
+                              ? this.getPercentCompleted(true)
+                              : 0
+                          }%`}</span>
                         </div>
                         <div>
-                          <Label>{`${this.getPercentCompleted(true)}%`}</Label>
+                          <Label>{`${
+                            this.getPercentCompleted(true)
+                              ? this.getPercentCompleted(true)
+                              : 0
+                          }%`}</Label>
                           <LineBar
-                            percentage={`${this.getPercentCompleted(true)}%`}
+                            percentage={`${
+                              this.getPercentCompleted(true)
+                                ? this.getPercentCompleted(true)
+                                : 0
+                            }%`}
                           />
                         </div>
                       </Grid>
@@ -503,7 +603,7 @@ class Project extends Component {
                 </div>
               </Panel>
             </LowerSection>
-            <TimelineList mergedList={mergedList} />
+            <TimelineList mergedList={mergedList} media={media} />
             {reportModal ? (
               <ProjectReport
                 preSubmitForm={this.preSubmitForm}
@@ -512,6 +612,8 @@ class Project extends Component {
                 closeReportModal={this.closeReportModal}
                 reportModal={reportModal}
                 name={name}
+                imageChanged={this.imageChanged}
+                displayImages={displayImages}
                 percentages={this.percentages}
               />
             ) : null}

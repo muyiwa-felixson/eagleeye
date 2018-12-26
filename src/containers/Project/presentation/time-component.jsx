@@ -29,7 +29,7 @@ import {
   TextArea,
   InputWrapper
 } from "../../../components/flex";
-import { Theme } from '../../../components/flex/theme';
+import { Theme } from "../../../components/flex/theme";
 
 export const TimeComponent = ({
   confirmed,
@@ -44,6 +44,7 @@ export const TimeComponent = ({
   comment,
   media
 }) => {
+  console.log(media);
   return (
     <TimeBox type={type}>
       <TimeDate>
@@ -83,9 +84,13 @@ export const TimeComponent = ({
           <p>{comment}</p>
 
           <div className="media">
-            {media.map(elem =>
-              elem.type === "picture" ? <Picture /> : <Video />
-            )}
+            {media.map(elem => {
+              return elem.type === "picture" ? (
+                <Picture backgroundImage={elem.image} />
+              ) : (
+                <Video />
+              );
+            })}
           </div>
         </TimeDiv>
       </TimeContent>

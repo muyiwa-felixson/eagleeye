@@ -79,7 +79,8 @@ class ProjectList extends Component {
   componentDidUpdate(prevProps, prevState) {
     const nextProps = this.props;
     const nextState = this.state;
-    if (!prevState.postData && nextState.postData) {
+    if (!prevState.postData && nextState.postData && !nextProps.loadProjectsPending && nextState.postData =='loading') {
+      console.log('callled and called here ')
       this.resetPostData();
     }
 
@@ -118,7 +119,7 @@ class ProjectList extends Component {
       },
       () => {
         getData({
-          url: baseurl,
+          url: urls.postProject,
           inputData: { doc: obj, dbname: "project" },
           context: "POST"
         })
@@ -126,7 +127,7 @@ class ProjectList extends Component {
             this.setState(() => {
               this.form.reset();
               return {
-                postData: data,
+                postData: 'loading',
                 submitButtonLoading: false,
                 projectModal: false
               };
@@ -134,6 +135,14 @@ class ProjectList extends Component {
           })
           .catch(err => {
             console.log(err);
+            this.setState(() => {
+              this.form.reset();
+              return {
+                postData: {},
+                submitButtonLoading: false,
+                projectModal: false
+              };
+            });
           });
       }
     );

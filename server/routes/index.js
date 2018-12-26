@@ -7,6 +7,36 @@ const { getDocument } = require("../controllers/getDocument");
 const { updateDocument } = require("../controllers/updateDocument");
 const { createDocument } = require("../controllers/createDocument");
 const { deleteDocument } = require("../controllers/deleteDocument");
+const { uploadFile } = require("../controllers/uploadFIle");
+const { fileFilter } = require("../utils/index");
+const crypto = require('crypto');
+const mime = require('mime');
+const fs = require('fs');
+// Multer is for uploadig images
+const multer = require("multer");
+const reportMedia = "reports";
+
+// const upload = multer({ dest: "../media" });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (!fs.existsSync("server/media/")) {
+      fs.mkdirSync("server/media/");
+    }
+    cb(null, "server/media/");
+  },
+  filename: (req, file, cb) => {
+    crypto.pseudoRandomBytes(16, (err, raw) => {
+      cb(
+        null,
+        raw.toString("hex") +
+          Date.now() +
+          "." +
+          mime.getExtension(file.mimetype)
+      );
+    });
+  }
+});
+const upload = multer({ storage: storage });
 
 const appName = process.env.APP_NAME;
 
@@ -34,9 +64,9 @@ const routes = app => {
     try {
       createDocument(dbname, doc, isSafe)
         .then(retVal => res.status(200).json(retVal))
-        .catch(err => { 
-            console.log(err);
-            res.status(500).json(err)
+        .catch(err => {
+          console.log(err);
+          res.status(500).json(err);
         });
     } catch (err) {
       console.log(err);
@@ -47,7 +77,6 @@ const routes = app => {
   // PATCH
   app.patch(`/${appName}/api/item`, (req, res) => {
     const { id, doc, dbname, rev } = req.body;
-    console.log(doc, ' ====> doc')
     try {
       updateDocument(dbname, doc, id, rev)
         .then(retVal => res.status(200).json(retVal))
@@ -68,6 +97,30 @@ const routes = app => {
       res.status(500).json(err);
     }
   });
+
+  // UPLOADMEDIA
+  // single upload
+  app.post(
+    `/${appName}/api/upload`,
+    upload.single(reportMedia),
+    (req, res, next) => {
+      const { file, body } = req;
+      const { id, doc, dbname, rev, reportId } = body;
+      uploadFile(dbname, doc, id, rev, reportId, file)
+        .then(retVal => res.status(200).json(retVal))
+        .catch(err => res.status(500).json(err));
+    }
+
+  );
+
+  app.post(
+    `/${appName}/api/upload/media`,
+    upload.array("photos", 12),
+    (req, res, next) => {
+      const { files, body } = req;
+      const { id, dbname, rev } = body;
+    }
+  );
 
   // Default routes
   app.use((req, res) => {

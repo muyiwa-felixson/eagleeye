@@ -30,7 +30,7 @@ import {
   TextArea,
   InputWrapper
 } from "../../../components/flex";
-import { getMonth } from '../../../utils/utils';
+
 export const PayComponent = props => {
     return (
       <TimeBox type={props.type}>

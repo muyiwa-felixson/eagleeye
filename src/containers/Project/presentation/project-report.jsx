@@ -1,38 +1,37 @@
 import React from "react";
-import {
-  TopSection,
-  LowerSection,
-  TimeLine,
-  TimeBox,
-  TimeDate,
-  TimeContent,
-  TimeDiv,
-  Picture,
-  Video,
-  PayContent,
-  DragZone
-} from "../components";
+import { Picture, Video, DragZone } from "../components";
 import {
   Button,
   Input,
   Grid,
   SimpleSelect,
-  Label,
-  Panel,
   PaleButton,
-  Aligner,
-  H4,
-  H5,
   P,
   ModalComponent,
   Boxed,
-  TextArea,
-  InputWrapper
+  TextArea
 } from "../../../components/flex";
 
 export const ProjectReport = props => {
-  const { reportModal, closeReportModal, preSubmitForm, submitForm, percentages, name } = props;
+  const {
+    reportModal,
+    closeReportModal,
+    preSubmitForm,
+    submitForm,
+    percentages,
+    imageChanged,
+    name,
+    displayImages
+  } = props;
   let ref = React.createRef();
+  let mediaFile = React.createRef();
+  const openFileSelect = ev => {
+    ev.preventDefault();
+    if (mediaFile) {
+      mediaFile.current.click(); // dispatchEvent(new Event("click"));
+    }
+  };
+
   return (
     <ModalComponent
       title="Project Report"
@@ -52,6 +51,14 @@ export const ProjectReport = props => {
         Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
         officia deserunt.
         <Boxed padVertical="30px">
+          <input
+            type="file"
+            onChange={imageChanged}
+            ref={mediaFile}
+            name="media"
+            style={{ display: "none" }}
+            accept="image/*, video/*"
+          />
           <Input
             disabled
             placeholder="Project Name"
@@ -64,7 +71,7 @@ export const ProjectReport = props => {
           <p />
           <Grid pad="15px" default="1fr 1fr 1fr" tablet="1fr 1fr">
             <SimpleSelect
-              options={percentages('reports')}
+              options={percentages("reports")}
               // {...getFieldProps("option1", {
               //   onChange() {},
               //   rules: [{ required: true }]
@@ -101,12 +108,15 @@ export const ProjectReport = props => {
           <p>Esunt in culpa qui officia deserunt.</p>
           <DragZone>
             <div className="file-region">
-              <Picture />
+              {displayImages.map((image, index) => {
+                return <Picture key={index} backgroundImage={image} />;
+              })}
+
               <Video />
             </div>
             <div className="placeholder">
               <i className="icon-upload-cloud-outline" />
-              <Button>Choose files to Upload</Button>
+              <Button onClick={openFileSelect}>Choose files to Upload</Button>
               <P>Drag and drop files here to upload </P>
             </div>
           </DragZone>

@@ -58,6 +58,7 @@ export const PayReport = props => {
             disabled
             placeholder="Project Name"
             value={name}
+            multiple={true}
             name="name"
             type="text"
             label="Project"

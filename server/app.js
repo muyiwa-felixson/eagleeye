@@ -14,6 +14,8 @@ const multer = require("multer");
 
 const Log = require("./utils/log");
 
+const fs = require('fs');
+
 const { createTables } = require("./db/createTables");
 
 app.use(
@@ -23,6 +25,10 @@ app.use(
     parameterLimit: 1000000
   })
 );
+
+
+app.use(bodyParser.urlencoded({ limit: '2000mb', extended: true ,  parameterLimit: 1000000}));
+app.use(bodyParser.json({limit:'2000mb'}));
 app.use(bodyParser.json({ limit: "2000mb" }));
 app.use(bodyParser({ limit: "1000mb" }));
 app.use((req, res, next) => {
@@ -33,9 +39,22 @@ app.use((req, res, next) => {
   );
   next();
 });
+const currentDir = process.cwd();
+fs.open(path.join(currentDir, "media") , 'wx', (err, fd) => { 
+  if(err) { 
+    try {
+    fs.mkdirSync(path.join(currentDir,"server", "media"));
+    } catch(err) { 
+      // do nothing 
+    }
+  } else { 
+    console.log(fd)
+    return fd;
+  }
+})
 app.use(cors());
-
-require("./routes").routes(app);
+app.use( '/static',express.static(__dirname + '/media'));
+require("./routes").routes(app); 
 process.on("uncaughtException", function(err) {
   Log.error(err);
 });
