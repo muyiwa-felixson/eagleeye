@@ -274,6 +274,7 @@ export const Picture = styled.div`
   background-position: center;
   box-shadow: 1px 5px 25px ${Theme.Shadow};
   cursor: pointer;
+  background-image: ${props => `url(${props.backgroundImage})`};
 `;
 
 export const Video = styled.div`
