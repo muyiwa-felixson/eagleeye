@@ -79,8 +79,13 @@ class ProjectList extends Component {
   componentDidUpdate(prevProps, prevState) {
     const nextProps = this.props;
     const nextState = this.state;
-    if (!prevState.postData && nextState.postData && !nextProps.loadProjectsPending && nextState.postData =='loading') {
-      console.log('callled and called here ')
+    if (
+      !prevState.postData &&
+      nextState.postData &&
+      !nextProps.loadProjectsPending &&
+      nextState.postData == "loading"
+    ) {
+      console.log("callled and called here ");
       this.resetPostData();
     }
 
@@ -94,7 +99,7 @@ class ProjectList extends Component {
       };
     });
   };
-  componentDidCatch() { }
+  componentDidCatch() {}
 
   submit = ev => {
     ev.preventDefault();
@@ -107,10 +112,10 @@ class ProjectList extends Component {
     projectFields.map(field => {
       obj = {
         ...obj,
-        [field]: formElements[field].value,
+        [field]: formElements[field].value
       };
     });
-    obj = { ...obj, dateOfAward, completed: 0, paid: 0 }
+    obj = { ...obj, dateOfAward, completed: 0, paid: 0 };
     this.setState(
       () => {
         return {
@@ -127,7 +132,7 @@ class ProjectList extends Component {
             this.setState(() => {
               this.form.reset();
               return {
-                postData: 'loading',
+                postData: "loading",
                 submitButtonLoading: false,
                 projectModal: false
               };
@@ -150,13 +155,13 @@ class ProjectList extends Component {
   navigateToProject = (rev, id) => {
     this.props.history.push(`/projects/project/${id}/${rev}`);
   };
-  handleDateChange = (date) => {
+  handleDateChange = date => {
     this.setState(() => {
       return {
         dateOfAward: date
-      }
-    })
-  }
+      };
+    });
+  };
   toggleClickAction = () => {
     const { projectModal } = this.state;
     this.setState(() => {
@@ -238,7 +243,9 @@ class ProjectList extends Component {
                       completed,
                       paid
                     } = doc;
-                    const splittedDate = dateOfAward.split(" ");
+                    try {
+                      const splittedDate = dateOfAward.split(" ");
+                    } catch (err) {}
                     const date = new Date(dateOfAward) || new Date();
                     const year = date.getFullYear();
                     const month = date.getMonth();
@@ -261,8 +268,8 @@ class ProjectList extends Component {
                   })}
                 </React.Fragment>
               ) : (
-                  <Loader absolute />
-                )}
+                <Loader absolute />
+              )}
             </React.Fragment>
           </Grid>
         </ListBody>
