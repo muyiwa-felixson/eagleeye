@@ -38,7 +38,9 @@ const defaultState = {
   totalPayable: 0,
   image: null,
   displayImages: [],
-  copleted: 0
+  copleted: 0,
+  approvingPost: false,
+  decliningPost: false
 };
 
 class Project extends Component {
@@ -69,8 +71,13 @@ class Project extends Component {
       if (!payments) payments = [];
       const mergedList = [...reports, ...payments];
       this.sortByDate(mergedList, reports, payments);
+    } 
+    if ( nextProps.approvePostPayload && prevProps.approvePostPending) { 
+      this.resetPostData();
     }
-
+    if ( nextProps.declinePostPayload && prevProps.declinePostPending) { 
+      this.resetPostData();
+    }
     //
   }
   sortByDate = (mergedList, reports, payments) => {
@@ -361,6 +368,46 @@ class Project extends Component {
       }
     );
   };
+  declinePost = (reportId ) => { 
+    const { loadProjectPayload } = this.props;
+    const { _id, _rev } = loadProjectPayload;;
+    if (loadProjectPayload.reports ) { 
+      const report = loadProjectPayload.reports.filter((report) => report.id === reportId )[0];
+      report.approved = true;
+      let withoutReport = loadProjectPayload.reports.filter((report) => report.id !== reportId );
+      delete loadProjectPayload.reports;
+      loadProjectPayload.reports = withoutReport;
+      const proxyUpdate = () => { 
+        return getData({
+          url: urls.postProject,
+          inputData: { doc:loadProjectPayload , dbname: "project", id: _id, rev: _rev },
+          context: "PATCH"
+        })
+      }
+      this.props.dispatchActions('DECLINE_POST', { func: proxyUpdate});
+    }
+
+  }
+  approvePost = (reportId) => {
+    const { loadProjectPayload } = this.props;
+    const { _id, _rev } = loadProjectPayload;;
+    if (loadProjectPayload.reports ) { 
+      const report = loadProjectPayload.reports.filter((report) => report.id === reportId )[0];
+      report.approved = true;
+      let withoutReport = loadProjectPayload.reports.filter((report) => report.id !== reportId );
+      withoutReport = [...withoutReport, report ];
+      delete loadProjectPayload.reports;
+      loadProjectPayload.reports = withoutReport;
+      const proxyUpdate = () => { 
+        return getData({
+          url: urls.postProject,
+          inputData: { doc:loadProjectPayload , dbname: "project", id: _id, rev: _rev },
+          context: "PATCH"
+        })
+      }
+      this.props.dispatchActions('APPROVE_POST', { func: proxyUpdate});
+    }
+  };
   preSubmitForm = ref => {
     if (ref) {
       ref.current.dispatchEvent(new Event("submit"));
@@ -419,7 +466,9 @@ class Project extends Component {
     const {
       loadProjectPayload = {},
       loadProjectPending,
-      loadProjectError
+      loadProjectError,
+      approvePostPending,
+      declinePostPending
     } = this.props;
     const {
       code = "",
@@ -454,7 +503,7 @@ class Project extends Component {
       sortedReports && sortedReports.length > 0
         ? sortedReports[0].completionLevel
         : 0;
-    console.log(mergedList, " and etc");
+
     return (
       <div>
         {loadProjectPending && !loadProjectPayload ? (
@@ -604,7 +653,14 @@ class Project extends Component {
                 </div>
               </Panel>
             </LowerSection>
-            <TimelineList mergedList={mergedList} media={media} />
+            <TimelineList
+              approvePost={(id) => this.approvePost(id)} 
+              declinePost={(id) => this.declinePost(id)}
+              mergedList={mergedList}
+              media={media}
+              approvePostPending={approvePostPending}
+
+            />
             {reportModal ? (
               <ProjectReport
                 preSubmitForm={this.preSubmitForm}
@@ -640,13 +696,24 @@ class Project extends Component {
   }
 }
 
-const mapStateToProps = ({ loadProject, postCompletionStat }) => ({
+const mapStateToProps = ({
+  loadProject,
+  postCompletionStat,
+  approvePost,
+  declinePost
+}) => ({
   loadProjectPending: loadProject.pending,
   loadProjectError: loadProject.error,
   loadProjectPayload: loadProject.payload,
   postCompletionStatPending: postCompletionStat.pending,
   postCompletionStatError: postCompletionStat.error,
-  postCompletionStatPayload: postCompletionStat.payload
+  postCompletionStatPayload: postCompletionStat.payload,
+  approvePostPayload: approvePost.payload,
+  approvePostPending: approvePost.pending,
+  approvePostError: approvePost.error,
+  declinePostPayload: declinePost.payload,
+  declinePostPending: declinePost.pending,
+  declinePostError: declinePost.error
 });
 const mapDispatchToProps = dispatch =>
   bindActionCreators({ dispatchActions }, dispatch);

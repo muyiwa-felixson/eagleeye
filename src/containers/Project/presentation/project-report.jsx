@@ -72,13 +72,6 @@ export const ProjectReport = props => {
           <Grid pad="15px" default="1fr 1fr 1fr" tablet="1fr 1fr">
             <SimpleSelect
               options={percentages("reports")}
-              // {...getFieldProps("option1", {
-              //   onChange() {},
-              //   rules: [{ required: true }]
-              // })}
-              // error={
-              //   (errors = getFieldError("option1")) ? errors.join(",") : null
-              // }
               type="select"
               name="completionLevel"
               label="Select Level of Completion"
