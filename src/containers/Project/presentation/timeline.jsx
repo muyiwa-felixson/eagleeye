@@ -7,7 +7,7 @@ import { PayComponent } from "./pay-component";
 import * as moment from "moment";
 import { getMonth } from "../../../utils/utils";
 export const TimelineList = props => {
-  const { mergedList } = props;
+  const { mergedList, approvePost, declinePost } = props;
   return (
     <Panel>
       <TimeLine>
@@ -22,10 +22,11 @@ export const TimelineList = props => {
               completionLevel,
               approved,
               category,
+              id,
               media = []
             } = item;
             const m = media.map(pic => {
-              console.log(pic, 'pic')
+              console.log(pic, "pic");
               return {
                 type: "picture",
                 image: pic
@@ -42,7 +43,10 @@ export const TimelineList = props => {
                   key={index}
                   confirmed={approved}
                   day={day}
+                  reportId={id}
                   month={month}
+                  approvePost={id => approvePost(id)}
+                  declinePost={id => declinePost(id)}
                   year={year}
                   level={completionLevel}
                   submittedBy={submittedBy}

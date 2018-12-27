@@ -41,10 +41,12 @@ export const TimeComponent = ({
   day,
   month,
   year,
+  reportId,
   comment,
-  media
+  media,
+  approvePost,
+  declinePost
 }) => {
-  console.log(media);
   return (
     <TimeBox type={type}>
       <TimeDate>
@@ -56,9 +58,14 @@ export const TimeComponent = ({
       <TimeContent>
         {!confirmed && (
           <div className="button-section">
-            <Button>Approve</Button>
+            <Button onClick={() => approvePost(reportId)}>Approve</Button>
             <PaleButton color={Theme.PrimaryBlue}>Update</PaleButton>
-            <Button color={Theme.PrimaryRed}>Decline</Button>
+            <Button
+              onClick={() => declinePost(reportId)}
+              color={Theme.PrimaryRed}
+            >
+              Decline
+            </Button>
           </div>
         )}
         <TimeDiv confirmed={confirmed} type="report">
