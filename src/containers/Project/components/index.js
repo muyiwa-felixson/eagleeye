@@ -298,27 +298,6 @@ export const Video = styled.div`
   &:hover{
     box-shadow: -3px 5px 5px rgba(0,0,0,0.4);
   }
-
-  /* // &:after{
-  //   width: 30px;
-  //   height: 30px;
-  //   border-radius: 50%;
-  //   background: rgba(255,255,255,0.2);
-  //   font-family: 'flexisaf';
-  //   font-size: 16px;
-  //   color: #fff;
-  //   text-align: center;
-  //   display: flex;
-  //   align-items: center;
-  //   justify-content: center;
-  //   content: '\\f00f';
-  //   position: absolute;
-  //   top: 20px;
-  //   left: 25px;
-  //   border: 10px solid rgba(255,255,255,0.2);
-  //   box-shadow: 0px 0px 5px ${Theme.Shadow};
-  //   text-shadow: 1px 1px 1px ${Theme.Shadow};
-  // } */
 `;
 
 export const Previewer = styled.div`
