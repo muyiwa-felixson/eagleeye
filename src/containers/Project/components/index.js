@@ -291,7 +291,7 @@ export const Video = styled.div`
   box-shadow: 1px 5px 25px ${Theme.Shadow};
   cursor: pointer;
 
-  // &:after{
+  /* // &:after{
   //   width: 30px;
   //   height: 30px;
   //   border-radius: 50%;
@@ -310,7 +310,20 @@ export const Video = styled.div`
   //   border: 10px solid rgba(255,255,255,0.2);
   //   box-shadow: 0px 0px 5px ${Theme.Shadow};
   //   text-shadow: 1px 1px 1px ${Theme.Shadow};
-  // }
+  // } */
+`;
+
+export const Previewer = styled.div`
+  width: 100%;
+  padding-top: 20px;
+  & img{
+    width: 100%;
+    border-radius: ${Theme.SecondaryRadius};
+  }
+  & video{
+    width: 100%;
+    border-radius: ${Theme.SecondaryRadius};
+  }
 `;
 
 export const DragZone = styled.div`

@@ -14,13 +14,11 @@ import {
   TextArea,
   InputWrapper
 } from "../../../components/flex";
-import { CurrencyFormat } from "react-currency-format";
+// import { CurrencyFormat } from "react-currency-format";
 const formatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "NGN",
   minimumFractionDigits: 2
-  // the default value for minimumFractionDigits depends on the currency
-  // and is usually already 2
 });
 export const PayReport = props => {
   const {
@@ -72,7 +70,7 @@ export const PayReport = props => {
             name="percentage"
             required
             forminput
-            onChange={(ev)=> calculatePayable(ev, cost)}
+            onChange={(ev) => calculatePayable(ev, cost)}
           />
         </Grid>
         <p />
@@ -91,7 +89,7 @@ export const PayReport = props => {
           <Input
             disabled
             placeholder="Payment Amount"
-            value={`${formatter.format(totalPayable )}`}
+            value={`${formatter.format(totalPayable)}`}
             type="text"
             name={"payableAmount"}
             label="Payment Amount"
