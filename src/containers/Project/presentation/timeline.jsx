@@ -7,7 +7,7 @@ import { PayComponent } from "./pay-component";
 import * as moment from "moment";
 import { getMonth } from "../../../utils/utils";
 export const TimelineList = props => {
-  const { mergedList, approvePost, declinePost } = props;
+  const { mergedList, approvePost, declinePost, previewer } = props;
   return (
     <Panel>
       <TimeLine>
@@ -53,6 +53,7 @@ export const TimelineList = props => {
                   fullDate={moment(date).format("DD MMMM YYYY")}
                   comment={reportComment}
                   media={m}
+                  previewer={previewer}
                 />
               );
             } else {
@@ -71,10 +72,10 @@ export const TimelineList = props => {
             }
           })
         ) : (
-          <div>
-            <h1>There are no reports or payment records to show</h1>
-          </div>
-        )}
+            <div>
+              <h1>There are no reports or payment records to show</h1>
+            </div>
+          )}
       </TimeLine>
     </Panel>
   );

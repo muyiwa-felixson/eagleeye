@@ -8,7 +8,7 @@ import { ProjectAdd } from "../../commons/index";
 import { ProjectReport } from "./presentation/project-report";
 import { PayReport } from "./presentation/pay-report";
 import { projectReportFields, paymentFields } from "../../config/form-fields";
-import { TopSection, LowerSection } from "./components";
+import { TopSection, LowerSection, Previewer } from "./components";
 import { LineBar } from "../Projects/components";
 import axios from "axios";
 import {
@@ -21,13 +21,23 @@ import {
   H4,
   Loader,
   H5,
-  P
+  P,
+  ModalBody,
+  ModalClose,
+  Modal,
+  ModalContent
 } from "../../components/flex";
 import { Theme } from "../../components/flex/theme";
 import { getData } from "../../api-requests/index";
 import { bindActionCreators } from "redux";
 import { TimelineList } from "./presentation/timeline";
 import { guid } from "../../utils/utils";
+
+const formatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "NGN",
+  minimumFractionDigits: 2
+});
 
 const defaultState = {
   reportModal: false,
@@ -40,7 +50,12 @@ const defaultState = {
   displayImages: [],
   copleted: 0,
   approvingPost: false,
-  decliningPost: false
+  decliningPost: false,
+  preview: false,
+  previewElement: {
+    type: "img",
+    source: ""
+  }
 };
 
 class Project extends Component {
@@ -166,7 +181,7 @@ class Project extends Component {
           }
           // target.reset();
         };
-        reader.removeEventListener("load", () => {});
+        reader.removeEventListener("load", () => { });
       }
       if (!file.length) {
         reader.readAsDataURL(file);
@@ -510,7 +525,7 @@ class Project extends Component {
     const { sortedReports } = this.state;
     let totalCoverage = 0;
     if (sortedReports) {
-      if (!approved && sortedReports && sortedReports.length > 0 ) {
+      if (!approved && sortedReports && sortedReports.length > 0) {
         const report = sortedReports[0];
         const { completionLevel } = report;
         return completionLevel;
@@ -545,6 +560,26 @@ class Project extends Component {
     //   return totalCoverage;
     // }
   };
+
+  previewMedia = (previewed) => {
+    this.setState({
+      preview: true,
+      previewElement: {
+        type: previewed.type,
+        source: previewed.source
+      }
+    })
+  }
+
+  closePreview = () => {
+    this.setState({
+      preview: false,
+      previewElement: {
+        type: "",
+        source: ""
+      }
+    })
+  }
   render() {
     let errors;
     // const { getFieldProps, getFieldError } = this.props.form;
@@ -594,187 +629,199 @@ class Project extends Component {
         {loadProjectPending && !loadProjectPayload ? (
           <Loader />
         ) : (
-          <React.Fragment>
-            <ProjectAdd />
-            <TopSection>
-              <Panel>
-                <Grid default="3fr 1fr">
-                  <div className="right-bar">
-                    <Label>Project Code</Label>
-                    <H4>{code} </H4>
+            <React.Fragment>
+              <ProjectAdd />
+              <TopSection>
+                <Panel>
+                  <Grid default="3fr 1fr">
+                    <div className="right-bar">
+                      <Label>Project Code</Label>
+                      <H4>{code} </H4>
 
-                    <Label>Project Name</Label>
-                    <H5>{name}</H5>
+                      <Label>Project Name</Label>
+                      <H5>{name}</H5>
 
-                    <Label>Description</Label>
-                    <P>{description}</P>
+                      <Label>Description</Label>
+                      <P>{description}</P>
 
-                    <Grid default="1fr 1.5fr 1fr" className="minibox">
-                      <div>
-                        <Label>Nature of Project</Label>
-                        <span className="answer">{nature}</span>
-                      </div>
-                      <div>
-                        <Label>Types of Project</Label>
-                        <span className="answer">{type}</span>
-                      </div>
-                      <div>
-                        <Label>Source of Funding</Label>
-                        <span className="answer">{funding}</span>
-                      </div>
-                    </Grid>
-                    <Grid default="1fr 1.5fr 1fr" className="minibox">
-                      <div>
-                        <Label>Project Duration</Label>
-                        <span className="answer">
-                          <i className="icon-clock"> </i> {duration}{" "}
-                          {durationType}
-                        </span>
-                      </div>
-                      <div>
-                        <Label>Contractor</Label>
-                        <span className="answer">
-                          <i className="icon-certificate"> </i> {contractor}
-                        </span>
-                      </div>
-                      <div>
-                        <Label>Project Cost</Label>
-                        <strong className="answer">
-                          <i className="icon-credit-card"> </i> {cost}
-                        </strong>
-                      </div>
-                    </Grid>
-
-                    <Grid default="repeat(4,1fr)" className="minibox">
-                      <div>
-                        <Label>State</Label>
-                        <span className="answer">Lagos</span>
-                      </div>
-                      <div>
-                        <Label>LGA</Label>
-                        <span className="answer">Ikeja</span>
-                      </div>
-                      <div>
-                        <Label>Town</Label>
-                        <span className="answer">Command</span>
-                      </div>
-                      <div>
-                        <Label>Target Unit</Label>
-                        <span className="answer">xxxxxx xxxxx xxx</span>
-                      </div>
-                    </Grid>
-                  </div>
-                  <Aligner center>
-                    <P>PAYMENTS</P>
-                    <H4 className="paid">{`${
-                      this.getPercentPaid() ? this.getPercentPaid() : 0
-                    }%`}</H4>
-                    <P>Of Project Cost has been approved for payment</P>
-                    <Button
-                      onClick={() => this.setState({ paymentModal: true })}
-                    >
-                      Make New Payment
-                    </Button>
-                  </Aligner>
-                </Grid>
-              </Panel>
-            </TopSection>
-            <LowerSection>
-              <Panel>
-                <div className="lower-buttons">
-                  <Grid default="2fr 1fr">
-                    <div>
-                      <Grid default="50px auto 50px auto" padHorizontal="10px">
+                      <Grid default="1fr 1.5fr 1fr" className="minibox">
                         <div>
-                          <span className="perval">{`${
-                            this.getPercentCompleted()
-                              ? this.getPercentCompleted()
-                              : 0
-                          }%`}</span>
+                          <Label>Nature of Project</Label>
+                          <span className="answer">{nature}</span>
                         </div>
                         <div>
-                          <Label>Reported Coverage</Label>
-                          <LineBar
-                            percentage={`${
-                              this.getPercentCompleted()
-                                ? this.getPercentCompleted()
-                                : 0
-                            }%`}
-                            color={Theme.PrimaryGreyDark}
-                          />
+                          <Label>Types of Project</Label>
+                          <span className="answer">{type}</span>
                         </div>
                         <div>
-                          <span className="perval">{`${
-                            this.getPercentCompleted(true)
-                              ? this.getPercentCompleted(true)
-                              : 0
-                          }%`}</span>
+                          <Label>Source of Funding</Label>
+                          <span className="answer">{funding}</span>
+                        </div>
+                      </Grid>
+                      <Grid default="1fr 1.5fr 1fr" className="minibox">
+                        <div>
+                          <Label>Project Duration</Label>
+                          <span className="answer">
+                            <i className="icon-clock"> </i> {duration}{" "}
+                            {durationType}
+                          </span>
                         </div>
                         <div>
-                          <Label>{`${
-                            this.getPercentCompleted(true)
-                              ? this.getPercentCompleted(true)
-                              : 0
-                          }%`}</Label>
-                          <LineBar
-                            percentage={`${
-                              this.getPercentCompleted(true)
-                                ? this.getPercentCompleted(true)
-                                : 0
-                            }%`}
-                          />
+                          <Label>Contractor</Label>
+                          <span className="answer">
+                            <i className="icon-certificate"> </i> {contractor}
+                          </span>
+                        </div>
+                        <div>
+                          <Label>Project Cost</Label>
+                          <strong className="answer">
+                            <i className="icon-credit-card"> </i> {formatter.format(cost)}
+                          </strong>
+                        </div>
+                      </Grid>
+
+                      <Grid default="repeat(4,1fr)" className="minibox">
+                        <div>
+                          <Label>State</Label>
+                          <span className="answer">Lagos</span>
+                        </div>
+                        <div>
+                          <Label>LGA</Label>
+                          <span className="answer">Ikeja</span>
+                        </div>
+                        <div>
+                          <Label>Town</Label>
+                          <span className="answer">Command</span>
+                        </div>
+                        <div>
+                          <Label>Target Unit</Label>
+                          <span className="answer">xxxxxx xxxxx xxx</span>
                         </div>
                       </Grid>
                     </div>
-                    <Aligner right>
-                      <PaleButton
-                        color={Theme.PrimaryBlue}
-                        onClick={() => this.setState({ reportModal: true })}
+                    <Aligner center>
+                      <P>PAYMENTS</P>
+                      <H4 className="paid">{`${
+                        this.getPercentPaid() ? this.getPercentPaid() : 0
+                        }%`}</H4>
+                      <P>Of Project Cost has been approved for payment</P>
+                      <Button
+                        onClick={() => this.setState({ paymentModal: true })}
                       >
-                        New Report
-                      </PaleButton>
+                        Make New Payment
+                    </Button>
                     </Aligner>
                   </Grid>
-                </div>
-              </Panel>
-            </LowerSection>
-            <TimelineList
-              approvePost={id => this.approvePost(id)}
-              declinePost={id => this.declinePost(id)}
-              mergedList={mergedList}
-              media={media}
-              approvePostPending={approvePostPending}
-            />
-            {reportModal ? (
-              <ProjectReport
-                preSubmitForm={this.preSubmitForm}
-                submitForm={this.submitForm}
-                coverageReported={this.getPercentCompleted}
-                closeReportModal={this.closeReportModal}
-                reportModal={reportModal}
-                name={name}
-                imageChanged={this.imageChanged}
-                displayImages={displayImages}
-                percentages={this.percentages}
+                </Panel>
+              </TopSection>
+              <LowerSection>
+                <Panel>
+                  <div className="lower-buttons">
+                    <Grid default="2fr 1fr">
+                      <div>
+                        <Grid default="50px auto 50px auto" padHorizontal="10px">
+                          <div>
+                            <span className="perval">{`${
+                              this.getPercentCompleted()
+                                ? this.getPercentCompleted()
+                                : 0
+                              }%`}</span>
+                          </div>
+                          <div>
+                            <Label>Reported Coverage</Label>
+                            <LineBar
+                              percentage={`${
+                                this.getPercentCompleted()
+                                  ? this.getPercentCompleted()
+                                  : 0
+                                }%`}
+                              color={Theme.PrimaryGreyDark}
+                            />
+                          </div>
+                          <div>
+                            <span className="perval">{`${
+                              this.getPercentCompleted(true)
+                                ? this.getPercentCompleted(true)
+                                : 0
+                              }%`}</span>
+                          </div>
+                          <div>
+                            <Label>{`${
+                              this.getPercentCompleted(true)
+                                ? this.getPercentCompleted(true)
+                                : 0
+                              }%`}</Label>
+                            <LineBar
+                              percentage={`${
+                                this.getPercentCompleted(true)
+                                  ? this.getPercentCompleted(true)
+                                  : 0
+                                }%`}
+                            />
+                          </div>
+                        </Grid>
+                      </div>
+                      <Aligner right>
+                        <PaleButton
+                          color={Theme.PrimaryBlue}
+                          onClick={() => this.setState({ reportModal: true })}
+                        >
+                          New Report
+                      </PaleButton>
+                      </Aligner>
+                    </Grid>
+                  </div>
+                </Panel>
+              </LowerSection>
+              <TimelineList
+                approvePost={id => this.approvePost(id)}
+                declinePost={id => this.declinePost(id)}
+                mergedList={mergedList}
+                media={media}
+                approvePostPending={approvePostPending}
+                previewer={this.previewMedia}
               />
-            ) : null}
-            {paymentModal ? (
-              <PayReport
-                paymentModal={paymentModal}
-                preSubmitFormPay={this.preSubmitFormPay}
-                closePaymentModal={this.closePaymentModal}
-                percentages={this.percentages}
-                paidPercent={this.getPercentPaid}
-                totalPayable={totalPayable}
-                calculatePayable={this.calculatePayable}
-                name={name}
-                cost={cost}
-                submitFormPay={this.submitFormPay}
-                getFieldsProps={this.props.getFieldProps}
-              />
-            ) : null}
-          </React.Fragment>
-        )}
+              {reportModal ? (
+                <ProjectReport
+                  preSubmitForm={this.preSubmitForm}
+                  submitForm={this.submitForm}
+                  coverageReported={this.getPercentCompleted}
+                  closeReportModal={this.closeReportModal}
+                  reportModal={reportModal}
+                  name={name}
+                  imageChanged={this.imageChanged}
+                  displayImages={displayImages}
+                  percentages={this.percentages}
+                />
+              ) : null}
+              {paymentModal ? (
+                <PayReport
+                  paymentModal={paymentModal}
+                  preSubmitFormPay={this.preSubmitFormPay}
+                  closePaymentModal={this.closePaymentModal}
+                  percentages={this.percentages}
+                  paidPercent={this.getPercentPaid}
+                  totalPayable={totalPayable}
+                  calculatePayable={this.calculatePayable}
+                  name={name}
+                  cost={cost}
+                  submitFormPay={this.submitFormPay}
+                  getFieldsProps={this.props.getFieldProps}
+                />
+              ) : null}
+
+              <Modal open={this.state.preview} backDropOpacity={0.2}>
+                <ModalBody style={{ backgroundColor: "rgba(0,0,0,0)" }} width="90%">
+                  <ModalClose onClick={() => this.closePreview()} style={{ color: "#ccc" }} />
+                  <ModalContent>
+                    <Previewer>
+                      <img src={this.state.previewElement.source} />
+                    </Previewer>
+                  </ModalContent>
+                </ModalBody>
+              </Modal>
+            </React.Fragment>
+          )}
       </div>
     );
   }

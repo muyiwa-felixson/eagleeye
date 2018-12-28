@@ -27,7 +27,8 @@ export const TimeComponent = ({
   comment,
   media,
   approvePost,
-  declinePost
+  declinePost,
+  previewer
 }) => {
   return (
     <TimeBox type={type}>
@@ -76,25 +77,26 @@ export const TimeComponent = ({
             {media.map(elem => {
               const isVideo = videoFilter(getExtension(elem.image));
               return !isVideo ? (
-                <Picture backgroundImage={elem.image} />
+                <Picture backgroundImage={elem.image} onClick={() => previewer({ type: "picture", source: elem.image })} />
               ) : (
-                <Video>
-                  <video
-                    type="video/mp4"
-                    style={{ width: "100%", height: "100%", display: "block" }}
-                    autoplay={true}
-                    loop={true}
-                    controls={true}
-                    muted={true}
-                  >
-                    <source
-                      // type="video/mp4"
-                      // data-reactid=".0.1.0.0.0"
-                      src={elem.image}
-                    />
-                  </video>
-                </Video>
-              );
+                  <Video>
+                    <video
+                      type="video/mp4"
+                      style={{ width: "100%", height: "100%", display: "block" }}
+                      autoplay={false}
+                      loop={false}
+                      controls={false}
+                      muted={true}
+                      onClick={() => previewer({ type: "video", source: elem.image })}
+                    >
+                      <source
+                        // type="video/mp4"
+                        // data-reactid=".0.1.0.0.0"
+                        src={elem.image}
+                      />
+                    </video>
+                  </Video>
+                );
             })}
           </div>
         </TimeDiv>

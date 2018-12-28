@@ -88,7 +88,7 @@ export const ListBody = styled.div`
 
 export const ProjectCard = styled.div`
 ${props => props.layout === "card" && css`
-
+  cursor: pointer;
   padding: 20px;
   min-height: 150px;
   background: #FFF;
