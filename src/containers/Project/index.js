@@ -109,7 +109,7 @@ class Project extends Component {
     }
     ceilVal = 100;
     let list = [];
-    for (let i = percent+1; i <= ceilVal; i++) {
+    for (let i = percent + 1; i <= ceilVal; i++) {
       list.push({ value: i, label: `${i}%` });
     }
     return list;
@@ -576,11 +576,7 @@ class Project extends Component {
                               }%`}</span>
                           </div>
                           <div>
-                            <Label>{`${
-                              this.getPercentCompleted(true)
-                                ? this.getPercentCompleted(true)
-                                : 0
-                              }%`}</Label>
+                            <Label>Approved Reports</Label>
                             <LineBar
                               percentage={`${
                                 this.getPercentCompleted(true)

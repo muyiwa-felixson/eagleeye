@@ -238,7 +238,7 @@ class ProjectList extends Component {
                       completed,
                       paid
                     } = doc;
-                    const splittedDate = dateOfAward.split(" ");
+                    const splittedDate = dateOfAward && dateOfAward.split(" ");
                     const date = new Date(dateOfAward) || new Date();
                     const year = date.getFullYear();
                     const month = date.getMonth();
