@@ -31,7 +31,6 @@ export const ProjectReport = props => {
       mediaFile.current.click(); // dispatchEvent(new Event("click"));
     }
   };
-  console.log(displayImages, ' ======> index')
   return (
     <ModalComponent
       title="Project Report"
@@ -72,7 +71,7 @@ export const ProjectReport = props => {
           <p />
           <Grid pad="15px" default="1fr 1fr 1fr" tablet="1fr 1fr">
             <SimpleSelect
-              options={percentages("reports")}
+              options={percentages("reports", true)}
               type="select"
               name="completionLevel"
               label="Select Level of Completion"

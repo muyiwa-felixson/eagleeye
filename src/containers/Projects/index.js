@@ -155,7 +155,9 @@ class ProjectList extends Component {
     const { loadProjectsPayload } = this.props;
     let totalCoverage = 0;
     if (loadProjectsPayload) {
-      const project = loadProjectsPayload.filter(project => project.id === id)[0].doc;
+      const project = loadProjectsPayload.filter(
+        project => project.id === id
+      )[0].doc;
       if (context === "payments") {
         if (project.payments) {
           const { payments } = project;
@@ -169,18 +171,40 @@ class ProjectList extends Component {
       } else {
         if (project.reports) {
           const { reports } = project;
-          reports.map(report => {
-            const { completionLevel } = report;
-            if (!isNaN(parseInt(completionLevel, 10))) {
-              totalCoverage += parseInt(completionLevel);
+          const sorted = this.sortByDate(reports);
+          for (let i = 0; i < sorted.length; i++) {
+            const report = sorted[i];
+            const { completionLevel, approved } = report;
+            if (approved) {
+              totalCoverage = completionLevel;
+              break;
             }
-          });
+          }
+          // reports.map(report => {
+          //   const { completionLevel } = report;
+          //   if (!isNaN(parseInt(completionLevel, 10))) {
+          //     totalCoverage += parseInt(completionLevel);
+          //   }
+          // });
         }
       }
     }
     return totalCoverage;
   };
 
+  sortByDate = mergedList => {
+    const sortFunction = (a, b) => {
+      const date1 = new Date(a.submittedOn);
+      const date2 = new Date(b.submittedOn);
+      // Turn your strings into dates, and then subtract them
+      // to get a value that is either negative, positive, or zero.
+      if (date1 < date2) return 1;
+      if (date1 > date2) return -1;
+      return 0;
+    };
+    const sorted = mergedList.sort(sortFunction);
+    return sorted;
+  };
   handleDateChange = date => {
     this.setState(() => {
       return {
@@ -284,8 +308,8 @@ class ProjectList extends Component {
                           code={fileNumber}
                           onClick={() => this.navigateToProject(id, rev)}
                           name={name}
-                          completed={this.getPercentCovered(id, 'reports')}
-                          paid={this.getPercentCovered(id, 'payments')}
+                          completed={this.getPercentCovered(id, "reports")}
+                          paid={this.getPercentCovered(id, "payments")}
                           layout={this.state.viewlayout}
                         />
                       </React.Fragment>
