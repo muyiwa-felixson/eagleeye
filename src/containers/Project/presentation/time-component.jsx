@@ -9,37 +9,9 @@ import {
 } from "../components";
 import { Button, Grid, Label, PaleButton } from "../../../components/flex";
 import { Theme } from "../../../components/flex/theme";
+import { getExtension, videoFilter } from "../../../utils/utils";
+import moment from 'moment';
 
-/**
- * @function fileFilter
- */
-const videoFilter = extension => {
-  const fileExtension = extension;
-  const acceptedExtensions = [
-    "mp4",
-    "ogx",
-    "3gp",
-    "ogg",
-    "flv",
-    "avi",
-    "quicktime",
-    "mpeg-4",
-    "xdcam",
-    "dnxhd",
-    "vob"
-  ];
-  if (acceptedExtensions.indexOf(fileExtension) < 0) {
-    return false;
-  } else {
-    return true;
-  }
-};
-/**
- * @function getExtension
- */
-const getExtension = filename => {
-  return filename.split(".").pop();
-};
 
 export const TimeComponent = ({
   confirmed,
@@ -92,7 +64,7 @@ export const TimeComponent = ({
               <Label>Submitted by</Label> {submittedBy}
             </div>
             <div>
-              <Label>Reported on</Label> {fullDate}
+              <Label>Reported on</Label> {}
             </div>
             <div>
               <Label>Confirmed By</Label> {confirmed ? confirmedBy : "Pending"}

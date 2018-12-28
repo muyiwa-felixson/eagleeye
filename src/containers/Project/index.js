@@ -116,7 +116,7 @@ class Project extends Component {
       sortedPayments
     });
   };
-  percentages = (stat = "payment") => {
+  percentages = (stat = "payment", approved = false) => {
     let ceilVal = 100;
     let percent = 0;
     if (stat == "payment") {
@@ -129,7 +129,11 @@ class Project extends Component {
       if (!this.getPercentCompleted()) {
         percent = 0;
       } else {
-        percent = this.getPercentCompleted();
+        if (!approved) {
+          percent = parseInt(this.getPercentCompleted(), 10);
+        } else {
+          percent = parseInt(this.getPercentCompleted(true), 10);
+        }
       }
     }
     ceilVal = 100;
@@ -314,9 +318,9 @@ class Project extends Component {
               let m = image;
               if (m.length && m.length > 1) {
                 url = urls.postMultipleMedia;
-                m.map((f) => {
+                m.map(f => {
                   dataF.append("photos[]", f, f.filename);
-                })
+                });
               } else {
                 url = urls.postSingleMedia;
                 dataF.append("reports", m, m.filename);
@@ -519,24 +523,42 @@ class Project extends Component {
   };
   getPercentCompleted = (approved = false) => {
     const { sortedReports } = this.state;
-    if (sortedReports && sortedReports.length > 0) {
-      let totalCoverage = 0;
-      if (!approved) {
-        sortedReports.map(report => {
-          let { completionLevel } = report;
-          totalCoverage += parseInt(completionLevel);
-        });
+    let totalCoverage = 0;
+    if (sortedReports) {
+      if (!approved && sortedReports && sortedReports.length > 0) {
+        const report = sortedReports[0];
+        const { completionLevel } = report;
+        return completionLevel;
       } else {
-        sortedReports.map(report => {
-          let { completionLevel } = report;
+        for (let i = 0; i < sortedReports.length; i++) {
+          const report = sortedReports[i];
+          const { completionLevel } = report;
           if (report.approved) {
-            totalCoverage += parseInt(completionLevel);
+            totalCoverage = completionLevel;
+            break;
           }
-        });
+        }
       }
-      if (!totalCoverage) totalCoverage = 0;
       return totalCoverage;
     }
+    // if (sortedReports && sortedReports.length > 0) {
+    //   let totalCoverage = 0;
+    //   if (!approved) {
+    //     sortedReports.map(report => {
+    //       let { completionLevel } = report;
+    //       totalCoverage += parseInt(completionLevel);
+    //     });
+    //   } else {
+    //     sortedReports.map(report => {
+    //       let { completionLevel } = report;
+    //       if (report.approved) {
+    //         totalCoverage += parseInt(completionLevel);
+    //       }
+    //     });
+    //   }
+    //   if (!totalCoverage) totalCoverage = 0;
+    //   return totalCoverage;
+    // }
   };
 
   previewMedia = (previewed) => {
