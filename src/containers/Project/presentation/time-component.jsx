@@ -64,7 +64,7 @@ export const TimeComponent = ({
               <Label>Submitted by</Label> {submittedBy}
             </div>
             <div>
-              <Label>Reported on</Label> {}
+              <Label>Reported on</Label> {fullDate}
             </div>
             <div>
               <Label>Confirmed By</Label> {confirmed ? confirmedBy : "Pending"}
