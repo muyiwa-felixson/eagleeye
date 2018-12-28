@@ -85,7 +85,6 @@ class ProjectList extends Component {
       !nextProps.loadProjectsPending &&
       nextState.postData == "loading"
     ) {
-      console.log("callled and called here ");
       this.resetPostData();
     }
 
@@ -105,9 +104,6 @@ class ProjectList extends Component {
     ev.preventDefault();
     const { submitButtonLoading, dateOfAward } = this.state;
     const formElements = ev.target.elements;
-    // this.props.form.validateFields((error, value) => {
-    //   console.log(error, value);
-    // });
     let obj = {};
     projectFields.map(field => {
       obj = {
@@ -139,7 +135,6 @@ class ProjectList extends Component {
             });
           })
           .catch(err => {
-            console.log(err);
             this.setState(() => {
               this.form.reset();
               return {

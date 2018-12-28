@@ -31,7 +31,7 @@ export const ProjectReport = props => {
       mediaFile.current.click(); // dispatchEvent(new Event("click"));
     }
   };
-
+  console.log(displayImages, ' ======> index')
   return (
     <ModalComponent
       title="Project Report"
@@ -53,9 +53,10 @@ export const ProjectReport = props => {
         <Boxed padVertical="30px">
           <input
             type="file"
-            onChange={imageChanged}
+            onChange={(e) => imageChanged(e, mediaFile)}
             ref={mediaFile}
             name="media"
+            multiple={true}
             style={{ display: "none" }}
             accept="image/*, video/*"
           />
