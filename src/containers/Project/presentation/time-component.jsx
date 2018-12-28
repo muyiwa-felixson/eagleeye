@@ -10,8 +10,7 @@ import {
 import { Button, Grid, Label, PaleButton } from "../../../components/flex";
 import { Theme } from "../../../components/flex/theme";
 import { getExtension, videoFilter } from "../../../utils/utils";
-import moment from 'moment';
-
+import moment from "moment";
 
 export const TimeComponent = ({
   confirmed,
@@ -77,26 +76,33 @@ export const TimeComponent = ({
             {media.map(elem => {
               const isVideo = videoFilter(getExtension(elem.image));
               return !isVideo ? (
-                <Picture backgroundImage={elem.image} onClick={() => previewer({ type: "picture", source: elem.image })} />
+                <Picture
+                  backgroundImage={elem.image}
+                  onClick={() =>
+                    previewer({ type: "picture", source: elem.image })
+                  }
+                />
               ) : (
-                  <Video>
-                    <video
-                      type="video/mp4"
-                      style={{ width: "100%", height: "100%", display: "block" }}
-                      autoplay={false}
-                      loop={false}
-                      controls={false}
-                      muted={true}
-                      onClick={() => previewer({ type: "video", source: elem.image })}
-                    >
-                      <source
-                        // type="video/mp4"
-                        // data-reactid=".0.1.0.0.0"
-                        src={elem.image}
-                      />
-                    </video>
-                  </Video>
-                );
+                <Video>
+                  <video
+                    type="video/mp4"
+                    style={{ width: "100%", height: "100%", display: "block" }}
+                    autoplay={false}
+                    loop={false}
+                    controls={true}
+                    muted={true}
+                    onClick={() =>
+                      previewer({ type: "video", source: elem.image })
+                    }
+                  >
+                    <source
+                     //  type="video/mp4"
+                      // data-reactid=".0.1.0.0.0"
+                      src={elem.image}
+                    />
+                  </video>
+                </Video>
+              );
             })}
           </div>
         </TimeDiv>
