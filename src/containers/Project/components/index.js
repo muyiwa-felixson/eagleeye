@@ -272,9 +272,13 @@ export const Picture = styled.div`
   float: left;
   background-size: cover;
   background-position: center;
-  box-shadow: 1px 5px 25px ${Theme.Shadow};
+  box-shadow: 0px 1px 5px rgba(0,0,0,0.2);
   cursor: pointer;
   background-image: ${props => `url(${props.backgroundImage})`};
+  transition: ${Theme.PrimaryTransition};
+  &:hover{
+    box-shadow: -3px 5px 5px rgba(0,0,0,0.4);
+  }
 `;
 
 export const Video = styled.div`
@@ -288,8 +292,12 @@ export const Video = styled.div`
   float: left;
   background-size: cover;
   background-position: center;
-  box-shadow: 1px 5px 25px ${Theme.Shadow};
+  box-shadow: 0px 1px 5px rgba(0,0,0,0.2);
   cursor: pointer;
+  transition: ${Theme.PrimaryTransition};
+  &:hover{
+    box-shadow: -3px 5px 5px rgba(0,0,0,0.4);
+  }
 
   /* // &:after{
   //   width: 30px;
