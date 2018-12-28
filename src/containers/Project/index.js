@@ -510,7 +510,7 @@ class Project extends Component {
     const { sortedReports } = this.state;
     let totalCoverage = 0;
     if (sortedReports) {
-      if (!approved && sortedReports) {
+      if (!approved && sortedReports && sortedReports.length > 0 ) {
         const report = sortedReports[0];
         const { completionLevel } = report;
         return completionLevel;

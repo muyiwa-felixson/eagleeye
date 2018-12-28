@@ -120,6 +120,36 @@ export const guid = () => {
   }
   return _p8() + _p8(true) + _p8(true) + _p8();
 };
+/**
+ * @function fileFilter
+ */
+export const videoFilter = extension => {
+  const fileExtension = extension;
+  const acceptedExtensions = [
+    "mp4",
+    "ogx",
+    "3gp",
+    "ogg",
+    "flv",
+    "avi",
+    "quicktime",
+    "mpeg-4",
+    "xdcam",
+    "dnxhd",
+    "vob"
+  ];
+  if (acceptedExtensions.indexOf(fileExtension) < 0) {
+    return false;
+  } else {
+    return true;
+  }
+};
+/**
+ * @function getExtension
+ */
+export const getExtension = filename => {
+  return filename.split(".").pop();
+};
 
 export {
   projectTypes,

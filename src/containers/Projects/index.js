@@ -341,8 +341,7 @@ class ProjectList extends Component {
           fluid
         >
           <form ref={el => (this.form = el)} onSubmit={this.submit}>
-            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
-            officia deserunt.
+            Add a new Project , please endeavour to add all the required fields 
             <Boxed padVertical="30px">
               <Grid pad="15px" default="3fr 1fr" tablet="2fr 1fr">
                 <Input
@@ -391,13 +390,13 @@ class ProjectList extends Component {
                   options={getOptions(projectTypes)}
                 />
 
-                <SimpleSelect
-                  type="select"
+                <Input
+                  type="text"
+                  placeholder="Target Unit"
                   label="Target Unit"
                   required
                   forminput
                   name="unit"
-                  options={getOptions(targetUnits)}
                 />
 
                 <Input

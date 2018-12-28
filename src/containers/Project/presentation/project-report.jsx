@@ -11,6 +11,7 @@ import {
   Boxed,
   TextArea
 } from "../../../components/flex";
+import moment from 'moment';
 
 export const ProjectReport = props => {
   const {
@@ -47,8 +48,7 @@ export const ProjectReport = props => {
       fluid
     >
       <form ref={ref} onSubmit={submitForm}>
-        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
-        officia deserunt.
+        Provide all the details of the report, please note that this will not be autoatically be confirmed until an admin manually confirms 
         <Boxed padVertical="30px">
           <input
             type="file"
@@ -79,9 +79,7 @@ export const ProjectReport = props => {
               forminput
             />
             <Input
-              disabled
               placeholder="Submitted By"
-              value="Damina Ibra"
               name="submittedBy"
               type="text"
               label="Submitted By"
@@ -90,7 +88,7 @@ export const ProjectReport = props => {
             <Input
               disabled
               placeholder="Submitted On"
-              value="Mon, 24th Dec 2018"
+              value={moment(new Date()).format("dddd D MMMM YYYY LT")}
               type="text"
               label="Submitted By"
               forminput
@@ -104,8 +102,6 @@ export const ProjectReport = props => {
               {displayImages.map((image, index) => {
                 return <Picture key={index} backgroundImage={image} />;
               })}
-
-              <Video />
             </div>
             <div className="placeholder">
               <i className="icon-upload-cloud-outline" />
