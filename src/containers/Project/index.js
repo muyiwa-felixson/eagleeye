@@ -37,7 +37,10 @@ const defaultState = {
   mergedList: null,
   totalPayable: 0,
   image: null,
-  displayImages: []
+  displayImages: [],
+  copleted: 0,
+  approvingPost: false,
+  decliningPost: false
 };
 
 class Project extends Component {
@@ -46,7 +49,6 @@ class Project extends Component {
     this.state = defaultState;
   }
   componentDidMount() {
-    console.log("component mounting ..");
     const { match } = this.props;
     const { params } = match;
     const { id, rev } = params;
@@ -69,7 +71,15 @@ class Project extends Component {
       const mergedList = [...reports, ...payments];
       this.sortByDate(mergedList, reports, payments);
     }
-
+    if (nextProps.approvePostPayload && prevProps.approvePostPending) {
+      this.resetPostData();
+    }
+    if (nextProps.declinePostPayload && prevProps.declinePostPending) {
+      this.resetPostData();
+    }
+    if (prevState.reportModal != nextState.reportModal) {
+      this.resetImage();
+    }
     //
   }
   sortByDate = (mergedList, reports, payments) => {
@@ -128,35 +138,75 @@ class Project extends Component {
       };
     });
   };
-
-  readFiles = (file, target) => {
+  resetImage = () => {
+    this.setState(() => {
+      return {
+        displayImages: []
+      };
+    });
+  };
+  readFiles = file => {
     if (file) {
       const reader = new FileReader();
-      reader.onload = e => {
-        const newImage = e.target.result;
-        this.setState(() => {
-          const { displayImages } = this.state;
-          displayImages.push(newImage);
-          return {
-            displayImages
+      if (!file.length) {
+        reader.onload = e => {
+          const newImage = e.target.result;
+          if (!file.length) {
+            const { displayImages } = this.state;
+            this.setState(() => {
+              displayImages.push(newImage);
+              return {
+                displayImages
+              };
+            });
+          }
+          // target.reset();
+        };
+        reader.removeEventListener("load", () => {});
+      }
+      if (!file.length) {
+        reader.readAsDataURL(file);
+      } else {
+        const { displayImages = [] } = this.state;
+        file.map(f => {
+          const r = new FileReader();
+          r.onload = e => {
+            const image = e.target.result;
+            displayImages.push(image);
           };
+          r.onloadend = () => {
+            this.setState(() => {
+              return {
+                displayImages
+              };
+            });
+          };
+          r.readAsDataURL(f);
         });
-        reader.removeEventListener("load", () => { });
-        // target.reset();
-      };
-
-      reader.readAsDataURL(file);
+      }
     }
   };
 
-  imageChanged = ev => {
+  imageChanged = (ev, ref) => {
     const target = ev.target;
-    const files = ev.target.files;
+    let files = ev.target.files;
+    // files = Object.assign(ev.target.files, files);
     this.readFiles(files["0"], target);
     if (files.length < 2) {
       this.setState(() => {
         return {
           image: files["0"]
+        };
+      });
+    } else {
+      const images = [];
+      for (let i = 0; i < files.length; i++) {
+        images.push(files[String(i)]);
+      }
+      this.readFiles(images);
+      this.setState(() => {
+        return {
+          image: images
         };
       });
     }
@@ -174,7 +224,8 @@ class Project extends Component {
   closeReportModal = () => {
     this.setState(() => {
       return {
-        reportModal: false
+        reportModal: false,
+        displayImage: []
       };
     });
   };
@@ -188,7 +239,6 @@ class Project extends Component {
   calculatePayable = (ev, cost) => {
     const percentage = ev.value;
     if (percentage) {
-      console.log(percentage);
       let num = percentage;
       num = parseInt(num, 10);
       const payable = (percentage / 100) * cost;
@@ -244,14 +294,19 @@ class Project extends Component {
           .then(data => {
             const { image } = this.state;
             const dataF = new FormData();
-            const media = [image];
             if (image) {
-              console.log("Image is here = == >");
               let url = "";
-              let m = null;
-              url = urls.postSingleMedia;
-              m = image;
-              dataF.append("reports", m, m.filename);
+              let m = image;
+              if (m.length &&  m.length > 1) {
+                url = urls.postMultipleMedia;
+                m.map((f) => { 
+                  dataF.append("photos[]", f, f.filename);
+                })
+              } else {
+                url = urls.postSingleMedia;
+                dataF.append("reports", m, m.filename);
+              }
+
               dataF.append("doc", obj);
               dataF.append("reportId", reportId);
               dataF.append("rev", data.rev);
@@ -266,7 +321,6 @@ class Project extends Component {
                   }
                 })
                 .then(data2 => {
-                  console.log(data2);
                   this.closeReportModal();
                   this.setState(() => {
                     return {
@@ -360,6 +414,63 @@ class Project extends Component {
       }
     );
   };
+  declinePost = reportId => {
+    const { loadProjectPayload } = this.props;
+    const { _id, _rev } = loadProjectPayload;
+    if (loadProjectPayload.reports) {
+      const report = loadProjectPayload.reports.filter(
+        report => report.id === reportId
+      )[0];
+      report.approved = true;
+      let withoutReport = loadProjectPayload.reports.filter(
+        report => report.id !== reportId
+      );
+      delete loadProjectPayload.reports;
+      loadProjectPayload.reports = withoutReport;
+      const proxyUpdate = () => {
+        return getData({
+          url: urls.postProject,
+          inputData: {
+            doc: loadProjectPayload,
+            dbname: "project",
+            id: _id,
+            rev: _rev
+          },
+          context: "PATCH"
+        });
+      };
+      this.props.dispatchActions("DECLINE_POST", { func: proxyUpdate });
+    }
+  };
+  approvePost = reportId => {
+    const { loadProjectPayload } = this.props;
+    const { _id, _rev } = loadProjectPayload;
+    if (loadProjectPayload.reports) {
+      const report = loadProjectPayload.reports.filter(
+        report => report.id === reportId
+      )[0];
+      report.approved = true;
+      let withoutReport = loadProjectPayload.reports.filter(
+        report => report.id !== reportId
+      );
+      withoutReport = [...withoutReport, report];
+      delete loadProjectPayload.reports;
+      loadProjectPayload.reports = withoutReport;
+      const proxyUpdate = () => {
+        return getData({
+          url: urls.postProject,
+          inputData: {
+            doc: loadProjectPayload,
+            dbname: "project",
+            id: _id,
+            rev: _rev
+          },
+          context: "PATCH"
+        });
+      };
+      this.props.dispatchActions("APPROVE_POST", { func: proxyUpdate });
+    }
+  };
   preSubmitForm = ref => {
     if (ref) {
       ref.current.dispatchEvent(new Event("submit"));
@@ -418,7 +529,9 @@ class Project extends Component {
     const {
       loadProjectPayload = {},
       loadProjectPending,
-      loadProjectError
+      loadProjectError,
+      approvePostPending,
+      declinePostPending
     } = this.props;
     const {
       code = "",
@@ -453,95 +566,154 @@ class Project extends Component {
       sortedReports && sortedReports.length > 0
         ? sortedReports[0].completionLevel
         : 0;
-    console.log(mergedList, " and etc");
+
     return (
       <div>
         {loadProjectPending && !loadProjectPayload ? (
           <Loader />
         ) : (
-            <React.Fragment>
-              <ProjectAdd />
-              <TopSection>
-                <Panel>
-                  <Grid default="3fr 1fr">
-                    <div className="right-bar">
-                      <Label>Project Code</Label>
-                      <H4>{code} </H4>
+          <React.Fragment>
+            <ProjectAdd />
+            <TopSection>
+              <Panel>
+                <Grid default="3fr 1fr">
+                  <div className="right-bar">
+                    <Label>Project Code</Label>
+                    <H4>{code} </H4>
 
-                      <Label>Project Name</Label>
-                      <H5>{name}</H5>
+                    <Label>Project Name</Label>
+                    <H5>{name}</H5>
 
-                      <Label>Description</Label>
-                      <P>{description}</P>
+                    <Label>Description</Label>
+                    <P>{description}</P>
 
-                      <Grid default="1fr 1.5fr 1fr" className="minibox">
-                        <div>
-                          <Label>Nature of Project</Label>
-                          <span className="answer">{nature}</span>
-                        </div>
-                        <div>
-                          <Label>Types of Project</Label>
-                          <span className="answer">{type}</span>
-                        </div>
-                        <div>
-                          <Label>Source of Funding</Label>
-                          <span className="answer">{funding}</span>
-                        </div>
-                      </Grid>
-                      <Grid default="1fr 1.5fr 1fr" className="minibox">
-                        <div>
-                          <Label>Project Duration</Label>
-                          <span className="answer">
-                            <i className="icon-clock"> </i> {duration}{" "}
-                            {durationType}
-                          </span>
-                        </div>
-                        <div>
-                          <Label>Contractor</Label>
-                          <span className="answer">
-                            <i className="icon-certificate"> </i> {contractor}
-                          </span>
-                        </div>
-                        <div>
-                          <Label>Project Cost</Label>
-                          <strong className="answer">
-                            <i className="icon-credit-card"> </i> {cost}
-                          </strong>
-                        </div>
-                      </Grid>
+                    <Grid default="1fr 1.5fr 1fr" className="minibox">
+                      <div>
+                        <Label>Nature of Project</Label>
+                        <span className="answer">{nature}</span>
+                      </div>
+                      <div>
+                        <Label>Types of Project</Label>
+                        <span className="answer">{type}</span>
+                      </div>
+                      <div>
+                        <Label>Source of Funding</Label>
+                        <span className="answer">{funding}</span>
+                      </div>
+                    </Grid>
+                    <Grid default="1fr 1.5fr 1fr" className="minibox">
+                      <div>
+                        <Label>Project Duration</Label>
+                        <span className="answer">
+                          <i className="icon-clock"> </i> {duration}{" "}
+                          {durationType}
+                        </span>
+                      </div>
+                      <div>
+                        <Label>Contractor</Label>
+                        <span className="answer">
+                          <i className="icon-certificate"> </i> {contractor}
+                        </span>
+                      </div>
+                      <div>
+                        <Label>Project Cost</Label>
+                        <strong className="answer">
+                          <i className="icon-credit-card"> </i> {cost}
+                        </strong>
+                      </div>
+                    </Grid>
 
-                      <Grid default="repeat(4,1fr)" className="minibox">
+                    <Grid default="repeat(4,1fr)" className="minibox">
+                      <div>
+                        <Label>State</Label>
+                        <span className="answer">Lagos</span>
+                      </div>
+                      <div>
+                        <Label>LGA</Label>
+                        <span className="answer">Ikeja</span>
+                      </div>
+                      <div>
+                        <Label>Town</Label>
+                        <span className="answer">Command</span>
+                      </div>
+                      <div>
+                        <Label>Target Unit</Label>
+                        <span className="answer">xxxxxx xxxxx xxx</span>
+                      </div>
+                    </Grid>
+                  </div>
+                  <Aligner center>
+                    <P>PAYMENTS</P>
+                    <H4 className="paid">{`${
+                      this.getPercentPaid() ? this.getPercentPaid() : 0
+                    }%`}</H4>
+                    <P>Of Project Cost has been approved for payment</P>
+                    <Button
+                      onClick={() => this.setState({ paymentModal: true })}
+                    >
+                      Make New Payment
+                    </Button>
+                  </Aligner>
+                </Grid>
+              </Panel>
+            </TopSection>
+            <LowerSection>
+              <Panel>
+                <div className="lower-buttons">
+                  <Grid default="2fr 1fr">
+                    <div>
+                      <Grid default="50px auto 50px auto" padHorizontal="10px">
                         <div>
-                          <Label>State</Label>
-                          <span className="answer">Lagos</span>
+                          <span className="perval">{`${
+                            this.getPercentCompleted()
+                              ? this.getPercentCompleted()
+                              : 0
+                          }%`}</span>
                         </div>
                         <div>
-                          <Label>LGA</Label>
-                          <span className="answer">Ikeja</span>
+                          <Label>Reported Coverage</Label>
+                          <LineBar
+                            percentage={`${
+                              this.getPercentCompleted()
+                                ? this.getPercentCompleted()
+                                : 0
+                            }%`}
+                            color={Theme.PrimaryGreyDark}
+                          />
                         </div>
                         <div>
-                          <Label>Town</Label>
-                          <span className="answer">Command</span>
+                          <span className="perval">{`${
+                            this.getPercentCompleted(true)
+                              ? this.getPercentCompleted(true)
+                              : 0
+                          }%`}</span>
                         </div>
                         <div>
-                          <Label>Target Unit</Label>
-                          <span className="answer">xxxxxx xxxxx xxx</span>
+                          <Label>{`${
+                            this.getPercentCompleted(true)
+                              ? this.getPercentCompleted(true)
+                              : 0
+                          }%`}</Label>
+                          <LineBar
+                            percentage={`${
+                              this.getPercentCompleted(true)
+                                ? this.getPercentCompleted(true)
+                                : 0
+                            }%`}
+                          />
                         </div>
                       </Grid>
                     </div>
-                    <Aligner center>
-                      <P>PAYMENTS</P>
-                      <H4 className="paid">{`${
-                        this.getPercentPaid() ? this.getPercentPaid() : 0
-                        }%`}</H4>
-                      <P>Of Project Cost has been approved for payment</P>
-                      <Button
-                        onClick={() => this.setState({ paymentModal: true })}
+                    <Aligner right>
+                      <PaleButton
+                        color={Theme.PrimaryBlue}
+                        onClick={() => this.setState({ reportModal: true })}
                       >
-                        Make New Payment
-                    </Button>
+                        New Report
+                      </PaleButton>
                     </Aligner>
                   </Grid>
+<<<<<<< HEAD
                 </Panel>
               </TopSection>
               <LowerSection>
@@ -630,15 +802,71 @@ class Project extends Component {
               ) : null}
             </React.Fragment>
           )}
+=======
+                </div>
+              </Panel>
+            </LowerSection>
+            <TimelineList
+              approvePost={id => this.approvePost(id)}
+              declinePost={id => this.declinePost(id)}
+              mergedList={mergedList}
+              media={media}
+              approvePostPending={approvePostPending}
+            />
+            {reportModal ? (
+              <ProjectReport
+                preSubmitForm={this.preSubmitForm}
+                submitForm={this.submitForm}
+                coverageReported={this.getPercentCompleted}
+                closeReportModal={this.closeReportModal}
+                reportModal={reportModal}
+                name={name}
+                imageChanged={this.imageChanged}
+                displayImages={displayImages}
+                percentages={this.percentages}
+              />
+            ) : null}
+            {paymentModal ? (
+              <PayReport
+                paymentModal={paymentModal}
+                preSubmitFormPay={this.preSubmitFormPay}
+                closePaymentModal={this.closePaymentModal}
+                percentages={this.percentages}
+                paidPercent={this.getPercentPaid}
+                totalPayable={totalPayable}
+                calculatePayable={this.calculatePayable}
+                name={name}
+                cost={cost}
+                submitFormPay={this.submitFormPay}
+                getFieldsProps={this.props.getFieldProps}
+              />
+            ) : null}
+          </React.Fragment>
+        )}
+>>>>>>> 3e6c2dbff1e6046dc7cdc1078597bd70a277bb8d
       </div>
     );
   }
 }
 
-const mapStateToProps = ({ loadProject }) => ({
+const mapStateToProps = ({
+  loadProject,
+  postCompletionStat,
+  approvePost,
+  declinePost
+}) => ({
   loadProjectPending: loadProject.pending,
   loadProjectError: loadProject.error,
-  loadProjectPayload: loadProject.payload
+  loadProjectPayload: loadProject.payload,
+  postCompletionStatPending: postCompletionStat.pending,
+  postCompletionStatError: postCompletionStat.error,
+  postCompletionStatPayload: postCompletionStat.payload,
+  approvePostPayload: approvePost.payload,
+  approvePostPending: approvePost.pending,
+  approvePostError: approvePost.error,
+  declinePostPayload: declinePost.payload,
+  declinePostPending: declinePost.pending,
+  declinePostError: declinePost.error
 });
 const mapDispatchToProps = dispatch =>
   bindActionCreators({ dispatchActions }, dispatch);

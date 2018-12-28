@@ -79,8 +79,12 @@ class ProjectList extends Component {
   componentDidUpdate(prevProps, prevState) {
     const nextProps = this.props;
     const nextState = this.state;
-    if (!prevState.postData && nextState.postData && !nextProps.loadProjectsPending && nextState.postData =='loading') {
-      console.log('callled and called here ')
+    if (
+      !prevState.postData &&
+      nextState.postData &&
+      !nextProps.loadProjectsPending &&
+      nextState.postData == "loading"
+    ) {
       this.resetPostData();
     }
 
@@ -94,23 +98,20 @@ class ProjectList extends Component {
       };
     });
   };
-  componentDidCatch() { }
+  componentDidCatch() {}
 
   submit = ev => {
     ev.preventDefault();
     const { submitButtonLoading, dateOfAward } = this.state;
     const formElements = ev.target.elements;
-    // this.props.form.validateFields((error, value) => {
-    //   console.log(error, value);
-    // });
     let obj = {};
     projectFields.map(field => {
       obj = {
         ...obj,
-        [field]: formElements[field].value,
+        [field]: formElements[field].value
       };
     });
-    obj = { ...obj, dateOfAward, completed: 0, paid: 0 }
+    obj = { ...obj, dateOfAward, completed: 0, paid: 0 };
     this.setState(
       () => {
         return {
@@ -127,14 +128,13 @@ class ProjectList extends Component {
             this.setState(() => {
               this.form.reset();
               return {
-                postData: 'loading',
+                postData: "loading",
                 submitButtonLoading: false,
                 projectModal: false
               };
             });
           })
           .catch(err => {
-            console.log(err);
             this.setState(() => {
               this.form.reset();
               return {
@@ -150,13 +150,44 @@ class ProjectList extends Component {
   navigateToProject = (rev, id) => {
     this.props.history.push(`/projects/project/${id}/${rev}`);
   };
-  handleDateChange = (date) => {
+
+  getPercentCovered = (id, context = "payments") => {
+    const { loadProjectsPayload } = this.props;
+    let totalCoverage = 0;
+    if (loadProjectsPayload) {
+      const project = loadProjectsPayload.filter(project => project.id === id)[0].doc;
+      if (context === "payments") {
+        if (project.payments) {
+          const { payments } = project;
+          payments.map(payment => {
+            let { percentage } = payment;
+            if (!isNaN(parseInt(percentage, 10))) {
+              totalCoverage += parseInt(percentage);
+            }
+          });
+        }
+      } else {
+        if (project.reports) {
+          const { reports } = project;
+          reports.map(report => {
+            const { completionLevel } = report;
+            if (!isNaN(parseInt(completionLevel, 10))) {
+              totalCoverage += parseInt(completionLevel);
+            }
+          });
+        }
+      }
+    }
+    return totalCoverage;
+  };
+
+  handleDateChange = date => {
     this.setState(() => {
       return {
         dateOfAward: date
-      }
-    })
-  }
+      };
+    });
+  };
   toggleClickAction = () => {
     const { projectModal } = this.state;
     this.setState(() => {
@@ -228,7 +259,6 @@ class ProjectList extends Component {
                 <React.Fragment>
                   {loadProjectsPayload.map((project, index) => {
                     const { doc, id, value } = project;
-                    console.log(doc, id, value);
                     let { rev } = value;
                     if (!rev) rev = doc._rev;
                     const {
@@ -238,7 +268,9 @@ class ProjectList extends Component {
                       completed,
                       paid
                     } = doc;
-                    const splittedDate = dateOfAward && dateOfAward.split(" ");
+                    try {
+                      const splittedDate = dateOfAward.split(" ");
+                    } catch (err) {}
                     const date = new Date(dateOfAward) || new Date();
                     const year = date.getFullYear();
                     const month = date.getMonth();
@@ -252,8 +284,8 @@ class ProjectList extends Component {
                           code={fileNumber}
                           onClick={() => this.navigateToProject(id, rev)}
                           name={name}
-                          completed={completed}
-                          paid={paid}
+                          completed={this.getPercentCovered(id, 'reports')}
+                          paid={this.getPercentCovered(id, 'payments')}
                           layout={this.state.viewlayout}
                         />
                       </React.Fragment>
@@ -261,8 +293,8 @@ class ProjectList extends Component {
                   })}
                 </React.Fragment>
               ) : (
-                  <Loader absolute />
-                )}
+                <Loader absolute />
+              )}
             </React.Fragment>
           </Grid>
         </ListBody>

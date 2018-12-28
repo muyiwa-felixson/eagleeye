@@ -1,35 +1,45 @@
 import React from "react";
 import {
-  TopSection,
-  LowerSection,
-  TimeLine,
   TimeBox,
   TimeDate,
   TimeContent,
   TimeDiv,
   Picture,
-  Video,
-  PayContent,
-  DragZone
+  Video
 } from "../components";
-import {
-  Button,
-  Input,
-  Grid,
-  SimpleSelect,
-  Label,
-  Panel,
-  PaleButton,
-  Aligner,
-  H4,
-  H5,
-  P,
-  ModalComponent,
-  Boxed,
-  TextArea,
-  InputWrapper
-} from "../../../components/flex";
+import { Button, Grid, Label, PaleButton } from "../../../components/flex";
 import { Theme } from "../../../components/flex/theme";
+
+/**
+ * @function fileFilter
+ */
+const videoFilter = extension => {
+  const fileExtension = extension;
+  const acceptedExtensions = [
+    "mp4",
+    "ogx",
+    "3gp",
+    "ogg",
+    "flv",
+    "avi",
+    "quicktime",
+    "mpeg-4",
+    "xdcam",
+    "dnxhd",
+    "vob"
+  ];
+  if (acceptedExtensions.indexOf(fileExtension) < 0) {
+    return false;
+  } else {
+    return true;
+  }
+};
+/**
+ * @function getExtension
+ */
+const getExtension = filename => {
+  return filename.split(".").pop();
+};
 
 export const TimeComponent = ({
   confirmed,
@@ -41,10 +51,12 @@ export const TimeComponent = ({
   day,
   month,
   year,
+  reportId,
   comment,
-  media
+  media,
+  approvePost,
+  declinePost
 }) => {
-  console.log(media);
   return (
     <TimeBox type={type}>
       <TimeDate>
@@ -56,9 +68,14 @@ export const TimeComponent = ({
       <TimeContent>
         {!confirmed && (
           <div className="button-section">
-            <Button>Approve</Button>
+            <Button onClick={() => approvePost(reportId)}>Approve</Button>
             <PaleButton color={Theme.PrimaryBlue}>Update</PaleButton>
-            <Button color={Theme.PrimaryRed}>Decline</Button>
+            <Button
+              onClick={() => declinePost(reportId)}
+              color={Theme.PrimaryRed}
+            >
+              Decline
+            </Button>
           </div>
         )}
         <TimeDiv confirmed={confirmed} type="report">
@@ -85,10 +102,26 @@ export const TimeComponent = ({
 
           <div className="media">
             {media.map(elem => {
-              return elem.type === "picture" ? (
+              const isVideo = videoFilter(getExtension(elem.image));
+              return !isVideo ? (
                 <Picture backgroundImage={elem.image} />
               ) : (
-                <Video />
+                <Video>
+                  <video
+                    type="video/mp4"
+                    style={{ width: "100%", height: "100%", display: "block" }}
+                    autoplay={true}
+                    loop={true}
+                    controls={true}
+                    muted={true}
+                  >
+                    <source
+                      // type="video/mp4"
+                      // data-reactid=".0.1.0.0.0"
+                      src={elem.image}
+                    />
+                  </video>
+                </Video>
               );
             })}
           </div>
