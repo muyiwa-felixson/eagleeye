@@ -290,9 +290,27 @@ export const Video = styled.div`
   background-position: center;
   box-shadow: 1px 5px 25px ${Theme.Shadow};
   cursor: pointer;
-  padding: 0px;
-  margin:0px;
 
+  // &:after{
+  //   width: 30px;
+  //   height: 30px;
+  //   border-radius: 50%;
+  //   background: rgba(255,255,255,0.2);
+  //   font-family: 'flexisaf';
+  //   font-size: 16px;
+  //   color: #fff;
+  //   text-align: center;
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: center;
+  //   content: '\\f00f';
+  //   position: absolute;
+  //   top: 20px;
+  //   left: 25px;
+  //   border: 10px solid rgba(255,255,255,0.2);
+  //   box-shadow: 0px 0px 5px ${Theme.Shadow};
+  //   text-shadow: 1px 1px 1px ${Theme.Shadow};
+  // }
 `;
 
 export const DragZone = styled.div`
