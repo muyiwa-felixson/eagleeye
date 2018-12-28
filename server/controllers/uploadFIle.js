@@ -13,11 +13,6 @@ const fetch = require("node-fetch");
 const host = process.env.COUCHBASE_HOST;
 const port = process.env.SERVER_PORT;
 const uploadFile = (dbname, document, id, rev, reportId, file) => {
-  console.log(
-    id,
-    typeof id,
-    "=============================================+> id"
-  );
   return new Promise((resolve, reject) => {
     fetch(
       `http://localhost:${process.env.SERVER_PORT}/${
@@ -30,7 +25,13 @@ const uploadFile = (dbname, document, id, rev, reportId, file) => {
           .then(doc => {
             const report = doc.reports.filter(doc => doc.id === reportId)[0];
             const media = report.media || [];
-            media.push(`http://${host}:${port}/static/${file.filename}`);
+            if (!file.length) {
+              media.push(`http://${host}:${port}/static/${file.filename}`);
+            } else {
+              file.map(f =>
+                media.push(`http://${host}:${port}/static/${f.filename}`)
+              );
+            }
             report.media = media;
             let newdoc = doc.reports.filter(rep => rep.id !== report.id);
             newdoc = [...newdoc, report];
@@ -40,12 +41,10 @@ const uploadFile = (dbname, document, id, rev, reportId, file) => {
               .catch(err => reject(err));
           })
           .catch(err => {
-            console.log(err);
             reject(err);
           });
       })
       .catch(err => {
-        console.log(err);
         reject(err);
       });
   });

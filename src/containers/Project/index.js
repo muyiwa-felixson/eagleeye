@@ -49,7 +49,6 @@ class Project extends Component {
     this.state = defaultState;
   }
   componentDidMount() {
-    console.log("component mounting ..");
     const { match } = this.props;
     const { params } = match;
     const { id, rev } = params;
@@ -71,12 +70,15 @@ class Project extends Component {
       if (!payments) payments = [];
       const mergedList = [...reports, ...payments];
       this.sortByDate(mergedList, reports, payments);
-    } 
-    if ( nextProps.approvePostPayload && prevProps.approvePostPending) { 
+    }
+    if (nextProps.approvePostPayload && prevProps.approvePostPending) {
       this.resetPostData();
     }
-    if ( nextProps.declinePostPayload && prevProps.declinePostPending) { 
+    if (nextProps.declinePostPayload && prevProps.declinePostPending) {
       this.resetPostData();
+    }
+    if (prevState.reportModal != nextState.reportModal) {
+      this.resetImage();
     }
     //
   }
@@ -136,35 +138,75 @@ class Project extends Component {
       };
     });
   };
-
-  readFiles = (file, target) => {
+  resetImage = () => {
+    this.setState(() => {
+      return {
+        displayImages: []
+      };
+    });
+  };
+  readFiles = file => {
     if (file) {
       const reader = new FileReader();
-      reader.onload = e => {
-        const newImage = e.target.result;
-        this.setState(() => {
-          const { displayImages } = this.state;
-          displayImages.push(newImage);
-          return {
-            displayImages
-          };
-        });
+      if (!file.length) {
+        reader.onload = e => {
+          const newImage = e.target.result;
+          if (!file.length) {
+            const { displayImages } = this.state;
+            this.setState(() => {
+              displayImages.push(newImage);
+              return {
+                displayImages
+              };
+            });
+          }
+          // target.reset();
+        };
         reader.removeEventListener("load", () => {});
-        // target.reset();
-      };
-
-      reader.readAsDataURL(file);
+      }
+      if (!file.length) {
+        reader.readAsDataURL(file);
+      } else {
+        const { displayImages = [] } = this.state;
+        file.map(f => {
+          const r = new FileReader();
+          r.onload = e => {
+            const image = e.target.result;
+            displayImages.push(image);
+          };
+          r.onloadend = () => {
+            this.setState(() => {
+              return {
+                displayImages
+              };
+            });
+          };
+          r.readAsDataURL(f);
+        });
+      }
     }
   };
 
-  imageChanged = ev => {
+  imageChanged = (ev, ref) => {
     const target = ev.target;
-    const files = ev.target.files;
+    let files = ev.target.files;
+    // files = Object.assign(ev.target.files, files);
     this.readFiles(files["0"], target);
     if (files.length < 2) {
       this.setState(() => {
         return {
           image: files["0"]
+        };
+      });
+    } else {
+      const images = [];
+      for (let i = 0; i < files.length; i++) {
+        images.push(files[String(i)]);
+      }
+      this.readFiles(images);
+      this.setState(() => {
+        return {
+          image: images
         };
       });
     }
@@ -182,7 +224,8 @@ class Project extends Component {
   closeReportModal = () => {
     this.setState(() => {
       return {
-        reportModal: false
+        reportModal: false,
+        displayImage: []
       };
     });
   };
@@ -196,7 +239,6 @@ class Project extends Component {
   calculatePayable = (ev, cost) => {
     const percentage = ev.value;
     if (percentage) {
-      console.log(percentage);
       let num = percentage;
       num = parseInt(num, 10);
       const payable = (percentage / 100) * cost;
@@ -252,14 +294,19 @@ class Project extends Component {
           .then(data => {
             const { image } = this.state;
             const dataF = new FormData();
-            const media = [image];
             if (image) {
-              console.log("Image is here = == >");
               let url = "";
-              let m = null;
-              url = urls.postSingleMedia;
-              m = image;
-              dataF.append("reports", m, m.filename);
+              let m = image;
+              if (m.length &&  m.length > 1) {
+                url = urls.postMultipleMedia;
+                m.map((f) => { 
+                  dataF.append("photos[]", f, f.filename);
+                })
+              } else {
+                url = urls.postSingleMedia;
+                dataF.append("reports", m, m.filename);
+              }
+
               dataF.append("doc", obj);
               dataF.append("reportId", reportId);
               dataF.append("rev", data.rev);
@@ -274,7 +321,6 @@ class Project extends Component {
                   }
                 })
                 .then(data2 => {
-                  console.log(data2);
                   this.closeReportModal();
                   this.setState(() => {
                     return {
@@ -368,44 +414,61 @@ class Project extends Component {
       }
     );
   };
-  declinePost = (reportId ) => { 
+  declinePost = reportId => {
     const { loadProjectPayload } = this.props;
-    const { _id, _rev } = loadProjectPayload;;
-    if (loadProjectPayload.reports ) { 
-      const report = loadProjectPayload.reports.filter((report) => report.id === reportId )[0];
+    const { _id, _rev } = loadProjectPayload;
+    if (loadProjectPayload.reports) {
+      const report = loadProjectPayload.reports.filter(
+        report => report.id === reportId
+      )[0];
       report.approved = true;
-      let withoutReport = loadProjectPayload.reports.filter((report) => report.id !== reportId );
+      let withoutReport = loadProjectPayload.reports.filter(
+        report => report.id !== reportId
+      );
       delete loadProjectPayload.reports;
       loadProjectPayload.reports = withoutReport;
-      const proxyUpdate = () => { 
+      const proxyUpdate = () => {
         return getData({
           url: urls.postProject,
-          inputData: { doc:loadProjectPayload , dbname: "project", id: _id, rev: _rev },
+          inputData: {
+            doc: loadProjectPayload,
+            dbname: "project",
+            id: _id,
+            rev: _rev
+          },
           context: "PATCH"
-        })
-      }
-      this.props.dispatchActions('DECLINE_POST', { func: proxyUpdate});
+        });
+      };
+      this.props.dispatchActions("DECLINE_POST", { func: proxyUpdate });
     }
-
-  }
-  approvePost = (reportId) => {
+  };
+  approvePost = reportId => {
     const { loadProjectPayload } = this.props;
-    const { _id, _rev } = loadProjectPayload;;
-    if (loadProjectPayload.reports ) { 
-      const report = loadProjectPayload.reports.filter((report) => report.id === reportId )[0];
+    const { _id, _rev } = loadProjectPayload;
+    if (loadProjectPayload.reports) {
+      const report = loadProjectPayload.reports.filter(
+        report => report.id === reportId
+      )[0];
       report.approved = true;
-      let withoutReport = loadProjectPayload.reports.filter((report) => report.id !== reportId );
-      withoutReport = [...withoutReport, report ];
+      let withoutReport = loadProjectPayload.reports.filter(
+        report => report.id !== reportId
+      );
+      withoutReport = [...withoutReport, report];
       delete loadProjectPayload.reports;
       loadProjectPayload.reports = withoutReport;
-      const proxyUpdate = () => { 
+      const proxyUpdate = () => {
         return getData({
           url: urls.postProject,
-          inputData: { doc:loadProjectPayload , dbname: "project", id: _id, rev: _rev },
+          inputData: {
+            doc: loadProjectPayload,
+            dbname: "project",
+            id: _id,
+            rev: _rev
+          },
           context: "PATCH"
-        })
-      }
-      this.props.dispatchActions('APPROVE_POST', { func: proxyUpdate});
+        });
+      };
+      this.props.dispatchActions("APPROVE_POST", { func: proxyUpdate });
     }
   };
   preSubmitForm = ref => {
@@ -654,12 +717,11 @@ class Project extends Component {
               </Panel>
             </LowerSection>
             <TimelineList
-              approvePost={(id) => this.approvePost(id)} 
-              declinePost={(id) => this.declinePost(id)}
+              approvePost={id => this.approvePost(id)}
+              declinePost={id => this.declinePost(id)}
               mergedList={mergedList}
               media={media}
               approvePostPending={approvePostPending}
-
             />
             {reportModal ? (
               <ProjectReport

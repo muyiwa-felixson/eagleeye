@@ -9,9 +9,9 @@ const { createDocument } = require("../controllers/createDocument");
 const { deleteDocument } = require("../controllers/deleteDocument");
 const { uploadFile } = require("../controllers/uploadFIle");
 const { fileFilter } = require("../utils/index");
-const crypto = require('crypto');
-const mime = require('mime');
-const fs = require('fs');
+const crypto = require("crypto");
+const mime = require("mime");
+const fs = require("fs");
 // Multer is for uploadig images
 const multer = require("multer");
 const reportMedia = "reports";
@@ -65,11 +65,9 @@ const routes = app => {
       createDocument(dbname, doc, isSafe)
         .then(retVal => res.status(200).json(retVal))
         .catch(err => {
-          console.log(err);
           res.status(500).json(err);
         });
     } catch (err) {
-      console.log(err);
       res.status(500).json(err);
     }
   });
@@ -110,15 +108,17 @@ const routes = app => {
         .then(retVal => res.status(200).json(retVal))
         .catch(err => res.status(500).json(err));
     }
-
   );
 
   app.post(
     `/${appName}/api/upload/media`,
-    upload.array("photos", 12),
+    upload.array("photos[]", 30),
     (req, res, next) => {
       const { files, body } = req;
-      const { id, dbname, rev } = body;
+      const { id, doc, dbname, rev, reportId } = body;
+      uploadFile(dbname, doc, id, rev, reportId, files)
+        .then(retVal => res.status(200).json(retVal))
+        .catch(err => res.status(500).json(err));
     }
   );
 
