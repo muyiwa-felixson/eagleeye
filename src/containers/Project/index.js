@@ -158,9 +158,11 @@ class Project extends Component {
     });
   };
   resetImage = () => {
+    console.log(this.state.images, ' ====================================+> this state i,age')
     this.setState(() => {
       return {
-        displayImages: []
+        displayImages: [],
+        images: []
       };
     });
   };
