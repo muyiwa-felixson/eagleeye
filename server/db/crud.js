@@ -6,9 +6,7 @@ const constants = require("./constants");
 const Log = require("../utils/log");
 const schema = require("../config/table");
 const Couch = require("couch-db").CouchDB;
-const dbusername = process.env.HOSTEDCOUCH;
-const dbpassword = process.env.HOSTEDCOUCHPASSWORD;
-const dburl = process.env.HOSTEDCOUCHURL;
+const { dburl, dbhost, dbusername, dbpassword } = constants;
 const nano = require("nano")({
   url: dburl,
   requestDefaults: {
