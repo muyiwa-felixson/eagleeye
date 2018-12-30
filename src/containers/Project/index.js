@@ -46,7 +46,7 @@ const defaultState = {
   expectedCost: 0,
   mergedList: null,
   totalPayable: 0,
-  image: null,
+  image: [],
   displayImages: [],
   copleted: 0,
   approvingPost: false,
@@ -212,21 +212,25 @@ class Project extends Component {
     let files = ev.target.files;
     // files = Object.assign(ev.target.files, files);
     this.readFiles(files["0"], target);
+    let { image = [] } = this.state;
     if (files.length < 2) {
+       image.push(files['0']);
       this.setState(() => {
         return {
-          image: files["0"]
+          image
         };
       });
     } else {
       const images = [];
       for (let i = 0; i < files.length; i++) {
         images.push(files[String(i)]);
+        image.push(files[String(i)])
       }
       this.readFiles(images);
+
       this.setState(() => {
         return {
-          image: images
+          image
         };
       });
     }
@@ -324,7 +328,7 @@ class Project extends Component {
                 });
               } else {
                 url = urls.postSingleMedia;
-                dataF.append("reports", m, m.filename);
+                dataF.append("reports", m[0], m[0].filename);
               }
 
               dataF.append("doc", obj);
