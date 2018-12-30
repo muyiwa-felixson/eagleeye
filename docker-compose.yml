@@ -1,34 +1,57 @@
-version: '3.0'
+version: "3.2"
+volumes:
+  couchdb_data: 
+  opt:
+  var:
+  couchdb_log:
+    
 services:
-    # couchdb:
-    #   image: couchdb
-    #   deploy:
-    #        replicas: 1
-    #   ports:
-    #       - 5984:5984
-    #   privileged: true
-    #   environment:
-    #       - COUCHDB_HOST
-    #       - COUCHDB_PORT
-    #       - COUCHDB_USERNAME
-    #       - COUCHDB_PASSWORD
-    app:
-        build: 
-          context: .
-          dockerfile: Dockerfile
-        ports:
-            - 3000:3000
-            - 3333:3333
-        environment:
-            - COUCHBASE_HOST
-            - COUCHBASE_BUCKET
-            - COUCHBASE_BUCKET_PASSWORD
-            - APPLICATION_PORT
-            - CLIENT_PORT
-            - SERVER_PORT
-            - SECRET_KEY
-            - APP_NAME
-            - HOSTEDCOUCH
-            - HOSTEDCOUCHPASSWORD
-            - HOSTEDCOUCHURL
-        restart: always
+  couchdb:
+    build: 
+      context: .
+      dockerfile: couchbase/Dockerfile
+    ports:
+      - 5984:5984
+    privileged: true
+    environment:
+        - COUCHDB_HOST
+        - COUCHDB_PORT
+        - COUCHDB_USERNAME
+        - COUCHDB_PASSWORD
+        - HOSTEDCOUCH
+        - HOSTEDCOUCHPASSWORD
+        - HOSTEDCOUCHURL
+        - COUCHBASE_ADMINISTRATOR_USERNAME
+        - COUCHBASE_ADMINISTRATOR_PASSWORD
+        - COUCHBASE_BUCKET
+        - COUCHBASE_BUCKET_PASSWORD
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+       - 3000:3000
+       - 3001:3001
+       - 3002:3003
+       - 3333:3333
+       - 3334:3334
+    environment:
+       - APPLICATION_PORT
+       - CLIENT_PORT
+       - SERVER_PORT
+       - SECRET_KEY
+       - APP_NAME
+       - HOSTEDCOUCH
+       - HOSTEDCOUCHPASSWORD
+       - HOSTEDCOUCHURL
+       - COUCHBASE_ADMINISTRATOR_USERNAME
+       - COUCHBASE_ADMINISTRATOR_PASSWORD
+       - COUCHBASE_BUCKET
+       - COUCHBASE_BUCKET_PASSWORD
+       - COUCHBASE_HOST
+       - NODE_ENV
+       - SKIP_PREFLIGHT_CHECK
+       - COUCHDB_USERNAME
+       - COUCHDB_PASSWORD
+
+       

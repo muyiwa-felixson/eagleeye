@@ -56,12 +56,14 @@ app.use(cors());
 app.use( '/static',express.static(__dirname + '/media'));
 require("./routes").routes(app); 
 process.on("uncaughtException", function(err) {
-  Log.error(err);
+  console.error(err);
 });
 createTables()
   .then(() => {
-    app.listen(PORT, () =>
+    console.log('Here it is loaded gracefully');
+    app.listen(PORT, (err) =>{
+     if(err) console.log(err)
       console.log(`eagle eye Server listening on ${PORT}!`)
-    );
+    });
   })
   .catch(err => console.error(err));

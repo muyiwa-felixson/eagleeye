@@ -4,7 +4,7 @@
  */
 module.exports = {
    tables : [
-       'payment', 'report', 'project', 'category', 'contractor', 'user', 'permissions'
+      'project', 'contractor', 'user', 'permissions'
    ],
    groups: [
       'superuser', 'adminstrator', 'contractor', 'officer'

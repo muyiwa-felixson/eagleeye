@@ -1,7 +1,7 @@
 # set -m
 
 /entrypoint.sh couchbase-server &
-docker run -e COUCHDB_USER=$COUCHBASE_ADMINISTRATOR_USERNAME -e COUCHDB_PASSWORD=$COUCHBASE_ADMINISTRATOR_PASSWORD -d couchdb
+docker run -d --name couchdb  -e COUCHDB_USER=$HOSTEDCOUCH -e COUCHDB_PASSWORD=$HOSTEDCOUCHPASSWORD -p 5984:5984 frodenas/couchdb
 sleep 15
 
 
