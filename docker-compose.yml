@@ -4,6 +4,7 @@ volumes:
   opt:
   var:
   couchdb_log:
+  persistence:
     
 services:
   couchdb:
@@ -12,6 +13,11 @@ services:
       dockerfile: couchbase/Dockerfile
     ports:
       - 5984:5984
+    volumes:
+      - type: volume
+        source: couchdb_data
+        target: /data
+        read_only: False 
     privileged: true
     environment:
         - COUCHDB_HOST

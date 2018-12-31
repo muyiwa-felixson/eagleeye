@@ -10,7 +10,7 @@ const { getDoc, getSomeDoc } = require("../db/crud");
 
 const getDocument = (dbname, id, key = "", val = "") => {
   return new Promise((resolve, reject) => {
-    if (id) {
+    if (id && !key) {
       getDoc(dbname, id)
         .then(document => resolve(document))
         .catch(err => reject(err));

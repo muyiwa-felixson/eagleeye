@@ -8,7 +8,7 @@ const { updateDocument } = require("../controllers/updateDocument");
 const { createDocument } = require("../controllers/createDocument");
 const { deleteDocument } = require("../controllers/deleteDocument");
 const { uploadFile } = require("../controllers/uploadFIle");
-const { fileFilter } = require("../utils/index");
+const { signup, signin, assignGroup } = require("../controllers/users");
 const crypto = require("crypto");
 const mime = require("mime");
 const fs = require("fs");
@@ -121,6 +121,36 @@ const routes = app => {
         .catch(err => res.status(500).json(err));
     }
   );
+
+  // Auth
+  app.post(`/${appName}/api/auth/signup`, (req, res) => {
+    const { firstname, lastname, username, password } = req.body;
+    signup({ username, password, firstname, lastname })
+      .then(response => {
+        res.status(200).json(response);
+      })
+      .catch(err => res.status(parseInt(err)).json(err));
+  });
+
+  // Auth
+  app.post(`/${appName}/api/auth/signin`, (req, res) => {
+    const { username, password } = req.body;
+    signin({ username, password })
+      .then(response => {
+        res.status(200).json(response);
+      })
+      .catch(err => res.status(parseInt(err)).json(err));
+  });
+
+  // Auth
+  app.post(`/${appName}/api/auth/group`, (req, res) => {
+    const { group, token } = req.body;
+    assignGroup({ group, token })
+      .then(response => {
+        res.status(200).json(response);
+      })
+      .catch(err => res.status(parseInt(err)).json(err));
+  });
 
   // Default routes
   app.use((req, res) => {

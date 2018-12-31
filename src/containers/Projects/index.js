@@ -316,8 +316,10 @@ class ProjectList extends Component {
                     );
                   })}
                 </React.Fragment>
-              ) : (
+              ) : loadProjectsPending ? (
                 <Loader absolute />
+              ) : (
+                <div><h2> There are currently no projects reported at the moment</h2></div>
               )}
             </React.Fragment>
           </Grid>
@@ -341,7 +343,7 @@ class ProjectList extends Component {
           fluid
         >
           <form ref={el => (this.form = el)} onSubmit={this.submit}>
-            Add a new Project , please endeavour to add all the required fields 
+            Add a new Project , please endeavour to add all the required fields
             <Boxed padVertical="30px">
               <Grid pad="15px" default="3fr 1fr" tablet="2fr 1fr">
                 <Input
