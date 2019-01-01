@@ -129,7 +129,7 @@ const routes = app => {
       .then(response => {
         res.status(200).json(response);
       })
-      .catch(err => res.status(parseInt(err)).json(err));
+      .catch(err => res.status(err.code || 500).json(err));
   });
 
   // Auth
@@ -139,7 +139,7 @@ const routes = app => {
       .then(response => {
         res.status(200).json(response);
       })
-      .catch(err => res.status(parseInt(err)).json(err));
+      .catch(err => res.status(err.code || 500).json(err));
   });
 
   // Auth
@@ -149,7 +149,7 @@ const routes = app => {
       .then(response => {
         res.status(200).json(response);
       })
-      .catch(err => res.status(parseInt(err)).json(err));
+      .catch(err => res.status(err.code || 500 ).json(err));
   });
 
   // Default routes
