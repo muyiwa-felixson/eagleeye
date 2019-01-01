@@ -124,8 +124,8 @@ const routes = app => {
 
   // Auth
   app.post(`/${appName}/api/auth/signup`, (req, res) => {
-    const { firstname, lastname, username, password } = req.body;
-    signup({ username, password, firstname, lastname })
+    const { firstname, lastname, username, password, token } = req.body;
+    signup({ username, password, firstname, lastname, token })
       .then(response => {
         res.status(200).json(response);
       })
@@ -144,8 +144,8 @@ const routes = app => {
 
   // Auth
   app.post(`/${appName}/api/auth/group`, (req, res) => {
-    const { group, token } = req.body;
-    assignGroup({ group, token })
+    const { group, username, token } = req.body;
+    assignGroup({ group, username, token })
       .then(response => {
         res.status(200).json(response);
       })

@@ -1,21 +1,26 @@
 const { secretKey } = require("../db/constants");
 const { getDoc } = require("../db/crud");
+const { permissions } = require("../config/table");
 const jwt = require("jsonwebtoken");
 
 /**
- * @function create a token and sign using the id , username and password 
+ * @function create a token and sign using the id , username and password
  * @param { object { id: string, username: string , password: string }}
- * @return { string } - token 
+ * @return { string } - token
  */
-const createToken = ({id, username, password, group}) => {
-    return jwt.sign({
-        _id: id,
-        username,
-        password,
-        group
-    }, secretKey, {
-        expiresIn: '1000h'
-    });
+const createToken = ({ id, username, password, group }) => {
+  return jwt.sign(
+    {
+      _id: id,
+      username,
+      password,
+      group
+    },
+    secretKey,
+    {
+      expiresIn: "1000h"
+    }
+  );
 };
 
 /**
@@ -39,7 +44,18 @@ const verifyToken = token => {
     });
   });
 };
+
+const getPermissions = token => {
+  return new Promise((resolve, reject) => {
+    verifyToken(token).then(user => {
+      const { group } = user;
+      const permissionList = permissions[group];
+      resolve(permissionList);
+    });
+  });
+};
 module.exports = {
   verifyToken,
-  createToken
+  createToken,
+  getPermissions
 };
