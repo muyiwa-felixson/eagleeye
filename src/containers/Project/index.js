@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { urls, baseurl } from "../../api-requests/urls";
-import { createForm, formShape } from "rc-form";
 import { dispatchActions } from "../../store/actions/action-config.action";
 import { ProjectAdd } from "../../commons/index";
 import { ProjectReport } from "./presentation/project-report";
@@ -48,6 +47,7 @@ const defaultState = {
   totalPayable: 0,
   image: [],
   displayImages: [],
+  submitButtonLoading: false,
   copleted: 0,
   approvingPost: false,
   decliningPost: false,
@@ -158,11 +158,11 @@ class Project extends Component {
     });
   };
   resetImage = () => {
-    console.log(this.state.images, ' ====================================+> this state i,age')
     this.setState(() => {
       return {
         displayImages: [],
-        images: []
+        image: [],
+        submitButtonLoading: false
       };
     });
   };
@@ -595,7 +595,8 @@ class Project extends Component {
       sortedReports,
       sortedPayments,
       totalPayable,
-      displayImages
+      displayImages,
+      submitButtonLoading 
     } = this.state;
     return (
       <div>
@@ -763,6 +764,7 @@ class Project extends Component {
                 closeReportModal={this.closeReportModal}
                 reportModal={reportModal}
                 name={name}
+                submitButtonLoading={submitButtonLoading}
                 imageChanged={this.imageChanged}
                 displayImages={displayImages}
                 percentages={this.percentages}

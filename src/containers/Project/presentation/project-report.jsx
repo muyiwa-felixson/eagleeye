@@ -21,6 +21,7 @@ export const ProjectReport = props => {
     submitForm,
     percentages,
     imageChanged,
+    submitButtonLoading,
     name,
     displayImages
   } = props;
@@ -41,7 +42,11 @@ export const ProjectReport = props => {
       footer={
         <div>
           <PaleButton onClick={closeReportModal}>Cancel</PaleButton>{" "}
+          { !submitButtonLoading ? 
           <Button onClick={() => preSubmitForm(ref)}>Save Report</Button>
+          :
+          <Button progess={true}>Loading ...</Button>          
+          }
         </div>
       }
       expandable
