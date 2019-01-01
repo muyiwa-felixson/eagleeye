@@ -7,7 +7,7 @@ module.exports = {
       'project', 'contractor', 'user', 'permissions'
    ],
    groups: [
-      'superuser', 'adminstrator', 'contractor', 'officer'
+      'superuser', 'adminstrator', 'projectCreator', 'paymentCreator'
    ],
    permissions: [
        'isOwner', 'isSuperuser', 'isadmin'
