@@ -11,5 +11,5 @@ export const projectReportFields = [
 ];
 
 export const paymentFields = [
-    'name', 'percentage', 'cost', 'submitteBy',  'reportComment', 'payableAmount', 'password'
+    'name', 'percentage', 'cost', 'submitteBy',  'submittedBy',  'reportComment', 'payableAmount', 'password'
 ]
