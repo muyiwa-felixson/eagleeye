@@ -47,11 +47,18 @@ const verifyToken = token => {
 
 const getPermissions = token => {
   return new Promise((resolve, reject) => {
-    verifyToken(token).then(user => {
-      const { group } = user;
-      const permissionList = permissions[group];
-      resolve(permissionList);
-    });
+    console.log("token in get permission", token);
+    verifyToken(token)
+      .then(user => {
+        const { group } = user;
+        console.log("group in get permission", group);
+        const permissionList = permissions[group];
+        resolve(permissionList);
+      })
+      .catch(err => {
+        console.log(err);
+        reject(err);
+      });
   });
 };
 module.exports = {

@@ -156,16 +156,25 @@ const signin = ({ username, password }) => {
               .then(compare => {
                 if (compare) {
                   const tok = user.doc.token || user.doc.usertoken;
-                  console.log(tok, ' got here your heard ...');
-                  getPermissions(tok).then(permissionList => {
-                    resolve({
-                      token: tok,
-                      group: user.doc.group,
-                      firstname: user.doc.firstname,
-                      lastname: user.doc.lastname,
-                      permissions: permissionList
+                  getPermissions(tok)
+                    .then(permissionList => {
+                      console.log(tok, permissionList,  " got here your heard ...");
+                      resolve({
+                        token: tok,
+                        group: user.doc.group,
+                        firstname: user.doc.firstname,
+                        lastname: user.doc.lastname,
+                        permissions: permissionList
+                      });
+                    })
+                    .catch(err => {
+                      console.log(err);
+                      reject({
+                        reason: "We encountered an error",
+                        code: 500,
+                        further: err
+                      });
                     });
-                  });
                 } else {
                   reject({
                     reason: "User not found",
