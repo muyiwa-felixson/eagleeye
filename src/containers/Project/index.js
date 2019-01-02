@@ -8,6 +8,7 @@ import { ProjectReport } from "./presentation/project-report";
 import { PayReport } from "./presentation/pay-report";
 import { projectReportFields, paymentFields } from "../../config/form-fields";
 import { TopSection, LowerSection, Previewer } from "./components";
+import { withCookies, Cookies } from "react-cookie";
 import { LineBar } from "../Projects/components";
 import axios from "axios";
 import {
@@ -55,7 +56,10 @@ const defaultState = {
   previewElement: {
     type: "img",
     source: ""
-  }
+  },
+  canCreateReports: false,
+  canInitiatePayement: false,
+  canEditReports: false
 };
 
 class Project extends Component {
@@ -67,6 +71,18 @@ class Project extends Component {
     const { match } = this.props;
     const { params } = match;
     const { id, rev } = params;
+    const { cookies, history, userInfoPayload } = this.props;
+    const token = cookies.get("token");
+    console.log(token, " here is token and tokenisation");
+    if (!token) {
+      history.push("/login");
+    }
+    if (!userInfoPayload) {
+      const proxyGetInfo = () => {
+        return getData({ url: urls.verify({ token }) });
+      };
+      this.props.dispatchActions("USER_INFO", { func: proxyGetInfo });
+    }
     const proxyLoadProject = () => {
       return getData({ url: urls.getProject({ id, rev }) });
     };
@@ -77,6 +93,9 @@ class Project extends Component {
     const nextState = this.state;
     if (!prevState.postData && nextState.postData) {
       this.resetPostData();
+    }
+    if (!prevProps.userInfoPayload && nextProps.userInfoPayload) {
+      this.checkInfo();
     }
     if (prevProps.loadProjectPending && nextProps.loadProjectPayload) {
       const { loadProjectPayload } = nextProps;
@@ -97,6 +116,31 @@ class Project extends Component {
     }
     //
   }
+  checkInfo = () => {
+    const { userInfoPayload, userInfoError, history } = this.props;
+    if (!userInfoPayload || userInfoError) {
+      history.push("/login");
+    } else {
+      const { permissionList } = userInfoPayload;
+      const tcanCreateReports = "Can create reports";
+      const tcanInitiatePayment = "Can initiate payments";
+      const tcanEditReports = "Can edit reports";
+      const indexCreateReports = permissionList.findIndex(
+        p => p === tcanCreateReports
+      );
+      const indexPayment = permissionList.findIndex(
+        p => p === tcanInitiatePayment
+      );
+      const indexEdit = permissionList.findIndex(p => p === tcanEditReports);
+      this.setState(() => {
+        return {
+          canCreateReports: indexCreateReports > -1,
+          canEditReports: indexEdit > -1,
+          canInitiatePayement: indexPayment > -1
+        };
+      });
+    }
+  };
   sortByDate = (mergedList, reports, payments) => {
     const sortFunction = (a, b) => {
       const date1 = new Date(a.submittedOn);
@@ -280,7 +324,7 @@ class Project extends Component {
     let doc = null;
     const { submitButtonLoading } = this.state;
     const formElements = ev.target.elements;
-    const { match, loadProjectPayload = {} } = this.props;
+    const { match, loadProjectPayload = {}, userInfoPayload } = this.props;
     const { params } = match;
     const { id } = params;
     const rev = loadProjectPayload._rev;
@@ -320,7 +364,8 @@ class Project extends Component {
             id,
             rev,
             confirmed: false,
-            intent: "createReport"
+            intent: "createReport",
+            token: userInfoPayload.token
           },
           context: "PATCH"
         })
@@ -344,6 +389,7 @@ class Project extends Component {
               dataF.append("reportId", reportId);
               dataF.append("rev", data.rev);
               dataF.append("id", data.id);
+              dataF.append("token", userInfoPayload.token);
 
               axios
                 .post(url, dataF, {
@@ -392,7 +438,7 @@ class Project extends Component {
   submitFormPay = ev => {
     ev.preventDefault();
     const formElements = ev.target.elements;
-    const { match, loadProjectPayload = {} } = this.props;
+    const { match, loadProjectPayload = {}, userInfoPayload } = this.props;
     const { params } = match;
     const { id } = params;
     const rev = loadProjectPayload._rev;
@@ -426,7 +472,8 @@ class Project extends Component {
             dbname: "project",
             id,
             rev,
-            itent: "initiatePayment"
+            itent: "initiatePayment",
+            token: userInfoPayload.token
           },
           context: "PATCH"
         })
@@ -454,7 +501,7 @@ class Project extends Component {
     );
   };
   declinePost = reportId => {
-    const { loadProjectPayload } = this.props;
+    const { loadProjectPayload, userInfoPayload } = this.props;
     const { _id, _rev } = loadProjectPayload;
     if (loadProjectPayload.reports) {
       const report = loadProjectPayload.reports.filter(
@@ -474,7 +521,8 @@ class Project extends Component {
             dbname: "project",
             id: _id,
             rev: _rev,
-            intent: "editProject"
+            intent: "editProject",
+            token: userInfoPayload.token
           },
           context: "PATCH"
         });
@@ -483,7 +531,7 @@ class Project extends Component {
     }
   };
   approvePost = reportId => {
-    const { loadProjectPayload } = this.props;
+    const { loadProjectPayload, userInfoPayload } = this.props;
     const { _id, _rev } = loadProjectPayload;
     if (loadProjectPayload.reports) {
       const report = loadProjectPayload.reports.filter(
@@ -500,6 +548,8 @@ class Project extends Component {
         return getData({
           url: urls.postProject,
           inputData: {
+            intent: "editReport",
+            token: userInfoPayload.token,
             doc: loadProjectPayload,
             dbname: "project",
             id: _id,
@@ -587,7 +637,9 @@ class Project extends Component {
     const {
       loadProjectPayload = {},
       loadProjectPending,
-      approvePostPending
+      approvePostPending,
+      userInfoPending,
+      userInfoPayload
     } = this.props;
     const {
       code = "",
@@ -610,11 +662,14 @@ class Project extends Component {
       sortedPayments,
       totalPayable,
       displayImages,
-      submitButtonLoading
+      submitButtonLoading,
+      canCreateReports,
+      canInitiatePayement,
+      canEditReports
     } = this.state;
     return (
       <div>
-        {loadProjectPending && !loadProjectPayload ? (
+        {userInfoPending || (loadProjectPending && !loadProjectPayload) ? (
           <Loader />
         ) : (
           <React.Fragment>
@@ -694,11 +749,13 @@ class Project extends Component {
                       this.getPercentPaid() ? this.getPercentPaid() : 0
                     }%`}</H4>
                     <P>Of Project Cost has been approved for payment</P>
-                    <Button
-                      onClick={() => this.setState({ paymentModal: true })}
-                    >
-                      Make New Payment
-                    </Button>
+                    {canInitiatePayement ? (
+                      <Button
+                        onClick={() => this.setState({ paymentModal: true })}
+                      >
+                        Make New Payment
+                      </Button>
+                    ) : null}
                   </Aligner>
                 </Grid>
               </Panel>
@@ -751,12 +808,14 @@ class Project extends Component {
                       </Grid>
                     </div>
                     <Aligner right>
-                      <PaleButton
-                        color={Theme.PrimaryBlue}
-                        onClick={() => this.setState({ reportModal: true })}
-                      >
-                        New Report
-                      </PaleButton>
+                      {canCreateReports ? (
+                        <PaleButton
+                          color={Theme.PrimaryBlue}
+                          onClick={() => this.setState({ reportModal: true })}
+                        >
+                          New Report
+                        </PaleButton>
+                      ) : null}
                     </Aligner>
                   </Grid>
                 </div>
@@ -766,6 +825,9 @@ class Project extends Component {
               approvePost={id => this.approvePost(id)}
               declinePost={id => this.declinePost(id)}
               mergedList={mergedList}
+              canCreateReports={canCreateReports}
+              canInitiatePayement={canInitiatePayement}
+              canEditReports={canEditReports}
               media={media}
               approvePostPending={approvePostPending}
               previewer={this.previewMedia}
@@ -778,6 +840,10 @@ class Project extends Component {
                 closeReportModal={this.closeReportModal}
                 reportModal={reportModal}
                 name={name}
+                reporter={`${userInfoPayload.firstname} ${userInfoPayload.lastname}`}
+                canCreateReports={canCreateReports}
+                canInitiatePayement={canInitiatePayement}
+                canEditReports={canEditReports}
                 submitButtonLoading={submitButtonLoading}
                 imageChanged={this.imageChanged}
                 displayImages={displayImages}
@@ -791,9 +857,13 @@ class Project extends Component {
                 closePaymentModal={this.closePaymentModal}
                 percentages={this.percentages}
                 paidPercent={this.getPercentPaid}
+                reporter={`${userInfoPayload.firstname} ${userInfoPayload.lastname}`}
                 totalPayable={totalPayable}
                 calculatePayable={this.calculatePayable}
                 name={name}
+                canCreateReports={canCreateReports}
+                canInitiatePayement={canInitiatePayement}
+                canEditReports={canEditReports}
                 cost={cost}
                 submitFormPay={this.submitFormPay}
                 getFieldsProps={this.props.getFieldProps}
@@ -827,7 +897,8 @@ const mapStateToProps = ({
   loadProject,
   postCompletionStat,
   approvePost,
-  declinePost
+  declinePost,
+  userInfo
 }) => ({
   loadProjectPending: loadProject.pending,
   loadProjectError: loadProject.error,
@@ -840,7 +911,10 @@ const mapStateToProps = ({
   approvePostError: approvePost.error,
   declinePostPayload: declinePost.payload,
   declinePostPending: declinePost.pending,
-  declinePostError: declinePost.error
+  declinePostError: declinePost.error,
+  userInfoPending: userInfo.pending,
+  userInfoError: userInfo.error,
+  userInfoPayload: userInfo.payload
 });
 const mapDispatchToProps = dispatch =>
   bindActionCreators({ dispatchActions }, dispatch);
@@ -848,4 +922,4 @@ const mapDispatchToProps = dispatch =>
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withRouter(Project));
+)(withRouter(withCookies(Project)));

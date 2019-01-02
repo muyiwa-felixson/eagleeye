@@ -23,7 +23,7 @@ const multer = require("multer");
 const reportMedia = "reports";
 
 const checkPerm = (permList, toCheck) => {
-  return permiList.findIndex(toChecki => toChecki === toCheck) > -1;
+  return permList.findIndex(toChecki => toChecki === toCheck) > -1;
 };
 const unauth = {
   reason: "you are not authorised to perform this action",
@@ -75,7 +75,7 @@ const routes = app => {
   app.get(`/${appName}/api/verify`, (req, res) => {
     const { token } = req.query;
     try {
-      readToken({token})
+      readToken({ token })
         .then(user => res.status(200).json(user))
         .catch(err => res.states(err.code).json(err));
     } catch (err) {
@@ -88,16 +88,22 @@ const routes = app => {
     const { doc, isSafe, dbname, token, intent } = req.body;
     getPermissions(token).then(permissionList => {
       if (intent === "createProject") {
-        if (!checkPerm(permissionList, "Can create projects"))
+        if (!checkPerm(permissionList, "Can create projects")) {
           res.status(401).json(unauth);
+          return;
+        }
       }
       if (intent === "intiatePayment") {
-        if (!checkPerm(permissionList, "Can initiate payments"))
+        if (!checkPerm(permissionList, "Can initiate payments")) {
           res.status(401).json(unauth);
+          return;
+        }
       }
       if (intent === "createReport") {
-        if (!checkPerm(permissionList, "Can create reports"))
+        if (!checkPerm(permissionList, "Can create reports")) {
           res.status(401).json(unauth);
+          return;
+        }
       }
       try {
         createDocument(dbname, doc, isSafe)
@@ -114,26 +120,37 @@ const routes = app => {
   // PATCH
   app.patch(`/${appName}/api/item`, (req, res) => {
     const { id, doc, dbname, rev, token, intent } = req.body;
+    console.log(intent, token, id, dbname, " and all is here and here ");
     getPermissions(token).then(permissionList => {
       if (intent === "editProject") {
-        if (!checkPerm(permissionList, "Can edit projects"))
+        if (!checkPerm(permissionList, "Can edit projects")) {
           res.status(401).json(unauth);
+          return;
+        }
       }
       if (intent === "editReport") {
-        if (!checkPerm(permissionList, "Can editReports"))
+        if (!checkPerm(permissionList, "Can edit reports")) {
           res.status(401).json(unauth);
+          return;
+        }
       }
       if (intent === "createProject") {
-        if (!checkPerm(permissionList, "Can create projects"))
+        if (!checkPerm(permissionList, "Can create projects")) {
           res.status(401).json(unauth);
+          return;
+        }
       }
       if (intent === "intiatePayment") {
-        if (!checkPerm(permissionList, "Can initiate payments"))
+        if (!checkPerm(permissionList, "Can initiate payments")) {
           res.status(401).json(unauth);
+          return;
+        }
       }
       if (intent === "createReport") {
-        if (!checkPerm(permissionList, "Can create reports"))
+        if (!checkPerm(permissionList, "Can create reports")) {
           res.status(401).json(unauth);
+          return;
+        }
       }
       try {
         updateDocument(dbname, doc, id, rev)
@@ -149,24 +166,34 @@ const routes = app => {
     const { id, dbname, rev, token, intnent } = req.body;
     getPermissions(token).then(permissionList => {
       if (intent === "editProject") {
-        if (!checkPerm(permissionList, "Can edit projects"))
+        if (!checkPerm(permissionList, "Can edit projects")) {
           res.status(401).json(unauth);
+          return;
+        }
       }
       if (intent === "editReport") {
-        if (!checkPerm(permissionList, "Can editReports"))
+        if (!checkPerm(permissionList, "Can edit reports")) {
           res.status(401).json(unauth);
+          return;
+        }
       }
       if (intent === "createProject") {
-        if (!checkPerm(permissionList, "Can create projects"))
+        if (!checkPerm(permissionList, "Can create projects")) {
           res.status(401).json(unauth);
+          return;
+        }
       }
       if (intent === "intiatePayment") {
-        if (!checkPerm(permissionList, "Can initiate payments"))
+        if (!checkPerm(permissionList, "Can initiate payments")) {
           res.status(401).json(unauth);
+          return;
+        }
       }
       if (intent === "createReport") {
-        if (!checkPerm(permissionList, "Can create reports"))
+        if (!checkPerm(permissionList, "Can create reports")) {
           res.status(401).json(unauth);
+          return;
+        }
       }
       try {
         deleteDocument(dbname, id, rev)
@@ -207,7 +234,7 @@ const routes = app => {
   // Auth
   app.post(`/${appName}/api/auth/signup`, (req, res) => {
     const { firstname, lastname, username, password, token, group } = req.body;
-    signup({ username, password, firstname, lastname, token , group})
+    signup({ username, password, firstname, lastname, token, group })
       .then(response => {
         res.status(200).json(response);
       })

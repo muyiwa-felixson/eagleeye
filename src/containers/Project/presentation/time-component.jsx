@@ -27,7 +27,9 @@ export const TimeComponent = ({
   media,
   approvePost,
   declinePost,
-  previewer
+  previewer,
+  canCreateReports,
+  canEditReports
 }) => {
   return (
     <TimeBox type={type}>
@@ -38,7 +40,7 @@ export const TimeComponent = ({
         <strong>{year}</strong>
       </TimeDate>
       <TimeContent>
-        {!confirmed && (
+        {!confirmed  && canEditReports && (
           <div className="button-section">
             <Button onClick={() => approvePost(reportId)}>Approve</Button>
             <PaleButton color={Theme.PrimaryBlue}>Update</PaleButton>

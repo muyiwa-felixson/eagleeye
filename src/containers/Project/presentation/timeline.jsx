@@ -7,7 +7,15 @@ import { PayComponent } from "./pay-component";
 import * as moment from "moment";
 import { getMonth } from "../../../utils/utils";
 export const TimelineList = props => {
-  const { mergedList, approvePost, declinePost, previewer } = props;
+  const {
+    mergedList,
+    approvePost,
+    declinePost,
+    previewer,
+    canEditReports,
+    canCreateReports,
+    canInitiatePayment
+  } = props;
   return (
     <Panel>
       <TimeLine>
@@ -44,6 +52,9 @@ export const TimelineList = props => {
                   confirmed={approved}
                   day={day}
                   reportId={id}
+                  canEditReports={canEditReports}
+                  canCreateReports={canCreateReports}
+                  canInitiatePayment={canInitiatePayment}
                   month={month}
                   approvePost={id => approvePost(id)}
                   declinePost={id => declinePost(id)}
@@ -63,6 +74,9 @@ export const TimelineList = props => {
                   day={day}
                   key={index}
                   month={month}
+                  canEditReports={canEditReports}
+                  canCreateReports={canCreateReports}
+                  canInitiatePayment={canInitiatePayment}
                   year={year}
                   fullDate={moment(date).format("DD MMMM YYYY")}
                   level={percentage}
@@ -72,10 +86,10 @@ export const TimelineList = props => {
             }
           })
         ) : (
-            <div>
-              <h1>There are no reports or payment records to show</h1>
-            </div>
-          )}
+          <div>
+            <h1>There are no reports or payment records to show</h1>
+          </div>
+        )}
       </TimeLine>
     </Panel>
   );
