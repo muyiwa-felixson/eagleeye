@@ -450,6 +450,7 @@ class Project extends Component {
         // Do nothing
       }
     });
+    console.log(obj2, ' obj22222222')
     obj2.submittedOn = new Date();
     obj2.category = "payments";
     obj2.id = guid();
@@ -581,12 +582,15 @@ class Project extends Component {
     const { sortedPayments } = this.state;
     if (sortedPayments && sortedPayments.length > 0) {
       let totalCoverage = 0;
-      sortedPayments.map(payment => {
-        let { percentage } = payment;
-        if (!isNaN(parseInt(percentage, 10))) {
-          totalCoverage += parseInt(percentage);
-        }
-      });
+      const payment = sortedPayments[0] || {};
+      const { percentage = 0 } = payment;
+      totalCoverage = percentage;
+      // sortedPayments.map(payment => {
+      //   let { percentage } = payment;
+      //   if (!isNaN(parseInt(percentage, 10))) {
+      //     totalCoverage += parseInt(percentage);
+      //   }
+      // });
       if (!totalCoverage) totalCoverage = 0;
       return totalCoverage;
     }
@@ -651,7 +655,8 @@ class Project extends Component {
       durationType = "",
       contractor = "",
       cost = "",
-      media = []
+      media = [],
+      unit = ""
     } = loadProjectPayload || {};
     const {
       reportModal,
@@ -738,7 +743,7 @@ class Project extends Component {
                       </div>
                       <div>
                         <Label>Target Unit</Label>
-                        <span className="answer">xxxxxx xxxxx xxx</span>
+                        <span className="answer">{unit}</span>
                       </div>
                     </Grid>
                   </div>
