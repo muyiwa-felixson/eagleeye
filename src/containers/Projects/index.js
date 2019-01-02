@@ -75,8 +75,8 @@ class ProjectList extends Component {
     return getData({ url: allProjects });
   };
   componentDidMount() {
-    console.log(this.props, " this props ");
     const { cookies, history, userInfoPayload } = this.props;
+    this.props.history.index = 0;
     const token = cookies.get("token");
     if (!token) {
       history.push("/login");

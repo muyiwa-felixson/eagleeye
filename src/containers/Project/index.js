@@ -77,12 +77,11 @@ class Project extends Component {
     if (!token) {
       history.push("/login");
     }
-    if (!userInfoPayload) {
-      const proxyGetInfo = () => {
-        return getData({ url: urls.verify({ token }) });
-      };
-      this.props.dispatchActions("USER_INFO", { func: proxyGetInfo });
-    }
+    const proxyGetInfo = () => {
+      return getData({ url: urls.verify({ token }) });
+    };
+    this.props.dispatchActions("USER_INFO", { func: proxyGetInfo });
+
     const proxyLoadProject = () => {
       return getData({ url: urls.getProject({ id, rev }) });
     };
@@ -840,7 +839,9 @@ class Project extends Component {
                 closeReportModal={this.closeReportModal}
                 reportModal={reportModal}
                 name={name}
-                reporter={`${userInfoPayload.firstname} ${userInfoPayload.lastname}`}
+                reporter={`${userInfoPayload.firstname} ${
+                  userInfoPayload.lastname
+                }`}
                 canCreateReports={canCreateReports}
                 canInitiatePayement={canInitiatePayement}
                 canEditReports={canEditReports}
@@ -857,7 +858,9 @@ class Project extends Component {
                 closePaymentModal={this.closePaymentModal}
                 percentages={this.percentages}
                 paidPercent={this.getPercentPaid}
-                reporter={`${userInfoPayload.firstname} ${userInfoPayload.lastname}`}
+                reporter={`${userInfoPayload.firstname} ${
+                  userInfoPayload.lastname
+                }`}
                 totalPayable={totalPayable}
                 calculatePayable={this.calculatePayable}
                 name={name}
