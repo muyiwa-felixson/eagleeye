@@ -121,7 +121,7 @@ class ProjectList extends Component {
       () => {
         getData({
           url: urls.postProject,
-          inputData: { doc: obj, dbname: "project" },
+          inputData: { doc: obj, dbname: "project", intent: 'creteProject' },
           context: "POST"
         })
           .then(data => {
