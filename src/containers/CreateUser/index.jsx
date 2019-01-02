@@ -16,6 +16,7 @@ const defaultState = {
   password: "",
   firstname: "",
   lastname: "",
+  success: false,
   group: "",
   error: {
     message: "",
@@ -37,7 +38,6 @@ class CreatUser extends React.Component {
       const proxyGetInfo = () => {
         return getData({ url: urls.verify({ token }) });
       };
-      console.log(urls.verify({ token }), " url being sent");
       this.props.dispatchActions("USER_INFO", { func: proxyGetInfo });
     } else {
       this.props.history.push(`/login`);
@@ -50,9 +50,12 @@ class CreatUser extends React.Component {
       const { permissionList } = nextProps.userInfoPayload;
       this.checkPermissions(permissionList);
     }
-    // if (nextProps.signupPending) {
-    //   this.setPendingState();
-    // }
+    if (!prevProps.signupPending && nextProps.signupPending) {
+      this.setPendingState();
+    }
+    if (!prevProps.signupPayload && nextProps.signupPayload) {
+      this.props.history.push(`/projects`);
+    }
   }
 
   checkPermissions = permissionList => {

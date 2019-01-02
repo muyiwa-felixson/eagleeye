@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { createForm, formShape } from "rc-form";
+import { withCookies, Cookies } from "react-cookie";
 import DatePicker from "react-datepicker";
 import {
   getOptions,
@@ -74,6 +75,18 @@ class ProjectList extends Component {
     return getData({ url: allProjects });
   };
   componentDidMount() {
+    console.log(this.props, " this props ");
+    const { cookies, history, userInfoPayload } = this.props;
+    const token = cookies.get("token");
+    if (!token) {
+      history.push("/login");
+    }
+    if (!userInfoPayload) {
+      const proxyGetInfo = () => {
+        return getData({ url: urls.verify({ token }) });
+      };
+      this.props.dispatchActions("USER_INFO", { func: proxyGetInfo });
+    }
     this.props.dispatchActions("LOAD_PROJECTS", { func: this.proxyGetUrl });
   }
   componentDidUpdate(prevProps, prevState) {
@@ -87,9 +100,18 @@ class ProjectList extends Component {
     ) {
       this.resetPostData();
     }
+    if (!prevProps.userInfoPayload && nextProps.userInfoPayload) {
+      this.checkInfo();
+    }
 
     //
   }
+  checkInfo = () => {
+    const { userInfoPayload, userInfoError, history } = this.props;
+    if (!userInfoPayload || userInfoError) {
+      history.push("/login");
+    }
+  };
   resetPostData = () => {
     this.props.dispatchActions("LOAD_PROJECTS", { func: this.proxyGetUrl });
     this.setState(() => {
@@ -121,7 +143,12 @@ class ProjectList extends Component {
       () => {
         getData({
           url: urls.postProject,
-          inputData: { doc: obj, dbname: "project", intent: 'creteProject' },
+          inputData: {
+            doc: obj,
+            dbname: "project",
+            token: this.props.userInfoPayload.token,
+            intent: "createProject"
+          },
           context: "POST"
         })
           .then(data => {
@@ -180,12 +207,6 @@ class ProjectList extends Component {
               break;
             }
           }
-          // reports.map(report => {
-          //   const { completionLevel } = report;
-          //   if (!isNaN(parseInt(completionLevel, 10))) {
-          //     totalCoverage += parseInt(completionLevel);
-          //   }
-          // });
         }
       }
     }
@@ -229,7 +250,9 @@ class ProjectList extends Component {
     const {
       loadProjectsPending,
       loadProjectsError,
-      loadProjectsPayload = []
+      loadProjectsPayload = [],
+      userInfoPending,
+      userInfoPayload
     } = this.props;
     const { submitButtonLoading } = this.state;
     return (
@@ -279,7 +302,9 @@ class ProjectList extends Component {
             pad={this.state.viewlayout === "card" ? "30px" : "5px"}
           >
             <React.Fragment>
-              {loadProjectsPayload && loadProjectsPayload.length > 0 ? (
+              {!userInfoPending &&
+              loadProjectsPayload &&
+              loadProjectsPayload.length > 0 ? (
                 <React.Fragment>
                   {loadProjectsPayload.map((project, index) => {
                     const { doc, id, value } = project;
@@ -316,10 +341,15 @@ class ProjectList extends Component {
                     );
                   })}
                 </React.Fragment>
-              ) : loadProjectsPending ? (
+              ) : loadProjectsPending || userInfoPending ? (
                 <Loader absolute />
               ) : (
-                <div><h2> There are currently no projects reported at the moment</h2></div>
+                <div>
+                  <h2>
+                    {" "}
+                    There are currently no projects reported at the moment
+                  </h2>
+                </div>
               )}
             </React.Fragment>
           </Grid>
@@ -474,10 +504,13 @@ class ProjectList extends Component {
   }
 }
 
-const mapStateToProps = ({ loadProjects }) => ({
+const mapStateToProps = ({ loadProjects, userInfo }) => ({
   loadProjectsPending: loadProjects.pending,
   loadProjectsError: loadProjects.error,
-  loadProjectsPayload: loadProjects.payload
+  loadProjectsPayload: loadProjects.payload,
+  userInfoPending: userInfo.pending,
+  userInfoError: userInfo.error,
+  userInfoPayload: userInfo.payload
 });
 const mapDispatchToProps = dispatch =>
   bindActionCreators({ dispatchActions }, dispatch);
@@ -485,4 +518,4 @@ const mapDispatchToProps = dispatch =>
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withRouter(ProjectList));
+)(withRouter(withCookies(ProjectList)));

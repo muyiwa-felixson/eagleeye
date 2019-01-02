@@ -11,7 +11,7 @@ import {
   Boxed,
   TextArea
 } from "../../../components/flex";
-import moment from 'moment';
+import moment from "moment";
 
 export const ProjectReport = props => {
   const {
@@ -23,7 +23,10 @@ export const ProjectReport = props => {
     imageChanged,
     submitButtonLoading,
     name,
-    displayImages
+    reporter,
+    displayImages,
+    canCreateReports,
+    canInitiatePayement
   } = props;
   let ref = React.createRef();
   let mediaFile = React.createRef();
@@ -42,22 +45,23 @@ export const ProjectReport = props => {
       footer={
         <div>
           <PaleButton onClick={closeReportModal}>Cancel</PaleButton>{" "}
-          { !submitButtonLoading ? 
-          <Button onClick={() => preSubmitForm(ref)}>Save Report</Button>
-          :
-          <Button progess={true}>Loading ...</Button>          
-          }
+          {!submitButtonLoading ? (
+            <Button onClick={() => preSubmitForm(ref)}>Save Report</Button>
+          ) : (
+            <Button progess={true}>Loading ...</Button>
+          )}
         </div>
       }
       expandable
       fluid
     >
       <form ref={ref} onSubmit={submitForm}>
-        Provide all the details of the report, please note that this will not be autoatically be confirmed until an admin manually confirms 
+        Provide all the details of the report, please note that this will not be
+        autoatically be confirmed until an admin manually confirms
         <Boxed padVertical="30px">
           <input
             type="file"
-            onChange={(e) => imageChanged(e, mediaFile)}
+            onChange={e => imageChanged(e, mediaFile)}
             ref={mediaFile}
             name="media"
             multiple={true}
@@ -84,8 +88,10 @@ export const ProjectReport = props => {
               forminput
             />
             <Input
+              disabled
               placeholder="Submitted By"
               name="submittedBy"
+              value={reporter}
               type="text"
               label="Submitted By"
               forminput

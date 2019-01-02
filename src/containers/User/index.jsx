@@ -32,13 +32,17 @@ class Auth extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     const nextProps = this.props;
     const nextState = this.state;
-    // if (nextProps.usersPending) {
-    //   this.setPendingState();
-    // }
-    if (nextProps.usersPayload) {
+    if (!prevProps.usersPending && nextProps.usersPending) {
+      this.setPendingState();
+    }
+    if (nextProps.usersPayload && !prevProps.usersPayload) {
       this.pushPage();
     }
-    if (nextProps.usersError) {
+    if (
+      prevProps.usersPending &&
+      nextProps.usersError &&
+      !prevProps.usersError
+    ) {
       this.setError();
     }
   }
@@ -52,8 +56,10 @@ class Auth extends React.Component {
   };
   pushPage = () => {
     const { cookies, usersPayload } = this.props;
-    const { token } = usersPayload;
-    if (cookies) {
+    console.log(usersPayload);
+    const token = usersPayload.token || usersPayload.userToken;
+
+    if (cookies && token) {
       cookies.set("token", token, { path: "/" });
       this.props.history.push(`/projects`);
     }

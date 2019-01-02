@@ -13,7 +13,7 @@ let id = "";
 let rev = "";
 const signup = ({ username, password, firstname, lastname, token, group }) => {
   return new Promise((resolve, reject) => {
-    if (!username || !password || !firstname || !lastname || !token || !group ) {
+    if (!username || !password || !firstname || !lastname || !token || !group) {
       reject({
         reason:
           "Unsupported sign up information please update the information parse",
@@ -30,7 +30,6 @@ const signup = ({ username, password, firstname, lastname, token, group }) => {
           username = username.trim().toLowerCase();
           firstname = firstname.trim().toLowerCase();
           lastname = lastname.trim().toLowerCase();
-          const group = "projectCreator";
           createdOn = new Date();
           hashPassword(password)
             .then(hashedPassword => {
@@ -82,14 +81,12 @@ const signup = ({ username, password, firstname, lastname, token, group }) => {
                             });
                           updateDoc(
                             "user",
-                            { ...doc, updatedOn: new Date(), usertoken },
+                            { ...doc, updatedOn: new Date(), token: usertoken },
                             id,
                             rev
                           )
                             .then(() => {
-                              assignGroup({ group, username, token })
-                                .then(() => resolve(token))
-                                .catch(err => reject(err));
+                              resolve(token);
                             })
                             .catch(err =>
                               reject({
@@ -153,14 +150,16 @@ const signin = ({ username, password }) => {
   return new Promise((resolve, reject) => {
     getDoc("user")
       .then(doc => {
-        doc.map(user => {
+        doc.map((user, index) => {
           if (user.doc.username === username) {
             comparePassword(user.doc.password, password)
               .then(compare => {
                 if (compare) {
-                  getPermissions(user.doc.token).then(permissionList => {
+                  const tok = user.doc.token || user.doc.usertoken;
+                  console.log(tok, ' got here your heard ...');
+                  getPermissions(tok).then(permissionList => {
                     resolve({
-                      token: user.doc.token,
+                      token: tok,
                       group: user.doc.group,
                       firstname: user.doc.firstname,
                       lastname: user.doc.lastname,
@@ -183,6 +182,13 @@ const signin = ({ username, password }) => {
                 });
               });
           }
+          // if (index === doc.length - 1 && user.doc.username !== username) {
+          //   reject({
+          //     reason: "User not found",
+          //     code: 404,
+          //     further: "Not Found"
+          //   });
+          // }
         });
       })
       .catch(err => {

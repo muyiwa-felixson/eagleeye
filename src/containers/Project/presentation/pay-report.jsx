@@ -30,8 +30,11 @@ export const PayReport = props => {
     getFieldProps,
     calculatePayable,
     totalPayable,
+    reporter,
     name,
     cost,
+    canCreateReports,
+    canInitiatePayement
   } = props;
 
   let ref = React.createRef();
@@ -70,7 +73,7 @@ export const PayReport = props => {
             name="percentage"
             required
             forminput
-            onChange={(ev) => calculatePayable(ev, cost)}
+            onChange={ev => calculatePayable(ev, cost)}
           />
         </Grid>
         <p />
@@ -96,10 +99,12 @@ export const PayReport = props => {
             forminput
           />
           <Input
-            placeholder="Enter Password"
-            type="password"
-            name={"password"}
-            label="Enter Password"
+            disabled
+            placeholder="Submitted by"
+            type="text"
+            name={"submittedBy"}
+            label="Submitted by"
+            value={reporter}
             forminput
           />
         </Grid>
