@@ -8,7 +8,13 @@ const { updateDocument } = require("../controllers/updateDocument");
 const { createDocument } = require("../controllers/createDocument");
 const { deleteDocument } = require("../controllers/deleteDocument");
 const { uploadFile } = require("../controllers/uploadFIle");
-const { signup, signin, assignGroup } = require("../controllers/users");
+const {
+  signup,
+  signin,
+  assignGroup,
+  readToken
+} = require("../controllers/users");
+const { getPermissions } = require("../utils/token");
 const crypto = require("crypto");
 const mime = require("mime");
 const fs = require("fs");
@@ -16,6 +22,14 @@ const fs = require("fs");
 const multer = require("multer");
 const reportMedia = "reports";
 
+const checkPerm = (permList, toCheck) => {
+  return permiList.findIndex(toChecki => toChecki === toCheck) > -1;
+};
+const unauth = {
+  reason: "you are not authorised to perform this action",
+  code: 401,
+  further: "Unauthorised"
+};
 // const upload = multer({ dest: "../media" });
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -58,42 +72,110 @@ const routes = app => {
     }
   });
 
-  // POST
-  app.post(`/${appName}/api/item`, (req, res) => {
-    const { doc, isSafe, dbname } = req.body;
+  app.get(`/${appName}/api/verify`, (req, res) => {
+    const { token } = req.query;
     try {
-      createDocument(dbname, doc, isSafe)
-        .then(retVal => res.status(200).json(retVal))
-        .catch(err => {
-          res.status(500).json(err);
-        });
+      readToken({token})
+        .then(user => res.status(200).json(user))
+        .catch(err => res.states(err.code).json(err));
     } catch (err) {
       res.status(500).json(err);
     }
+  });
+
+  // POST
+  app.post(`/${appName}/api/item`, (req, res) => {
+    const { doc, isSafe, dbname, token, intent } = req.body;
+    getPermissions(token).then(permissionList => {
+      if (intent === "createProject") {
+        if (!checkPerm(permissionList, "Can create projects"))
+          res.status(401).json(unauth);
+      }
+      if (intent === "intiatePayment") {
+        if (!checkPerm(permissionList, "Can initiate payments"))
+          res.status(401).json(unauth);
+      }
+      if (intent === "createReport") {
+        if (!checkPerm(permissionList, "Can create reports"))
+          res.status(401).json(unauth);
+      }
+      try {
+        createDocument(dbname, doc, isSafe)
+          .then(retVal => res.status(200).json(retVal))
+          .catch(err => {
+            res.status(500).json(err);
+          });
+      } catch (err) {
+        res.status(500).json(err);
+      }
+    });
   });
 
   // PATCH
   app.patch(`/${appName}/api/item`, (req, res) => {
-    const { id, doc, dbname, rev } = req.body;
-    try {
-      updateDocument(dbname, doc, id, rev)
-        .then(retVal => res.status(200).json(retVal))
-        .catch(err => res.status(500).json(err));
-    } catch (err) {
-      res.status(500).json(err);
-    }
+    const { id, doc, dbname, rev, token, intent } = req.body;
+    getPermissions(token).then(permissionList => {
+      if (intent === "editProject") {
+        if (!checkPerm(permissionList, "Can edit projects"))
+          res.status(401).json(unauth);
+      }
+      if (intent === "editReport") {
+        if (!checkPerm(permissionList, "Can editReports"))
+          res.status(401).json(unauth);
+      }
+      if (intent === "createProject") {
+        if (!checkPerm(permissionList, "Can create projects"))
+          res.status(401).json(unauth);
+      }
+      if (intent === "intiatePayment") {
+        if (!checkPerm(permissionList, "Can initiate payments"))
+          res.status(401).json(unauth);
+      }
+      if (intent === "createReport") {
+        if (!checkPerm(permissionList, "Can create reports"))
+          res.status(401).json(unauth);
+      }
+      try {
+        updateDocument(dbname, doc, id, rev)
+          .then(retVal => res.status(200).json(retVal))
+          .catch(err => res.status(500).json(err));
+      } catch (err) {
+        res.status(500).json(err);
+      }
+    });
   });
-
   // DELETE
   app.delete(`/${appName}/api/item`, (req, res) => {
-    const { id, dbname, rev } = req.body;
-    try {
-      deleteDocument(dbname, id, rev)
-        .then(retVal => res.status(200).json(retVal))
-        .catch(err => res.status(500).json(err));
-    } catch (err) {
-      res.status(500).json(err);
-    }
+    const { id, dbname, rev, token, intnent } = req.body;
+    getPermissions(token).then(permissionList => {
+      if (intent === "editProject") {
+        if (!checkPerm(permissionList, "Can edit projects"))
+          res.status(401).json(unauth);
+      }
+      if (intent === "editReport") {
+        if (!checkPerm(permissionList, "Can editReports"))
+          res.status(401).json(unauth);
+      }
+      if (intent === "createProject") {
+        if (!checkPerm(permissionList, "Can create projects"))
+          res.status(401).json(unauth);
+      }
+      if (intent === "intiatePayment") {
+        if (!checkPerm(permissionList, "Can initiate payments"))
+          res.status(401).json(unauth);
+      }
+      if (intent === "createReport") {
+        if (!checkPerm(permissionList, "Can create reports"))
+          res.status(401).json(unauth);
+      }
+      try {
+        deleteDocument(dbname, id, rev)
+          .then(retVal => res.status(200).json(retVal))
+          .catch(err => res.status(500).json(err));
+      } catch (err) {
+        res.status(500).json(err);
+      }
+    });
   });
 
   // UPLOADMEDIA
@@ -124,8 +206,8 @@ const routes = app => {
 
   // Auth
   app.post(`/${appName}/api/auth/signup`, (req, res) => {
-    const { firstname, lastname, username, password, token } = req.body;
-    signup({ username, password, firstname, lastname, token })
+    const { firstname, lastname, username, password, token, group } = req.body;
+    signup({ username, password, firstname, lastname, token , group})
       .then(response => {
         res.status(200).json(response);
       })
@@ -149,7 +231,7 @@ const routes = app => {
       .then(response => {
         res.status(200).json(response);
       })
-      .catch(err => res.status(err.code || 500 ).json(err));
+      .catch(err => res.status(err.code || 500).json(err));
   });
 
   // Default routes

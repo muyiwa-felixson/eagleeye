@@ -203,7 +203,7 @@ class Project extends Component {
             });
           };
           r.readAsDataURL(f);
-          r.removeEventListener("load", ()=>{ });
+          r.removeEventListener("load", () => {});
         });
       }
     }
@@ -216,7 +216,7 @@ class Project extends Component {
     this.readFiles(files["0"], target);
     let { image = [] } = this.state;
     if (files.length < 2) {
-       image.push(files['0']);
+      image.push(files["0"]);
       this.setState(() => {
         return {
           image
@@ -226,7 +226,7 @@ class Project extends Component {
       const images = [];
       for (let i = 0; i < files.length; i++) {
         images.push(files[String(i)]);
-        image.push(files[String(i)])
+        image.push(files[String(i)]);
       }
       this.readFiles(images);
 
@@ -314,7 +314,14 @@ class Project extends Component {
       () => {
         getData({
           url: urls.postProject,
-          inputData: { doc: obj, dbname: "project", id, rev, confirmed: false },
+          inputData: {
+            doc: obj,
+            dbname: "project",
+            id,
+            rev,
+            confirmed: false,
+            intent: "createReport"
+          },
           context: "PATCH"
         })
           .then(data => {
@@ -414,7 +421,13 @@ class Project extends Component {
       () => {
         getData({
           url: urls.postProject,
-          inputData: { doc: obj, dbname: "project", id, rev },
+          inputData: {
+            doc: obj,
+            dbname: "project",
+            id,
+            rev,
+            itent: "initiatePayment"
+          },
           context: "PATCH"
         })
           .then(data => {
@@ -460,7 +473,8 @@ class Project extends Component {
             doc: loadProjectPayload,
             dbname: "project",
             id: _id,
-            rev: _rev
+            rev: _rev,
+            intent: "editProject"
           },
           context: "PATCH"
         });
@@ -573,7 +587,7 @@ class Project extends Component {
     const {
       loadProjectPayload = {},
       loadProjectPending,
-      approvePostPending,
+      approvePostPending
     } = this.props;
     const {
       code = "",
@@ -596,7 +610,7 @@ class Project extends Component {
       sortedPayments,
       totalPayable,
       displayImages,
-      submitButtonLoading 
+      submitButtonLoading
     } = this.state;
     return (
       <div>
@@ -807,7 +821,6 @@ class Project extends Component {
       </div>
     );
   }
-  
 }
 
 const mapStateToProps = ({
@@ -835,4 +848,4 @@ const mapDispatchToProps = dispatch =>
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withRouter((Project)));
+)(withRouter(Project));

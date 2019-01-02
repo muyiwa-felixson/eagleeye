@@ -4,17 +4,16 @@
 const { hashPassword, comparePassword } = require("../utils/password");
 const { createToken, verifyToken, getPermissions } = require("../utils/token");
 const { createDoc, updateDoc, getDoc } = require("../db/crud");
-const { getDocument } = require("../controllers/getDocument");
-const { groups, permissions } = require("../config/table");
+const { groups } = require("../config/table");
 /**
  * @function signup
  * @param { UserObject}
  */
 let id = "";
 let rev = "";
-const signup = ({ username, password, firstname, lastname, token }) => {
+const signup = ({ username, password, firstname, lastname, token, group }) => {
   return new Promise((resolve, reject) => {
-    if (!username || !password || !firstname || !lastname || !token) {
+    if (!username || !password || !firstname || !lastname || !token || !group ) {
       reject({
         reason:
           "Unsupported sign up information please update the information parse",
@@ -66,14 +65,14 @@ const signup = ({ username, password, firstname, lastname, token }) => {
                         .then(obj => {
                           id = obj.id;
                           rev = obj.rev;
-                          const token =
+                          const usertoken =
                             createToken({
                               username,
                               password: hashed,
                               id,
                               group
                             }) || "";
-                          if (!token)
+                          if (!usertoken)
                             deleteDoc("user", id, rev).then(doc => {
                               reject({
                                 reason: "Could not create token for this user",
@@ -83,12 +82,14 @@ const signup = ({ username, password, firstname, lastname, token }) => {
                             });
                           updateDoc(
                             "user",
-                            { ...doc, updatedOn: new Date(), token },
+                            { ...doc, updatedOn: new Date(), usertoken },
                             id,
                             rev
                           )
                             .then(() => {
-                              resolve(token);
+                              assignGroup({ group, username, token })
+                                .then(() => resolve(token))
+                                .catch(err => reject(err));
                             })
                             .catch(err =>
                               reject({
@@ -217,7 +218,6 @@ const assignGroup = ({ group, username, token }) => {
                   .then(userT => {
                     getDoc("user", userT._id).then(item => {
                       item = { ...item, group };
-                      console.log(item, ' ----item' )
                       updateDoc("user", item, item._id, item._rev)
                         .then(res => resolve(res))
                         .catch(err => {
@@ -250,9 +250,36 @@ const assignGroup = ({ group, username, token }) => {
     }
   });
 };
-
+/**
+ * @function verify token and return
+ */
+const readToken = ({ token }) => {
+  return new Promise((resolve, reject) => {
+    verifyToken(token)
+      .then(item => {
+        const { username, group, firstname, lastname } = item;
+        getPermissions(token).then(permissionList => {
+          resolve({
+            username,
+            firstname,
+            lastname,
+            permissionList,
+            token
+          });
+        });
+      })
+      .catch(err => {
+        reject({
+          reason: "Sorry could not find the specified token",
+          code: 404,
+          further: err
+        });
+      });
+  });
+};
 module.exports = {
   signup,
   signin,
-  assignGroup
+  assignGroup,
+  readToken
 };

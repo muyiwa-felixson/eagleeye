@@ -32,8 +32,8 @@ const verifyToken = token => {
   return new Promise((resolve, reject) => {
     return jwt.verify(token, secretKey, (err, success) => {
       if (err) {
-        Log.message(err);
-        reject(false);
+        console.log(err);
+        reject(err);
       } else {
         getDoc("user", success._id)
           .then(user => {
