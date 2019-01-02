@@ -29,6 +29,7 @@ export const TimelineList = props => {
               reportComment,
               completionLevel,
               approved,
+
               category,
               id,
               media = []
@@ -70,7 +71,7 @@ export const TimelineList = props => {
             } else {
               return (
                 <PayComponent
-                  approvedBy="Mr Salki Abdul"
+                  approvedBy={submittedBy}
                   day={day}
                   key={index}
                   month={month}
