@@ -16,31 +16,33 @@ code {
 /**
 TMEPRORY STYLES
 */
-.auth-body {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  background-color: #fff;
-  flex-direction: column;
-  position:fixed;
-  align-items: center;
-  justify-content: center;
-}
-.auth-box {
-  width: 50%;
-  min-height: 50%;
-  border: solid 1px rgba(0, 0, 0, 0.8);
-  padding: 20px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.mbottom{ 
-  margin-bottom:20px!important;
+/* .auth-body {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    flex-direction: column;
+    position: fixed;
+    align-items: center;
+    justify-content: center;
 }
 
-.pull-left { 
-  margin-left:auto!important;
+.auth-box {
+    width: 50%;
+    min-height: 50%;
+    border: solid 1px rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
+
+.mbottom {
+    margin-bottom: 20px !important;
+}
+
+.pull-left {
+    margin-left: auto !important;
+} */

@@ -39,7 +39,7 @@ export const TopSection = styled.div`
   }
 
   & p{
-    opacity: 0.6;
+    opacity: 0.9;
   }
 
   & .right-bar{
