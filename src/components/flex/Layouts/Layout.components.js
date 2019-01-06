@@ -105,6 +105,12 @@ export const Grid = styled.div`
   `}
   `;
 
+
+export const Space = styled.div`
+    display: block;
+    height: ${props => props.height ? props.height : 20}px;
+`;
+
 Grid.defaultProps = {
   default: "repeat(6, 1fr)",
   mobile: "1fr",

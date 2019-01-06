@@ -48,8 +48,8 @@ export const ProjectReport = props => {
           {!submitButtonLoading ? (
             <Button onClick={() => preSubmitForm(ref)}>Save Report</Button>
           ) : (
-            <Button progess={true}>Loading ...</Button>
-          )}
+              <Button progess={true}>Loading ...</Button>
+            )}
         </div>
       }
       expandable
@@ -57,7 +57,7 @@ export const ProjectReport = props => {
     >
       <form ref={ref} onSubmit={submitForm}>
         Provide all the details of the report, please note that this will not be
-        autoatically be confirmed until an admin manually confirms
+        automatically be confirmed until an admin manually confirms
         <Boxed padVertical="30px">
           <input
             type="file"
@@ -107,7 +107,7 @@ export const ProjectReport = props => {
           </Grid>
           <p />
           <TextArea name="reportComment" label="Report Comment" />
-          <p>Esunt in culpa qui officia deserunt.</p>
+          <p>Upload project pictures and video.</p>
           <DragZone>
             <div className="file-region">
               {displayImages.map((image, index) => {

@@ -78,7 +78,7 @@ export const PayReport = props => {
         </Grid>
         <p />
         <TextArea name="reportComment" label="Report Comment" />
-        <p>Esunt in culpa qui officia deserunt.</p>
+        <p></p>
         <Grid default="1fr 1fr 1fr" pad="20px">
           <Input
             disabled
