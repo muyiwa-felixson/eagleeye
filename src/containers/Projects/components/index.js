@@ -371,3 +371,41 @@ export const LevelList = styled.div`
         }
     }
 `;
+
+export const LocTable = styled.table`
+  margin: 10px 0;
+  border: 1px solid ${Theme.PrimaryPale};
+  border-collapse: collapse;
+  color: ${Theme.PrimaryFontColor};
+  font-size: 12px;
+  & thead{
+    & th{
+      text-align: left;
+      font-size: 10px;
+      opacity: 0.6;
+      padding: 10px;
+    }
+    & th:last-child{
+      width: 40px;
+    }
+    border-bottom: 1px solid ${Theme.PrimaryPale};
+  }
+  & tbody{
+    & tr{
+      border-bottom: 1px solid ${Theme.PrimaryPale};
+    }
+    & tr:last-child{
+      border-bottom: none;
+    }
+    & tr:nth-child(even){
+      background: #f6f6f6;
+    }
+    & td{
+      padding: 10px;
+      border-right: 1px solid ${Theme.PrimaryPale};
+    }
+    & td:last-child{
+      border-right: none;
+    }
+  }
+`;

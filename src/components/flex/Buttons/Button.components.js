@@ -155,6 +155,13 @@ export const PaleButton = styled.button`
             }
     `}
 
+    ${props => props.small && css`
+        ${props => props.icon && css`
+        padding: 6px 6px;
+        min-width: 30px;
+        `} 
+    `} 
+
     &:hover{
         background-color: ${props => props.color ? lighten(0.4, props.color) : lighten(0.4, Theme.PrimaryColor)};
     }

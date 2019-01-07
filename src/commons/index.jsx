@@ -20,9 +20,9 @@ export const ProjectAdd = (props) => {
         </div>
         <PopMenu>
           <ul>
-            <li><NavLink to="./projects">Projects</NavLink></li>
+            <li><NavLink to="/projects">Projects</NavLink></li>
             <li><NavLink to="#">Contractors</NavLink></li>
-            <li><NavLink to="./signup">Manage Users</NavLink></li>
+            <li><NavLink to="/signup">Manage Users</NavLink></li>
           </ul>
         </PopMenu>
         <div />

@@ -20,9 +20,10 @@ import {
   LineBar,
   BallLegend,
   LevelList,
-  AutosuggestItem
+  AutosuggestItem,
+  LocTable
 } from "./components";
-import { getLevelAttr, levelAttribute } from "../../utils/levels";
+import { locations } from "../../utils/levels";
 import {
   Button,
   Input,
@@ -62,7 +63,9 @@ const defaultState = {
   viewlayout: "card",
   newProject: null,
   postData: null,
-  submitButtonLoading: false
+  submitButtonLoading: false,
+  state: "",
+  LGA: ""
 };
 class ProjectList extends Component {
   constructor() {
@@ -246,6 +249,31 @@ class ProjectList extends Component {
       this.form.dispatchEvent(new Event("submit"));
     }
   };
+
+  getState = () => {
+    let filters = Object.assign(locations);
+    let locationOptions = [];
+    filters.map(elem => locationOptions.push({ value: elem.state.name, label: elem.state.name, data: elem.state.locals }));
+    return locationOptions;
+  }
+  getLGA = (selectedState) => {
+    let locationOptions = [];
+    selectedState && selectedState.map(elem => locationOptions.push({ value: elem.name, label: elem.name }));
+    return locationOptions;
+  }
+  handleStateChange = (optionSelected) => {
+    this.setState({
+      state: optionSelected.data,
+      LGA: ""
+    })
+  }
+
+  handleLGAChange = (optionSelected) => {
+    this.setState({
+      LGA: optionSelected.value
+    })
+  }
+
   render() {
     const {
       loadProjectsPending,
@@ -494,6 +522,55 @@ class ProjectList extends Component {
                     forminput
                   />
                 </Grid>
+              </Grid>
+              <h3>Location</h3>
+              <Grid pad="15px" default="1fr 1fr 1fr 1fr 2fr" tablet="1fr 1fr 1fr 1fr" mobile="1fr 1fr">
+                <SimpleSelect
+                  type="select"
+                  label="State"
+                  name="state"
+                  options={this.getState()}
+                  onChange={this.handleStateChange}
+                  forminput
+                />
+
+                <SimpleSelect
+                  type="select"
+                  label="State"
+                  name="state"
+                  forminput
+                  options={this.getLGA(this.state.state)}
+                />
+
+                <Input
+                  placeholder="Ward/Town"
+                  type="text"
+                  label="Location"
+                  forminput
+                  name="ward"
+                />
+                <Button style={{ marginTop: "10px" }}>Add Location</Button>
+              </Grid>
+
+              <Grid pad="0" default="4fr 2fr" tablet="1fr" mobile="1fr">
+                <LocTable>
+                  <thead>
+                    <th>State</th><th>LGA</th><th>Location</th><th></th>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Kwara</td><td>Ilorin South</td><td>Ogidi</td><td><PaleButton small icon color={Theme.PrimaryRed}><i className="icon-cancel" /></PaleButton></td>
+                    </tr>
+
+                    <tr>
+                      <td>Kwara</td><td>Ilorin South</td><td>Ogidi</td><td><PaleButton small icon color={Theme.PrimaryRed}><i className="icon-cancel" /></PaleButton></td>
+                    </tr>
+
+                    <tr>
+                      <td>Kwara</td><td>Ilorin South</td><td>Ogidi</td><td><PaleButton small icon color={Theme.PrimaryRed}><i className="icon-cancel" /></PaleButton></td>
+                    </tr>
+                  </tbody>
+                </LocTable>
               </Grid>
               <p />
             </Boxed>
