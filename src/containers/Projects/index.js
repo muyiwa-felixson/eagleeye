@@ -120,7 +120,7 @@ class ProjectList extends Component {
       };
     });
   };
-  componentDidCatch() {}
+  componentDidCatch() { }
 
   submit = ev => {
     ev.preventDefault();
@@ -257,7 +257,7 @@ class ProjectList extends Component {
     const { submitButtonLoading } = this.state;
     return (
       <Relative>
-        <ProjectAdd clickAction={this.toggleClickAction} />
+        <ProjectAdd projects clickAction={this.toggleClickAction} />
         <ListBody>
           <Grid className="filter-lane" default="200px 1fr 1.5fr" tablet="1fr">
             <div>
@@ -303,54 +303,54 @@ class ProjectList extends Component {
           >
             <React.Fragment>
               {!userInfoPending &&
-              loadProjectsPayload &&
-              loadProjectsPayload.length > 0 ? (
-                <React.Fragment>
-                  {loadProjectsPayload.map((project, index) => {
-                    const { doc, id, value } = project;
-                    let { rev } = value;
-                    if (!rev) rev = doc._rev;
-                    const {
-                      dateOfAward,
-                      fileNumber,
-                      name,
-                      completed,
-                      paid
-                    } = doc;
-                    try {
-                      const splittedDate = dateOfAward.split(" ");
-                    } catch (err) {}
-                    const date = new Date(dateOfAward) || new Date();
-                    const year = date.getFullYear();
-                    const month = date.getMonth();
-                    return (
-                      <React.Fragment>
-                        {loadProjectsPending ? <Loader absolute /> : null}
-                        <ProjectCardComponent
-                          key={index}
-                          year={year}
-                          month={getMonth(month)}
-                          code={fileNumber}
-                          onClick={() => this.navigateToProject(id, rev)}
-                          name={name}
-                          completed={this.getPercentCovered(id, "reports")}
-                          paid={this.getPercentCovered(id, "payments")}
-                          layout={this.state.viewlayout}
-                        />
-                      </React.Fragment>
-                    );
-                  })}
-                </React.Fragment>
-              ) : loadProjectsPending || userInfoPending ? (
-                <Loader absolute />
-              ) : (
-                <div>
-                  <h2>
-                    {" "}
-                    There are currently no projects reported at the moment
+                loadProjectsPayload &&
+                loadProjectsPayload.length > 0 ? (
+                  <React.Fragment>
+                    {loadProjectsPayload.map((project, index) => {
+                      const { doc, id, value } = project;
+                      let { rev } = value;
+                      if (!rev) rev = doc._rev;
+                      const {
+                        dateOfAward,
+                        fileNumber,
+                        name,
+                        completed,
+                        paid
+                      } = doc;
+                      try {
+                        const splittedDate = dateOfAward.split(" ");
+                      } catch (err) { }
+                      const date = new Date(dateOfAward) || new Date();
+                      const year = date.getFullYear();
+                      const month = date.getMonth();
+                      return (
+                        <React.Fragment>
+                          {loadProjectsPending ? <Loader absolute /> : null}
+                          <ProjectCardComponent
+                            key={index}
+                            year={year}
+                            month={getMonth(month)}
+                            code={fileNumber}
+                            onClick={() => this.navigateToProject(id, rev)}
+                            name={name}
+                            completed={this.getPercentCovered(id, "reports")}
+                            paid={this.getPercentCovered(id, "payments")}
+                            layout={this.state.viewlayout}
+                          />
+                        </React.Fragment>
+                      );
+                    })}
+                  </React.Fragment>
+                ) : loadProjectsPending || userInfoPending ? (
+                  <Loader absolute />
+                ) : (
+                    <div>
+                      <h2>
+                        {" "}
+                        There are currently no projects reported at the moment
                   </h2>
-                </div>
-              )}
+                    </div>
+                  )}
             </React.Fragment>
           </Grid>
         </ListBody>

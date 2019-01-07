@@ -20,14 +20,15 @@ export const Signup = ({
   return (
     <React.Fragment>
       <form ref={form} onSubmit={signup}>
-      <H2 className="mbottom">Create Users</H2>
+        {/* <H2 className="mbottom">Create Users</H2> */}
         <Input
           label="email"
           placeholder="email"
-          type="text"
+          type="email"
           name={"username"}
           className="mbottom"
           onChange={e => updateInfo(e, "username")}
+          forminput
         />
         <Input
           label="Password"
@@ -39,7 +40,7 @@ export const Signup = ({
         />
         <Input
           label="Firstname"
-          placeholder="Password"
+          placeholder="First Name"
           type="text"
           className="mbottom"
           onChange={e => updateInfo(e, "firstname")}
@@ -64,14 +65,14 @@ export const Signup = ({
           forminput
         />
 
-        { !signupPending ? (
-          <Button  onClick={()=>submit(form)}> CreatUser</Button>
+        {!signupPending ? (
+          <Button onClick={() => submit(form)}> Create User</Button>
         ) : (
-          <Button progress={true}>
-            {" "}
-            Loading ...
+            <Button progress={true}>
+              {" "}
+              Loading ...
           </Button>
-        )}
+          )}
         {error ? <P>{error}</P> : null}
       </form>
     </React.Fragment>

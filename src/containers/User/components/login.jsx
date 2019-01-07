@@ -1,7 +1,7 @@
 import React from "react";
 import styled, { keyframes, css } from 'styled-components';
 import { darken, lighten, transparentize } from 'polished';
-import { Slide } from 'react-slideshow-image';
+import { Fade } from 'react-slideshow-image';
 import { Theme } from '../../../components/flex/theme';
 import { Input, Button, P, H2, Layout, Boxed, H4, Space } from "../../../components/flex";
 import Logo from '../../../components/assets/logo.png';
@@ -12,19 +12,19 @@ import Slide3 from '../../../components/assets/slider3.jpg';
 
 const properties = {
   duration: 5000,
-  transitionDuration: 500,
+  transitionDuration: 1000,
   infinite: true,
-  indicators: true,
-  arrows: true
+  indicators: false,
+  arrows: false
 }
 
 const Slideshow = () => {
   return (
-    <Slide {...properties}>
+    <Fade {...properties}>
       <div className="each-slide" style={{ 'backgroundImage': `url(${Slide1})` }}></div>
       <div className="each-slide" style={{ 'backgroundImage': `url(${Slide2})` }}></div>
       <div className="each-slide" style={{ 'backgroundImage': `url(${Slide3})` }}></div>
-    </Slide>
+    </Fade>
   )
 }
 const moveup = keyframes`

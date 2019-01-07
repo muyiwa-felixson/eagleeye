@@ -132,6 +132,11 @@ export const PaleButton = styled.button`
     ${props => props.width && css`
         min-width: ${props => props.width};
     `} 
+    ${props => props.small && css`
+        height: 30px;
+        padding: 6px 14px;
+        line-height: 16px;
+    `} 
 
     ${props => props.icon && css`
         padding: 11px 11px;

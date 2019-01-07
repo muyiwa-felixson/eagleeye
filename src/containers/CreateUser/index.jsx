@@ -9,7 +9,10 @@ import { urls } from "../../api-requests/urls";
 // Local imports
 import { dispatchActions } from "../../store/actions/action-config.action";
 import { Signup } from "./components/signup";
+import { Relative } from "../../containers/Projects/components";
+import { ProjectAdd } from "../../commons/index";
 import { Loader } from "../../components/flex/Loader/Loader.components";
+import { Boxed, FlexiTable, ModalComponent, PaleButton, Grid, Button } from "../../components/flex";
 
 const defaultState = {
   username: "",
@@ -18,6 +21,7 @@ const defaultState = {
   lastname: "",
   success: false,
   group: "",
+  userModal: false,
   error: {
     message: "",
     status: false
@@ -103,6 +107,9 @@ class CreatUser extends React.Component {
   };
   signup = e => {
     e.preventDefault();
+    // PLEASE NOTE I ADDED THIS PART TO CLOSE THE MODAL ON SAVE //
+    this.closeUserModal();
+    // PLEASE NOTE I ADDED THIS PART TO CLOSE THE MODAL ON SAVE //
     const {
       firstname,
       lastname,
@@ -136,6 +143,37 @@ class CreatUser extends React.Component {
       });
     }
   };
+
+  closeUserModal = () => {
+    this.setState({
+      userModal: false
+    })
+  }
+
+  columns = [{
+    title: 'First Name', dataIndex: 'firstname', key: 'firstname',
+  }, {
+    title: 'Last Name', dataIndex: 'lastname', key: 'lastname',
+  }, {
+    title: 'Email', dataIndex: 'email', key: 'email',
+  }, {
+    title: 'User Group', dataIndex: 'usergroup', key: 'usergroup', width: 200
+  },
+  {
+    title: 'Actions', dataIndex: '', key: 'operations', render: () => <PaleButton small>Delete</PaleButton>, width: 100
+  },];
+
+
+  data = [
+    { firstname: 'Jack', lastname: 'Reacher', email: 'jack@reacher.com', usergroup: 'Super Admin' },
+    { firstname: 'Peter', lastname: 'Parker', email: 'peter@spidey.com', usergroup: 'Super Admin' },
+    { firstname: 'Clark', lastname: 'Kent', email: 'kent@dailyplanet.com', usergroup: 'Super Admin' },
+    { firstname: 'Bruce', lastname: 'Wayne', email: 'bruce@darkknight.com', usergroup: 'Super Admin' },
+    { firstname: 'Barry', lastname: 'Allen', email: 'allen@csi.com', usergroup: 'Super Admin' },
+    { firstname: 'Jack', lastname: 'Ryan', email: 'jack@ryan.com', usergroup: 'Admin' }
+  ];
+
+
   render() {
     const { signupPending, userInfoPending } = this.props;
     const { error } = this.state;
@@ -143,8 +181,28 @@ class CreatUser extends React.Component {
       return <Loader />;
     } else {
       return (
-        <div className="auth-body">
-          <div className="auth-box">
+        <Relative>
+          <ProjectAdd />
+          <div className="auth-body">
+            <Boxed margin="0 auto" pad="120px 30px 30px 30px">
+              <Grid default="auto 150px">
+                <div />
+                <Button onClick={() => this.setState({ userModal: true })}>Add User</Button>
+              </Grid>
+              <FlexiTable
+                columns={this.columns}
+                data={this.data}
+              >
+              </FlexiTable>
+            </Boxed>
+          </div>
+          <ModalComponent
+            title="Create User"
+            subTitle=""
+            open={this.state.userModal}
+            onClose={this.closeUserModal}
+            width="600px"
+          >
             <Signup
               signup={this.signup}
               error={error.message}
@@ -152,8 +210,9 @@ class CreatUser extends React.Component {
               signupPending={signupPending}
               submit={this.submit}
             />
-          </div>
-        </div>
+          </ModalComponent>
+
+        </Relative>
       );
     }
   }

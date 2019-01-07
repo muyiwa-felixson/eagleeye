@@ -8,51 +8,7 @@ export const Relative = styled.div`
   position: relative;
 `;
 
-export const TopBar = styled.div`   
-  position: fixed;
-  top: 0;
-  left: 0;
-  background: white;
-  height: 100px;
-  width: 100%;
-  display: grid;
-  grid-template-columns: 100px auto auto 150px 60px 60px 20px;
-  grid-gap: 10px;
-  align-items: center;
-  align-content: center;
-  box-shadow: 0 0 35px ${Theme.Shadow};
-  z-index: 1000;
-   border-bottom: 1px solid ${Theme.PrimaryGreyLight};
 
-  & .logo{
-    text-align: center;
-    font-size: 30px;
-  }
-  & .login-user{
-    display: flex;
-    width: 44px;
-    height: 44px;
-    font-size: 18px;
-    line-height: 20px;
-    align-items: center;
-    align-content: center;
-    justify-content: center;
-    border-radius: 50px;
-    border: 2px solid ${Theme.PrimaryGrey};
-    color:${Theme.PrimaryGrey};
-  }
-  & .alert{
-    display: flex;
-    width: 44px;
-    height: 44px;
-    font-size: 18px;
-    line-height: 20px;
-    align-items: center;
-    align-content: center;
-    justify-content: center;
-    color:${Theme.PrimaryGrey};
-  }
-`;
 
 export const ListBody = styled.div`
   padding: 20px;
