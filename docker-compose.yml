@@ -17,7 +17,7 @@ services:
     volumes:
       - type: volume
         source: couchdb_data
-        target: /data
+        target: /opt/couchdb/data
         read_only: False 
     privileged: true
     environment:
@@ -36,6 +36,7 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
+      
     ports:
        - 3000:3000
        - 3001:3001
@@ -44,6 +45,9 @@ services:
        - 3334:3334
     volumes:
        - ./server/media:/usr/src/app/server/media
+       - ./server:/usr/src/app/server
+       - ./src:/usr/src/app/src
+       - ./public:/usr/src/app/public
     environment:
        - APPLICATION_PORT
        - CLIENT_PORT

@@ -65,11 +65,14 @@ const defaultState = {
   postData: null,
   submitButtonLoading: false,
   state: "",
-  LGA: ""
+  LGA: "",
+  TOWN: "",
+  locations: []
 };
 class ProjectList extends Component {
   constructor() {
     super();
+    this.locForm = React.createRef();
     this.state = defaultState;
     this.form = React.createRef();
   }
@@ -123,11 +126,11 @@ class ProjectList extends Component {
       };
     });
   };
-  componentDidCatch() { }
+  componentDidCatch() {}
 
   submit = ev => {
     ev.preventDefault();
-    const { submitButtonLoading, dateOfAward } = this.state;
+    const { submitButtonLoading, dateOfAward, locations } = this.state;
     const formElements = ev.target.elements;
     let obj = {};
     projectFields.map(field => {
@@ -136,7 +139,7 @@ class ProjectList extends Component {
         [field]: formElements[field].value
       };
     });
-    obj = { ...obj, dateOfAward, completed: 0, paid: 0 };
+    obj = { ...obj, dateOfAward, completed: 0, paid: 0, locations };
     this.setState(
       () => {
         return {
@@ -253,27 +256,81 @@ class ProjectList extends Component {
   getState = () => {
     let filters = Object.assign(locations);
     let locationOptions = [];
-    filters.map(elem => locationOptions.push({ value: elem.state.name, label: elem.state.name, data: elem.state.locals }));
+    filters.map(elem =>
+      locationOptions.push({
+        value: elem.state.name,
+        label: elem.state.name,
+        data: elem.state.locals
+      })
+    );
     return locationOptions;
-  }
-  getLGA = (selectedState) => {
-    let locationOptions = [];
-    selectedState && selectedState.map(elem => locationOptions.push({ value: elem.name, label: elem.name }));
-    return locationOptions;
-  }
-  handleStateChange = (optionSelected) => {
-    this.setState({
-      state: optionSelected.data,
-      LGA: ""
-    })
-  }
+  };
+  getLGA = selectedState => {
+    if (selectedState) {
+      const stateValue = [...locations].filter(
+        item => item.state.name === selectedState
+      )[0];
+      console.log(stateValue, "statevalue");
+      let locationOptions = stateValue.state.locals.map(elem => {
+        return { value: elem.name, label: elem.name };
+      });
+      return locationOptions;
+    }
+  };
 
-  handleLGAChange = (optionSelected) => {
-    this.setState({
-      LGA: optionSelected.value
-    })
-  }
+  handleLocChange = (e, name) => {
+    let target;
+    let value;
+    try {
+      target = e.target;
+      value = target.value;
+    } catch (error) {
+      value = e.value;
+    }
+    if (value) {
+      this.setState({
+        [name]: value
+      });
+    }
+  };
 
+  addLocations = locationObject => {
+    const { locations } = this.state;
+
+    const newLocations = [...locations, locationObject];
+    this.setState(() => {
+      return {
+        locations: newLocations,
+        LGA: "",
+        STATE: "",
+        TOWN: ""
+      };
+    });
+  };
+  deleteLocations = locationObject => {
+    let { locations } = this.state;
+    locations = locations.filter(location => {
+      return (
+        location.STATE === locationObject.STATE &&
+        location.LGA === locationObject.LGA &&
+        location.TOWN === locationObject.town
+      );
+    });
+    this.setState(() => {
+      return {
+        locations
+      };
+    });
+  };
+  submitState = () => {
+    if (this.locForm) {
+      this.locForm.current.reset();
+      const { LGA, STATE, TOWN } = this.state;
+      if (LGA && STATE && TOWN) {
+        this.addLocations({ TOWN, LGA, STATE });
+      }
+    }
+  };
   render() {
     const {
       loadProjectsPending,
@@ -282,7 +339,9 @@ class ProjectList extends Component {
       userInfoPending,
       userInfoPayload
     } = this.props;
-    const { submitButtonLoading } = this.state;
+    const { submitButtonLoading, locations, STATE, LGA, TOWN } = this.state;
+    let locButtonDisabled = true; 
+    if (STATE !== '' && LGA !== '' && TOWN !== '') locButtonDisabled = false;
     return (
       <Relative>
         <ProjectAdd projects clickAction={this.toggleClickAction} />
@@ -331,54 +390,54 @@ class ProjectList extends Component {
           >
             <React.Fragment>
               {!userInfoPending &&
-                loadProjectsPayload &&
-                loadProjectsPayload.length > 0 ? (
-                  <React.Fragment>
-                    {loadProjectsPayload.map((project, index) => {
-                      const { doc, id, value } = project;
-                      let { rev } = value;
-                      if (!rev) rev = doc._rev;
-                      const {
-                        dateOfAward,
-                        fileNumber,
-                        name,
-                        completed,
-                        paid
-                      } = doc;
-                      try {
-                        const splittedDate = dateOfAward.split(" ");
-                      } catch (err) { }
-                      const date = new Date(dateOfAward) || new Date();
-                      const year = date.getFullYear();
-                      const month = date.getMonth();
-                      return (
-                        <React.Fragment>
-                          {loadProjectsPending ? <Loader absolute /> : null}
-                          <ProjectCardComponent
-                            key={index}
-                            year={year}
-                            month={getMonth(month)}
-                            code={fileNumber}
-                            onClick={() => this.navigateToProject(id, rev)}
-                            name={name}
-                            completed={this.getPercentCovered(id, "reports")}
-                            paid={this.getPercentCovered(id, "payments")}
-                            layout={this.state.viewlayout}
-                          />
-                        </React.Fragment>
-                      );
-                    })}
-                  </React.Fragment>
-                ) : loadProjectsPending || userInfoPending ? (
-                  <Loader absolute />
-                ) : (
-                    <div>
-                      <h2>
-                        {" "}
-                        There are currently no projects reported at the moment
+              loadProjectsPayload &&
+              loadProjectsPayload.length > 0 ? (
+                <React.Fragment>
+                  {loadProjectsPayload.map((project, index) => {
+                    const { doc, id, value } = project;
+                    let { rev } = value;
+                    if (!rev) rev = doc._rev;
+                    const {
+                      dateOfAward,
+                      fileNumber,
+                      name,
+                      completed,
+                      paid
+                    } = doc;
+                    try {
+                      const splittedDate = dateOfAward.split(" ");
+                    } catch (err) {}
+                    const date = new Date(dateOfAward) || new Date();
+                    const year = date.getFullYear();
+                    const month = date.getMonth();
+                    return (
+                      <React.Fragment>
+                        {loadProjectsPending ? <Loader absolute /> : null}
+                        <ProjectCardComponent
+                          key={index}
+                          year={year}
+                          month={getMonth(month)}
+                          code={fileNumber}
+                          onClick={() => this.navigateToProject(id, rev)}
+                          name={name}
+                          completed={this.getPercentCovered(id, "reports")}
+                          paid={this.getPercentCovered(id, "payments")}
+                          layout={this.state.viewlayout}
+                        />
+                      </React.Fragment>
+                    );
+                  })}
+                </React.Fragment>
+              ) : loadProjectsPending || userInfoPending ? (
+                <Loader absolute />
+              ) : (
+                <div>
+                  <h2>
+                    {" "}
+                    There are currently no projects reported at the moment
                   </h2>
-                    </div>
-                  )}
+                </div>
+              )}
             </React.Fragment>
           </Grid>
         </ListBody>
@@ -524,51 +583,80 @@ class ProjectList extends Component {
                 </Grid>
               </Grid>
               <h3>Location</h3>
-              <Grid pad="15px" default="1fr 1fr 1fr 1fr 2fr" tablet="1fr 1fr 1fr 1fr" mobile="1fr 1fr">
-                <SimpleSelect
-                  type="select"
-                  label="State"
-                  name="state"
-                  options={this.getState()}
-                  onChange={this.handleStateChange}
-                  forminput
-                />
+              <form ref={this.locForm} onSubmit={(e)=>e.preventDefault()} >
+              <Grid
+                pad="15px"
+                default="1fr 1fr 1fr 1fr 2fr"
+                tablet="1fr 1fr 1fr 1fr"
+                mobile="1fr 1fr"
+              >
+                  <SimpleSelect
+                    type="select"
+                    label="State"
+                    name="state"
+                    options={this.getState()}
+                    onChange={e => this.handleLocChange(e, "STATE")}
+                    forminput
+                  />
 
-                <SimpleSelect
-                  type="select"
-                  label="State"
-                  name="state"
-                  forminput
-                  options={this.getLGA(this.state.state)}
-                />
+                  <SimpleSelect
+                    type="select"
+                    label="State"
+                    name="state"
+                    forminput
+                    onChange={e => this.handleLocChange(e, "LGA")}
+                    options={this.getLGA(STATE)}
+                  />
 
-                <Input
-                  placeholder="Ward/Town"
-                  type="text"
-                  label="Location"
-                  forminput
-                  name="ward"
-                />
-                <Button style={{ marginTop: "10px" }}>Add Location</Button>
+                  <Input
+                    placeholder="Ward/Town"
+                    type="text"
+                    label="Location"
+                    forminput
+                    name="ward"
+                    onChange={e => this.handleLocChange(e, "TOWN")}
+                  />
+                  <Button
+                    disabled={locButtonDisabled}
+                    onClick={this.submitState}
+                    style={{ marginTop: "10px" }}
+                  >
+                    Add Location
+                  </Button>
               </Grid>
+              </form>
 
               <Grid pad="0" default="4fr 2fr" tablet="1fr" mobile="1fr">
                 <LocTable>
                   <thead>
-                    <th>State</th><th>LGA</th><th>Location</th><th></th>
+                    <th>State</th>
+                    <th>LGA</th>
+                    <th>Location</th>
+                    <th />
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>Kwara</td><td>Ilorin South</td><td>Ogidi</td><td><PaleButton small icon color={Theme.PrimaryRed}><i className="icon-cancel" /></PaleButton></td>
-                    </tr>
-
-                    <tr>
-                      <td>Kwara</td><td>Ilorin South</td><td>Ogidi</td><td><PaleButton small icon color={Theme.PrimaryRed}><i className="icon-cancel" /></PaleButton></td>
-                    </tr>
-
-                    <tr>
-                      <td>Kwara</td><td>Ilorin South</td><td>Ogidi</td><td><PaleButton small icon color={Theme.PrimaryRed}><i className="icon-cancel" /></PaleButton></td>
-                    </tr>
+                    {locations.map((location, index) => {
+                      const { STATE, LGA, TOWN } = location;
+                      return (
+                        <tr key={index}>
+                          <td>{STATE}</td>
+                          <td>{LGA}</td>
+                          <td>{TOWN}</td>
+                          <td>
+                            <PaleButton
+                              onClick={() =>
+                                this.deleteLocations({ STATE, TOWN, LGA })
+                              }
+                              small
+                              icon
+                              color={Theme.PrimaryRed}
+                            >
+                              <i className="icon-cancel" />
+                            </PaleButton>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </LocTable>
               </Grid>

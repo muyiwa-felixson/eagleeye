@@ -68,11 +68,12 @@ export const getData = ({ url, inputData, context = "GET" }) => {
     if (context === "GET") {
       fetch(url)
         .then(data => {
-          const { ok, statusText } = data;
+          const { ok, statusText, status } = data;
           if (!ok) {
-            reject(
-              `The server encountered an error on ${context} of status ${statusText}`
-            );
+            reject({
+              statement: `The server encountered an error on ${context} of status ${statusText}`,
+              status: status
+            });
           }
           const promiseReturnValue = switchResponseData(data);
           promiseReturnValue
@@ -93,11 +94,12 @@ export const getData = ({ url, inputData, context = "GET" }) => {
       };
       fetch(url, httpOptions)
         .then(returned => {
-          const { ok, statusText } = returned;
+          const { ok, statusText, status } = returned;
           if (!ok) {
-            reject(
-              `The server encountered an error on ${context} of status ${statusText}`
-            );
+            reject({
+              statement: `The server encountered an error on ${context} of status ${statusText}`,
+              status: status
+            });
           }
           const promiseReturnValue = switchResponseData(returned);
           promiseReturnValue

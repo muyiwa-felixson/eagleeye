@@ -226,7 +226,7 @@ class Project extends Component {
           }
           // target.reset();
         };
-        reader.removeEventListener("load", () => { });
+        reader.removeEventListener("load", () => {});
       }
       if (!file.length) {
         reader.readAsDataURL(file);
@@ -246,7 +246,7 @@ class Project extends Component {
             });
           };
           r.readAsDataURL(f);
-          r.removeEventListener("load", () => { });
+          r.removeEventListener("load", () => {});
         });
       }
     }
@@ -450,7 +450,6 @@ class Project extends Component {
         // Do nothing
       }
     });
-    console.log(obj2, ' obj22222222')
     obj2.submittedOn = new Date();
     obj2.category = "payments";
     obj2.id = guid();
@@ -671,227 +670,232 @@ class Project extends Component {
       canInitiatePayement,
       canEditReports
     } = this.state;
+    const locations =loadProjectPayload ?  loadProjectPayload.locations || [] : [];
     return (
       <div>
         {userInfoPending || (loadProjectPending && !loadProjectPayload) ? (
           <Loader />
         ) : (
-            <React.Fragment>
-              <ProjectAdd />
-              <TopSection>
-                <Panel>
-                  <Grid default="3fr 1fr">
-                    <div className="right-bar">
-                      <Label>Project Code</Label>
-                      <H4>{code} </H4>
+          <React.Fragment>
+            <ProjectAdd />
+            <TopSection>
+              <Panel>
+                <Grid default="3fr 1fr">
+                  <div className="right-bar">
+                    <Label>Project Code</Label>
+                    <H4>{code} </H4>
 
-                      <Label>Project Name</Label>
-                      <H5>{name}</H5>
+                    <Label>Project Name</Label>
+                    <H5>{name}</H5>
 
-                      <Label>Description</Label>
-                      <P>{description}</P>
+                    <Label>Description</Label>
+                    <P>{description}</P>
 
-                      <Grid default="1fr 1.5fr 1fr" className="minibox">
-                        <div>
-                          <Label>Nature of Project</Label>
-                          <span className="answer">{nature}</span>
-                        </div>
-                        <div>
-                          <Label>Types of Project</Label>
-                          <span className="answer">{type}</span>
-                        </div>
-                        <div>
-                          <Label>Source of Funding</Label>
-                          <span className="answer">{funding}</span>
-                        </div>
-                      </Grid>
-                      <Grid default="1fr 1.5fr 1fr" className="minibox">
-                        <div>
-                          <Label>Project Duration</Label>
-                          <span className="answer">
-                            <i className="icon-clock"> </i> {duration}{" "}
-                            {durationType}
-                          </span>
-                        </div>
-                        <div>
-                          <Label>Contractor</Label>
-                          <span className="answer">
-                            <i className="icon-certificate"> </i> {contractor}
-                          </span>
-                        </div>
-                        <div>
-                          <Label>Project Cost</Label>
-                          <strong className="answer">
-                            <i className="icon-credit-card"> </i>{" "}
-                            {formatter.format(cost)}
-                          </strong>
-                        </div>
-                      </Grid>
-
-                      <Grid default="repeat(4,1fr)" className="minibox">
-                        <div>
-                          <Label>State</Label>
-                          <span className="answer">Lagos</span>
-                        </div>
-                        <div>
-                          <Label>LGA</Label>
-                          <span className="answer">Ikeja</span>
-                        </div>
-                        <div>
-                          <Label>Town</Label>
-                          <span className="answer">Command</span>
-                        </div>
-                        <div>
-                          <Label>Target Unit</Label>
-                          <span className="answer">{unit}</span>
-                        </div>
-                      </Grid>
-                    </div>
-                    <Aligner center>
-                      <P>PAYMENTS</P>
-                      <H4 className="paid">{`${
-                        this.getPercentPaid() ? this.getPercentPaid() : 0
-                        }%`}</H4>
-                      <P>Of Project Cost has been approved for payment</P>
-                      {canInitiatePayement ? (
-                        <Button
-                          onClick={() => this.setState({ paymentModal: true })}
-                        >
-                          Make New Payment
-                      </Button>
-                      ) : null}
-                    </Aligner>
-                  </Grid>
-                </Panel>
-              </TopSection>
-              <LowerSection>
-                <Panel>
-                  <div className="lower-buttons">
-                    <Grid default="2fr 1fr">
+                    <Grid default="1fr 1.5fr 1fr" className="minibox">
                       <div>
-                        <Grid default="50px auto 50px auto" padHorizontal="10px">
+                        <Label>Nature of Project</Label>
+                        <span className="answer">{nature}</span>
+                      </div>
+                      <div>
+                        <Label>Types of Project</Label>
+                        <span className="answer">{type}</span>
+                      </div>
+                      <div>
+                        <Label>Source of Funding</Label>
+                        <span className="answer">{funding}</span>
+                      </div>
+                    </Grid>
+                    <Grid default="1fr 1.5fr 1fr" className="minibox">
+                      <div>
+                        <Label>Project Duration</Label>
+                        <span className="answer">
+                          <i className="icon-clock"> </i> {duration}{" "}
+                          {durationType}
+                        </span>
+                      </div>
+                      <div>
+                        <Label>Contractor</Label>
+                        <span className="answer">
+                          <i className="icon-certificate"> </i> {contractor}
+                        </span>
+                      </div>
+                      <div>
+                        <Label>Project Cost</Label>
+                        <strong className="answer">
+                          <i className="icon-credit-card"> </i>{" "}
+                          {formatter.format(cost)}
+                        </strong>
+                      </div>
+                    </Grid>
+
+                    {locations.map((location, index) => {
+                      return (
+                        <Grid default="repeat(4,1fr)" className="minibox">
                           <div>
-                            <span className="perval">{`${
+                            <Label>State</Label>
+                            <span className="answer">{location.STATE}</span>
+                          </div>
+                          <div>
+                            <Label>LGA</Label>
+                            <span className="answer">{location.LGA}</span>
+                          </div>
+                          <div>
+                            <Label>Town</Label>
+                            <span className="answer">{location.TOWN}</span>
+                          </div>
+                          <div>
+                            <Label>Target Unit</Label>
+                            <span className="answer">{unit}</span>
+                          </div>
+                        </Grid>
+                      );
+                    })}
+                  </div>
+                  <Aligner center>
+                    <P>PAYMENTS</P>
+                    <H4 className="paid">{`${
+                      this.getPercentPaid() ? this.getPercentPaid() : 0
+                    }%`}</H4>
+                    <P>Of Project Cost has been approved for payment</P>
+                    {canInitiatePayement ? (
+                      <Button
+                        onClick={() => this.setState({ paymentModal: true })}
+                      >
+                        Make New Payment
+                      </Button>
+                    ) : null}
+                  </Aligner>
+                </Grid>
+              </Panel>
+            </TopSection>
+            <LowerSection>
+              <Panel>
+                <div className="lower-buttons">
+                  <Grid default="2fr 1fr">
+                    <div>
+                      <Grid default="50px auto 50px auto" padHorizontal="10px">
+                        <div>
+                          <span className="perval">{`${
+                            this.getPercentCompleted()
+                              ? this.getPercentCompleted()
+                              : 0
+                          }%`}</span>
+                        </div>
+                        <div>
+                          <Label>Reported Coverage</Label>
+                          <LineBar
+                            percentage={`${
                               this.getPercentCompleted()
                                 ? this.getPercentCompleted()
                                 : 0
-                              }%`}</span>
-                          </div>
-                          <div>
-                            <Label>Reported Coverage</Label>
-                            <LineBar
-                              percentage={`${
-                                this.getPercentCompleted()
-                                  ? this.getPercentCompleted()
-                                  : 0
-                                }%`}
-                              color={Theme.PrimaryGreyDark}
-                            />
-                          </div>
-                          <div>
-                            <span className="perval">{`${
+                            }%`}
+                            color={Theme.PrimaryGreyDark}
+                          />
+                        </div>
+                        <div>
+                          <span className="perval">{`${
+                            this.getPercentCompleted(true)
+                              ? this.getPercentCompleted(true)
+                              : 0
+                          }%`}</span>
+                        </div>
+                        <div>
+                          <Label>Approved Reports</Label>
+                          <LineBar
+                            percentage={`${
                               this.getPercentCompleted(true)
                                 ? this.getPercentCompleted(true)
                                 : 0
-                              }%`}</span>
-                          </div>
-                          <div>
-                            <Label>Approved Reports</Label>
-                            <LineBar
-                              percentage={`${
-                                this.getPercentCompleted(true)
-                                  ? this.getPercentCompleted(true)
-                                  : 0
-                                }%`}
-                            />
-                          </div>
-                        </Grid>
-                      </div>
-                      <Aligner right>
-                        {canCreateReports ? (
-                          <PaleButton
-                            color={Theme.PrimaryBlue}
-                            onClick={() => this.setState({ reportModal: true })}
-                          >
-                            New Report
+                            }%`}
+                          />
+                        </div>
+                      </Grid>
+                    </div>
+                    <Aligner right>
+                      {canCreateReports ? (
+                        <PaleButton
+                          color={Theme.PrimaryBlue}
+                          onClick={() => this.setState({ reportModal: true })}
+                        >
+                          New Report
                         </PaleButton>
-                        ) : null}
-                      </Aligner>
-                    </Grid>
-                  </div>
-                </Panel>
-              </LowerSection>
-              <TimelineList
-                approvePost={id => this.approvePost(id)}
-                declinePost={id => this.declinePost(id)}
-                mergedList={mergedList}
+                      ) : null}
+                    </Aligner>
+                  </Grid>
+                </div>
+              </Panel>
+            </LowerSection>
+            <TimelineList
+              approvePost={id => this.approvePost(id)}
+              declinePost={id => this.declinePost(id)}
+              mergedList={mergedList}
+              canCreateReports={canCreateReports}
+              canInitiatePayement={canInitiatePayement}
+              canEditReports={canEditReports}
+              media={media}
+              approvePostPending={approvePostPending}
+              previewer={this.previewMedia}
+            />
+            {reportModal ? (
+              <ProjectReport
+                preSubmitForm={this.preSubmitForm}
+                submitForm={this.submitForm}
+                coverageReported={this.getPercentCompleted}
+                closeReportModal={this.closeReportModal}
+                reportModal={reportModal}
+                name={name}
+                reporter={`${userInfoPayload.firstname} ${
+                  userInfoPayload.lastname
+                }`}
                 canCreateReports={canCreateReports}
                 canInitiatePayement={canInitiatePayement}
                 canEditReports={canEditReports}
-                media={media}
-                approvePostPending={approvePostPending}
-                previewer={this.previewMedia}
+                submitButtonLoading={submitButtonLoading}
+                imageChanged={this.imageChanged}
+                displayImages={displayImages}
+                percentages={this.percentages}
               />
-              {reportModal ? (
-                <ProjectReport
-                  preSubmitForm={this.preSubmitForm}
-                  submitForm={this.submitForm}
-                  coverageReported={this.getPercentCompleted}
-                  closeReportModal={this.closeReportModal}
-                  reportModal={reportModal}
-                  name={name}
-                  reporter={`${userInfoPayload.firstname} ${
-                    userInfoPayload.lastname
-                    }`}
-                  canCreateReports={canCreateReports}
-                  canInitiatePayement={canInitiatePayement}
-                  canEditReports={canEditReports}
-                  submitButtonLoading={submitButtonLoading}
-                  imageChanged={this.imageChanged}
-                  displayImages={displayImages}
-                  percentages={this.percentages}
-                />
-              ) : null}
-              {paymentModal ? (
-                <PayReport
-                  paymentModal={paymentModal}
-                  preSubmitFormPay={this.preSubmitFormPay}
-                  closePaymentModal={this.closePaymentModal}
-                  percentages={this.percentages}
-                  paidPercent={this.getPercentPaid}
-                  reporter={`${userInfoPayload.firstname} ${
-                    userInfoPayload.lastname
-                    }`}
-                  totalPayable={totalPayable}
-                  calculatePayable={this.calculatePayable}
-                  name={name}
-                  canCreateReports={canCreateReports}
-                  canInitiatePayement={canInitiatePayement}
-                  canEditReports={canEditReports}
-                  cost={cost}
-                  submitFormPay={this.submitFormPay}
-                  getFieldsProps={this.props.getFieldProps}
-                />
-              ) : null}
+            ) : null}
+            {paymentModal ? (
+              <PayReport
+                paymentModal={paymentModal}
+                preSubmitFormPay={this.preSubmitFormPay}
+                closePaymentModal={this.closePaymentModal}
+                percentages={this.percentages}
+                paidPercent={this.getPercentPaid}
+                reporter={`${userInfoPayload.firstname} ${
+                  userInfoPayload.lastname
+                }`}
+                totalPayable={totalPayable}
+                calculatePayable={this.calculatePayable}
+                name={name}
+                canCreateReports={canCreateReports}
+                canInitiatePayement={canInitiatePayement}
+                canEditReports={canEditReports}
+                cost={cost}
+                submitFormPay={this.submitFormPay}
+                getFieldsProps={this.props.getFieldProps}
+              />
+            ) : null}
 
-              <Modal open={this.state.preview} backDropOpacity={0.2}>
-                <ModalBody
-                  style={{ backgroundColor: "rgba(0,0,0,0)" }}
-                  width="90%"
-                >
-                  <ModalClose
-                    onClick={() => this.closePreview()}
-                    style={{ color: "#ccc" }}
-                  />
-                  <ModalContent>
-                    <Previewer>
-                      <img src={this.state.previewElement.source} />
-                    </Previewer>
-                  </ModalContent>
-                </ModalBody>
-              </Modal>
-            </React.Fragment>
-          )}
+            <Modal open={this.state.preview} backDropOpacity={0.2}>
+              <ModalBody
+                style={{ backgroundColor: "rgba(0,0,0,0)" }}
+                width="90%"
+              >
+                <ModalClose
+                  onClick={() => this.closePreview()}
+                  style={{ color: "#ccc" }}
+                />
+                <ModalContent>
+                  <Previewer>
+                    <img src={this.state.previewElement.source} />
+                  </Previewer>
+                </ModalContent>
+              </ModalBody>
+            </Modal>
+          </React.Fragment>
+        )}
       </div>
     );
   }

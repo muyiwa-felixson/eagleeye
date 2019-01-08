@@ -77,7 +77,7 @@ const routes = app => {
     try {
       readToken({ token })
         .then(user => res.status(200).json(user))
-        .catch(err => res.states(err.code).json(err));
+        .catch(err => res.status(err.code).json(err));
     } catch (err) {
       res.status(500).json(err);
     }
@@ -163,7 +163,7 @@ const routes = app => {
   });
   // DELETE
   app.delete(`/${appName}/api/item`, (req, res) => {
-    const { id, dbname, rev, token, intnent } = req.body;
+    const { id, dbname, rev, token, intent } = req.body;
     getPermissions(token).then(permissionList => {
       if (intent === "editProject") {
         if (!checkPerm(permissionList, "Can edit projects")) {
@@ -197,7 +197,7 @@ const routes = app => {
       }
       try {
         deleteDocument(dbname, id, rev)
-          .then(retVal => res.status(200).json(retVal))
+          .then(retVal => res.status(200).json(`deleted document from ${dbname} successfully`))
           .catch(err => res.status(500).json(err));
       } catch (err) {
         res.status(500).json(err);
@@ -248,7 +248,10 @@ const routes = app => {
       .then(response => {
         res.status(200).json(response);
       })
-      .catch(err => res.status(err.code || 500).json(err));
+      .catch(err =>  {
+        res.status(err.code || 500).json(err)
+    
+      });
   });
 
   // Auth

@@ -7,6 +7,7 @@ const Log = require("../utils/log");
 const schema = require("../config/table");
 const Couch = require("couch-db").CouchDB;
 const { dburl, dbhost, dbusername, dbpassword } = constants;
+console.log(dburl, ' url is here');
 const nano = require("nano")({
   url: dburl,
   requestDefaults: {
@@ -16,8 +17,6 @@ const nano = require("nano")({
   }
 });
 const couch = require("couch-db").CouchDB;
-// const cluster = new Couchbase.Cluster(`${couchbase}://${couchbaseHost}`, {LCB_CNTL_DETAILED_ERRCODES: true});
-// cluster.authenticate(username, couchbasePassword);
 
 const { tables } = schema;
 /**
@@ -128,15 +127,34 @@ const getDoc = (dbValue = "", id) => {
  * @return { promise<Object> } the object returned
  */
 
-async function getSomeDoc(dbValue, key, val) {
-  dbValue = dbValue.toLowerCase();
-  if (!checkDbValue(dbValue))
-    throw new Error(
-      `Wrong database name passed in please check the value ${dbValue}`
-    );
-  const n1Query = `SELECT * FROM ${dbValue} WHERE ${key}=${val}`;
-  return query(n1Query);
-}
+const getSomeDoc = (dbValue, param) => {
+  return new Promise((resolve, reject) => {
+    dbValue = dbValue.toLowerCase();
+    if (!checkDbValue(dbValue))
+      throw new Error(
+        `Wrong database name passed in please check the value ${dbValue}`
+      );
+    let query = {
+      selector: {
+        [Object.keys(param)[0]]: { $eq: param[Object.keys(param)[0]] }
+      }
+    };
+    db = nano.db.use(dbValue);
+    const opt = {
+      // method: "POST",
+      db: dbValue,
+      doc: "_find",
+      body: query
+    };
+    db.find(query, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+};
 
 /**
  * @function updateDoc updates a document on the database
@@ -178,17 +196,13 @@ const deleteDoc = (dbValue, id, rev) => {
         `Wrong database name passed in please check the value ${dbValue}`
       );
     const db = nano.db.use(dbValue);
-    db.destroy({ _id: id, _rev: rev })
+    db.destroy( id, rev)
       .then(result => {
         resolve(result);
       })
       .catch(err => {
-        reject(err);
+        resolve(err);
       });
-    bucket.remove(dbValue, id, (err, result) => {
-      if (err) throw new Error(err);
-      return result.result;
-    });
   });
 };
 module.exports = {

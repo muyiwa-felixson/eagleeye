@@ -33,5 +33,7 @@ export const reduxVariables = {
   DECLINE_POST: "DECLINE_POST",
   USERS: "USERS",
   USER_INFO: "USER_INFO",
-  SIGNUP: "SIGNUP"
+  SIGNUP: "SIGNUP",
+  GET_USERS: 'GET_USERS',
+  DELETE_USER: 'DELETE_USER'
 };
