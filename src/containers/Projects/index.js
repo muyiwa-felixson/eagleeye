@@ -20,9 +20,10 @@ import {
   LineBar,
   BallLegend,
   LevelList,
-  AutosuggestItem
+  AutosuggestItem,
+  LocTable
 } from "./components";
-import { getLevelAttr, levelAttribute } from "../../utils/levels";
+import { locations } from "../../utils/levels";
 import {
   Button,
   Input,
@@ -62,7 +63,9 @@ const defaultState = {
   viewlayout: "card",
   newProject: null,
   postData: null,
-  submitButtonLoading: false
+  submitButtonLoading: false,
+  state: "",
+  LGA: ""
 };
 class ProjectList extends Component {
   constructor() {
@@ -120,7 +123,7 @@ class ProjectList extends Component {
       };
     });
   };
-  componentDidCatch() {}
+  componentDidCatch() { }
 
   submit = ev => {
     ev.preventDefault();
@@ -246,6 +249,31 @@ class ProjectList extends Component {
       this.form.dispatchEvent(new Event("submit"));
     }
   };
+
+  getState = () => {
+    let filters = Object.assign(locations);
+    let locationOptions = [];
+    filters.map(elem => locationOptions.push({ value: elem.state.name, label: elem.state.name, data: elem.state.locals }));
+    return locationOptions;
+  }
+  getLGA = (selectedState) => {
+    let locationOptions = [];
+    selectedState && selectedState.map(elem => locationOptions.push({ value: elem.name, label: elem.name }));
+    return locationOptions;
+  }
+  handleStateChange = (optionSelected) => {
+    this.setState({
+      state: optionSelected.data,
+      LGA: ""
+    })
+  }
+
+  handleLGAChange = (optionSelected) => {
+    this.setState({
+      LGA: optionSelected.value
+    })
+  }
+
   render() {
     const {
       loadProjectsPending,
@@ -257,7 +285,7 @@ class ProjectList extends Component {
     const { submitButtonLoading } = this.state;
     return (
       <Relative>
-        <ProjectAdd clickAction={this.toggleClickAction} />
+        <ProjectAdd projects clickAction={this.toggleClickAction} />
         <ListBody>
           <Grid className="filter-lane" default="200px 1fr 1.5fr" tablet="1fr">
             <div>
@@ -303,54 +331,54 @@ class ProjectList extends Component {
           >
             <React.Fragment>
               {!userInfoPending &&
-              loadProjectsPayload &&
-              loadProjectsPayload.length > 0 ? (
-                <React.Fragment>
-                  {loadProjectsPayload.map((project, index) => {
-                    const { doc, id, value } = project;
-                    let { rev } = value;
-                    if (!rev) rev = doc._rev;
-                    const {
-                      dateOfAward,
-                      fileNumber,
-                      name,
-                      completed,
-                      paid
-                    } = doc;
-                    try {
-                      const splittedDate = dateOfAward.split(" ");
-                    } catch (err) {}
-                    const date = new Date(dateOfAward) || new Date();
-                    const year = date.getFullYear();
-                    const month = date.getMonth();
-                    return (
-                      <React.Fragment>
-                        {loadProjectsPending ? <Loader absolute /> : null}
-                        <ProjectCardComponent
-                          key={index}
-                          year={year}
-                          month={getMonth(month)}
-                          code={fileNumber}
-                          onClick={() => this.navigateToProject(id, rev)}
-                          name={name}
-                          completed={this.getPercentCovered(id, "reports")}
-                          paid={this.getPercentCovered(id, "payments")}
-                          layout={this.state.viewlayout}
-                        />
-                      </React.Fragment>
-                    );
-                  })}
-                </React.Fragment>
-              ) : loadProjectsPending || userInfoPending ? (
-                <Loader absolute />
-              ) : (
-                <div>
-                  <h2>
-                    {" "}
-                    There are currently no projects reported at the moment
+                loadProjectsPayload &&
+                loadProjectsPayload.length > 0 ? (
+                  <React.Fragment>
+                    {loadProjectsPayload.map((project, index) => {
+                      const { doc, id, value } = project;
+                      let { rev } = value;
+                      if (!rev) rev = doc._rev;
+                      const {
+                        dateOfAward,
+                        fileNumber,
+                        name,
+                        completed,
+                        paid
+                      } = doc;
+                      try {
+                        const splittedDate = dateOfAward.split(" ");
+                      } catch (err) { }
+                      const date = new Date(dateOfAward) || new Date();
+                      const year = date.getFullYear();
+                      const month = date.getMonth();
+                      return (
+                        <React.Fragment>
+                          {loadProjectsPending ? <Loader absolute /> : null}
+                          <ProjectCardComponent
+                            key={index}
+                            year={year}
+                            month={getMonth(month)}
+                            code={fileNumber}
+                            onClick={() => this.navigateToProject(id, rev)}
+                            name={name}
+                            completed={this.getPercentCovered(id, "reports")}
+                            paid={this.getPercentCovered(id, "payments")}
+                            layout={this.state.viewlayout}
+                          />
+                        </React.Fragment>
+                      );
+                    })}
+                  </React.Fragment>
+                ) : loadProjectsPending || userInfoPending ? (
+                  <Loader absolute />
+                ) : (
+                    <div>
+                      <h2>
+                        {" "}
+                        There are currently no projects reported at the moment
                   </h2>
-                </div>
-              )}
+                    </div>
+                  )}
             </React.Fragment>
           </Grid>
         </ListBody>
@@ -494,6 +522,55 @@ class ProjectList extends Component {
                     forminput
                   />
                 </Grid>
+              </Grid>
+              <h3>Location</h3>
+              <Grid pad="15px" default="1fr 1fr 1fr 1fr 2fr" tablet="1fr 1fr 1fr 1fr" mobile="1fr 1fr">
+                <SimpleSelect
+                  type="select"
+                  label="State"
+                  name="state"
+                  options={this.getState()}
+                  onChange={this.handleStateChange}
+                  forminput
+                />
+
+                <SimpleSelect
+                  type="select"
+                  label="State"
+                  name="state"
+                  forminput
+                  options={this.getLGA(this.state.state)}
+                />
+
+                <Input
+                  placeholder="Ward/Town"
+                  type="text"
+                  label="Location"
+                  forminput
+                  name="ward"
+                />
+                <Button style={{ marginTop: "10px" }}>Add Location</Button>
+              </Grid>
+
+              <Grid pad="0" default="4fr 2fr" tablet="1fr" mobile="1fr">
+                <LocTable>
+                  <thead>
+                    <th>State</th><th>LGA</th><th>Location</th><th></th>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Kwara</td><td>Ilorin South</td><td>Ogidi</td><td><PaleButton small icon color={Theme.PrimaryRed}><i className="icon-cancel" /></PaleButton></td>
+                    </tr>
+
+                    <tr>
+                      <td>Kwara</td><td>Ilorin South</td><td>Ogidi</td><td><PaleButton small icon color={Theme.PrimaryRed}><i className="icon-cancel" /></PaleButton></td>
+                    </tr>
+
+                    <tr>
+                      <td>Kwara</td><td>Ilorin South</td><td>Ogidi</td><td><PaleButton small icon color={Theme.PrimaryRed}><i className="icon-cancel" /></PaleButton></td>
+                    </tr>
+                  </tbody>
+                </LocTable>
               </Grid>
               <p />
             </Boxed>

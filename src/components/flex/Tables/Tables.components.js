@@ -50,8 +50,8 @@ const TableWrapper = styled.div`
                     
                 }
                 &:hover{
-                    border-left: 3px solid ${lighten(0, Theme.PrimaryColor)};
-                    background-color: ${lighten(0.46, Theme.PrimaryColor)};
+                    border-left: 3px solid ${lighten(0.3, Theme.PrimaryColor)};
+                    background-color: ${lighten(0.7, Theme.PrimaryColor)};
                 }
             }
             & td{
@@ -71,7 +71,7 @@ const FootTable = styled.div`
 const Pretable = styled.div`
     display: none;
     padding: 10px;
-    /* background: ${lighten(0.2,Theme.PrimaryGrey)}; */
+    /* background: ${lighten(0.2, Theme.PrimaryGrey)}; */
     /* border-radius: ${Theme.PrimaryRadius} ${Theme.PrimaryRadius} 0 0; */
     color: ${Theme.PrimaryFontColor};
 
@@ -164,7 +164,7 @@ const PaginationWrapper = styled.div`
                 }
             }
             &.rc-pagination-item-active{
-                color: ${darken(0.1,Theme.PrimaryColor)};
+                color: ${darken(0.1, Theme.PrimaryColor)};
                 font-weight: bold;
                 padding: 14px 0 15px 0;
                 background-color: ${lighten(0.43, Theme.PrimaryColor)};
@@ -223,7 +223,7 @@ export class FlexiTable extends React.Component {
         super(props)
         this.state = {}
     }
-    
+
     render() {
         return (
             <TableWrapper>
@@ -232,19 +232,19 @@ export class FlexiTable extends React.Component {
                         <Input type="search" />
                         <Boxed></Boxed>
                         <Boxed align="right">
-                        <span>20 of 300</span>
-                        <div>5 Selected</div>
+                            <span>20 of 300</span>
+                            <div>5 Selected</div>
                         </Boxed>
                     </Grid>
                 </Pretable>
                 <Table
                     {...this.props}
-                >{ null}</Table>
+                >{null}</Table>
                 {this.props.children && (
                     <FootTable>
-                        { this.props.children }
+                        {this.props.children}
                     </FootTable>
-                    )
+                )
                 }
             </TableWrapper>
         )
@@ -258,7 +258,7 @@ export class FlexiPagination extends React.Component {
             pageSize: this.props.pageCounts[0]
         }
     }
-    
+
     changePages = (selectedOption) => {
         this.setState({ pageSize: selectedOption });
         console.log(`Option selected:`, selectedOption);
@@ -267,19 +267,19 @@ export class FlexiPagination extends React.Component {
         return (
             <PaginationWrapper>
                 <div className="page-sizer">
-                { this.props.itemsDisplayed &&
-                <SimpleSelect 
-                    placeholder="items"
-                    options={this.props.pageCounts}
-                    value={this.state.pageSize}
-                    onChange={this.changePages}
-                    isSearchable={false}
-                />
-                }
+                    {this.props.itemsDisplayed &&
+                        <SimpleSelect
+                            placeholder="items"
+                            options={this.props.pageCounts}
+                            value={this.state.pageSize}
+                            onChange={this.changePages}
+                            isSearchable={false}
+                        />
+                    }
                 </div>
-                <Pagination 
-                {...this.props} 
-                    showTotal={(total, range) => `${range[0]} - ${range[1]} of ${total} ${total > 1 ? pluralize(this.props.valueType) : this.props.valueType}`} 
+                <Pagination
+                    {...this.props}
+                    showTotal={(total, range) => `${range[0]} - ${range[1]} of ${total} ${total > 1 ? pluralize(this.props.valueType) : this.props.valueType}`}
                     pageSize={this.state.pageSize.value}
                 />
             </PaginationWrapper>

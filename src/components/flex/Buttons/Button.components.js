@@ -132,6 +132,11 @@ export const PaleButton = styled.button`
     ${props => props.width && css`
         min-width: ${props => props.width};
     `} 
+    ${props => props.small && css`
+        height: 30px;
+        padding: 6px 14px;
+        line-height: 16px;
+    `} 
 
     ${props => props.icon && css`
         padding: 11px 11px;
@@ -149,6 +154,13 @@ export const PaleButton = styled.button`
                 margin-right: -8px;
             }
     `}
+
+    ${props => props.small && css`
+        ${props => props.icon && css`
+        padding: 6px 6px;
+        min-width: 30px;
+        `} 
+    `} 
 
     &:hover{
         background-color: ${props => props.color ? lighten(0.4, props.color) : lighten(0.4, Theme.PrimaryColor)};
