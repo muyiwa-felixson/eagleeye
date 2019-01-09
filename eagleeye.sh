@@ -13,4 +13,12 @@ docker-compose run -d   -e COUCHDB_USER=$HOSTEDCOUCH -e COUCHDB_PASSWORD=$HOSTED
 # reun the app 
 docker-compose run  -d --service-ports  --name app app
 
+echo "Please Wait!!! starting up client Server"
+sleep 240 && source .env
+docker rm -f app
+docker-compose build app
+docker-compose run  --service-ports  --name app app
+
+echo "Ready Tiger"
+
 
