@@ -68,7 +68,11 @@ const defaultState = {
   LGA: "",
   TOWN: "",
   locations: [],
-  contractors: []
+  contractors: [],
+  editingProject: null,
+  projectReporteItems: {
+
+  }
 };
 class ProjectList extends Component {
   constructor() {
@@ -102,6 +106,9 @@ class ProjectList extends Component {
       func: proxygetContractors
     });
   }
+  editProject = doc => {
+    this.setState({ editingProject: doc, projectModal: true });
+  };
   componentDidUpdate(prevProps, prevState) {
     const nextProps = this.props;
     const nextState = this.state;
@@ -119,19 +126,27 @@ class ProjectList extends Component {
     if (prevProps.getContractorsPending && nextProps.getContractorsPayload) {
       this.setContractors();
     }
-
+    if (!prevState.locations && nextState.locations) {
+      this.setLocationFromState();
+    }
     //
   }
+  setLocationFromState = () => {
+    this.setState(() => {
+      return {
+        locations: this.state.editingProject.locations
+      };
+    });
+  };
   setContractors = () => {
     const { getContractorsPayload = [] } = this.props;
     if (getContractorsPayload) {
       const contractors = getContractorsPayload.map(contractor => {
         return {
           label: contractor.doc.companyName,
-          value:  contractor.doc.companyName
+          value: contractor.doc.companyName
         };
       });
-      console.log(contractors, ' ===contractors');
       this.setState(() => {
         return { contractors };
       });
@@ -155,7 +170,12 @@ class ProjectList extends Component {
 
   submit = ev => {
     ev.preventDefault();
-    const { submitButtonLoading, dateOfAward, locations } = this.state;
+    const {
+      submitButtonLoading,
+      dateOfAward,
+      locations,
+      editingProject
+    } = this.state;
     const formElements = ev.target.elements;
     let obj = {};
     projectFields.map(field => {
@@ -164,7 +184,11 @@ class ProjectList extends Component {
         [field]: formElements[field].value
       };
     });
-    obj = { ...obj, dateOfAward, completed: 0, paid: 0, locations };
+    if (!editingProject) {
+      obj = { ...obj, dateOfAward, completed: 0, paid: 0, locations };
+    } else {
+      obj = { ...obj, locations: [...obj.loctions, locations] };
+    }
     this.setState(
       () => {
         return {
@@ -172,36 +196,78 @@ class ProjectList extends Component {
         };
       },
       () => {
-        getData({
-          url: urls.postProject,
-          inputData: {
-            doc: obj,
-            dbname: "project",
-            token: this.props.userInfoPayload.token,
-            intent: "createProject"
-          },
-          context: "POST"
-        })
-          .then(data => {
-            this.setState(() => {
-              this.form.reset();
-              return {
-                postData: "loading",
-                submitButtonLoading: false,
-                projectModal: false
-              };
-            });
+        if (!editingProject) {
+          getData({
+            url: urls.postProject,
+            inputData: {
+              doc: obj,
+              dbname: "project",
+              token: this.props.userInfoPayload.token,
+              intent: "createProject"
+            },
+            context: "POST"
           })
-          .catch(err => {
-            this.setState(() => {
-              this.form.reset();
-              return {
-                postData: {},
-                submitButtonLoading: false,
-                projectModal: false
-              };
+            .then(data => {
+              this.setState(() => {
+                this.form.reset();
+                return {
+                  postData: "loading",
+                  submitButtonLoading: false,
+                  projectModal: false,
+                  editingProject: null
+                };
+              });
+            })
+            .catch(err => {
+              this.setState(() => {
+                this.form.reset();
+                return {
+                  postData: {},
+                  submitButtonLoading: false,
+                  projectModal: false,
+                  editingProject: null
+                };
+              });
             });
-          });
+        } else {
+          getData({
+            url: urls.postProject,
+            inputData: {
+              doc: obj,
+              dbname: "project",
+              id: this.state.editingProject._id,
+              rev: this.state.editingProject._rev,
+              _id: this.state.editingProject._id,
+              _rev: this.state.editingProject._rev,
+              token: this.props.userInfoPayload.token,
+              intent: "createProject"
+            },
+            context: "PATCH"
+          })
+            .then(data => {
+              this.setState(() => {
+                this.form.reset();
+                return {
+                  postData: "loading",
+                  submitButtonLoading: false,
+                  projectModal: false,
+                  editingProject: null
+                };
+              });
+            })
+            .catch(err => {
+              this.setState(() => {
+                this.form.reset();
+                return {
+                  postData: {},
+                  submitButtonLoading: false,
+                  projectModal: false,
+                  editingProject: null
+                };
+              });
+            });
+          // editing project
+        }
       }
     );
   };
@@ -266,9 +332,12 @@ class ProjectList extends Component {
   };
   toggleClickAction = () => {
     const { projectModal } = this.state;
+    let { editingProject } = this.state;
+    if (!projectModal) editingProject = null;
     this.setState(() => {
       return {
-        projectModal: !projectModal
+        projectModal: !projectModal,
+        editingProject
       };
     });
   };
@@ -309,6 +378,7 @@ class ProjectList extends Component {
     try {
       target = e.target;
       value = target.value;
+      console.log(e)
     } catch (error) {
       value = e.value;
     }
@@ -318,6 +388,7 @@ class ProjectList extends Component {
       });
     }
   };
+
 
   addLocations = locationObject => {
     const { locations } = this.state;
@@ -365,7 +436,14 @@ class ProjectList extends Component {
       canCreateReports,
       canEditReports
     } = this.props;
-    const { submitButtonLoading, locations, STATE, LGA, TOWN } = this.state;
+    let {
+      submitButtonLoading,
+      locations,
+      STATE,
+      LGA,
+      TOWN,
+      editingProject
+    } = this.state;
     let locButtonDisabled = true;
     if (STATE !== "" && LGA !== "" && TOWN !== "") locButtonDisabled = false;
     return (
@@ -455,6 +533,9 @@ class ProjectList extends Component {
                           paid={this.getPercentCovered(id, "payments")}
                           layout={this.state.viewlayout}
                         />
+                        <button onClick={() => this.editProject(doc)}>
+                          Edit
+                        </button>
                       </React.Fragment>
                     );
                   })}
@@ -500,6 +581,7 @@ class ProjectList extends Component {
                   label="Project"
                   forminput
                   name="name"
+                  defaultValue={editingProject ? editingProject.name : ""}
                 />
 
                 <Input
@@ -508,6 +590,7 @@ class ProjectList extends Component {
                   label="File Number"
                   forminput
                   name="fileNumber"
+                  defaultValue={editingProject ? editingProject.fileNumber : ""}
                 />
               </Grid>
               <p />
@@ -517,10 +600,18 @@ class ProjectList extends Component {
                 <SimpleSelect
                   type="select"
                   label="Project Nature"
-                  required
-                  forminput
                   name="nature"
                   options={getOptions(natureOfProject)}
+                  defaultValue={
+                    editingProject
+                      ? {
+                          value: editingProject.nature,
+                          label: editingProject.nature
+                        }
+                      : -1
+                  }
+                  required
+                  forminput
                 />
                 <SimpleSelect
                   type="select"
@@ -529,6 +620,14 @@ class ProjectList extends Component {
                   forminput
                   name="funding"
                   options={getOptions(sourceOfFunding)}
+                 value={
+                    editingProject
+                      ? {
+                          value: editingProject.funding,
+                          label: editingProject.funding
+                        }
+                      : -1
+                  }
                 />
 
                 <SimpleSelect
@@ -538,6 +637,14 @@ class ProjectList extends Component {
                   forminput
                   name="type"
                   options={getOptions(projectTypes)}
+                  value={
+                    editingProject
+                      ? {
+                          value: editingProject.type,
+                          label: editingProject.type
+                        }
+                      : -1
+                  }
                 />
 
                 <Input
@@ -547,6 +654,7 @@ class ProjectList extends Component {
                   required
                   forminput
                   name="unit"
+                  value={editingProject ? editingProject.unit : ""}
                 />
 
                 <Input
@@ -555,6 +663,7 @@ class ProjectList extends Component {
                   label="Project Cost"
                   forminput
                   name="cost"
+                  value={editingProject ? editingProject.cost : ""}
                 />
 
                 {/* <Input
@@ -570,7 +679,11 @@ class ProjectList extends Component {
                     <Label>Date of Award</Label>
                     <DatePicker
                       name="dateOfAward"
-                      selected={this.state.dateOfAward || new Date()}
+                      selected={
+                        editingProject
+                          ? editingProject.dateOfAward
+                          : this.state.dateOfAward || new Date()
+                      }
                       onChange={this.handleDateChange}
                     />
                   </InputWrapper>
@@ -583,6 +696,14 @@ class ProjectList extends Component {
                   forminput
                   name="contractor"
                   options={this.state.contractors}
+                  value={
+                    editingProject
+                      ? {
+                          value: editingProject.contractor,
+                          label: editingProject.contractor
+                        }
+                      : -1
+                  }
                 />
                 <Grid
                   default="1fr 2fr"
@@ -597,6 +718,14 @@ class ProjectList extends Component {
                     required
                     forminput
                     name="duration"
+                    value={
+                      editingProject
+                        ? {
+                            value: editingProject.duration,
+                            label: editingProject.duration
+                          }
+                        : -1
+                    }
                   />
                   <SimpleSelect
                     options={[
@@ -607,6 +736,14 @@ class ProjectList extends Component {
                     ]}
                     type="select"
                     label="Duration Type"
+                    value={
+                      editingProject
+                        ? {
+                            value: editingProject.durationType,
+                            label: editingProject.durationType
+                          }
+                        : -1
+                    }
                     name="durationType"
                     required
                     forminput
