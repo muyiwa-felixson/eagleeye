@@ -58,8 +58,9 @@ const defaultState = {
     source: ""
   },
   canCreateReports: false,
-  canInitiatePayement: false,
-  canEditReports: false
+  canInitiatePayment: false,
+  canEditReports: false,
+  editingReport: null
 };
 
 class Project extends Component {
@@ -73,7 +74,6 @@ class Project extends Component {
     const { id, rev } = params;
     const { cookies, history, userInfoPayload } = this.props;
     const token = cookies.get("token");
-    console.log(token, " here is token and tokenisation");
     if (!token) {
       history.push("/login");
     }
@@ -135,7 +135,7 @@ class Project extends Component {
         return {
           canCreateReports: indexCreateReports > -1,
           canEditReports: indexEdit > -1,
-          canInitiatePayement: indexPayment > -1
+          canInitiatePayment: indexPayment > -1
         };
       });
     }
@@ -209,6 +209,26 @@ class Project extends Component {
       };
     });
   };
+  editReport = report => {
+    console.log(report, " here is report ===>");
+    this.setState(() => {
+      return {
+        editingReport: report,
+        reportModal: true
+      };
+    });
+  };
+  deleteImage = index => {
+    let { image, displayImages } = this.state;
+    image = image.filter((im, ind) => ind !== index);
+    displayImages = displayImages.filter((im, ind) => ind !== index);
+    this.setState(() => {
+      return {
+        image,
+        displayImages
+      };
+    });
+  };
   readFiles = file => {
     if (file) {
       const reader = new FileReader();
@@ -251,7 +271,19 @@ class Project extends Component {
       }
     }
   };
-
+  editImageChanged = img => {
+    let { image = [], displayImages = [] } = this.state;
+    if (image.length < 1 || displayImages.length < 1) {
+      displayImages = img;
+      image = img;
+      this.setState(() => {
+        return {
+          image,
+          displayImages
+        };
+      });
+    }
+  };
   imageChanged = (ev, ref) => {
     const target = ev.target;
     let files = ev.target.files;
@@ -294,7 +326,9 @@ class Project extends Component {
     this.setState(() => {
       return {
         reportModal: false,
-        displayImage: []
+        displayImage: [],
+        editingReport: [],
+        image: []
       };
     });
   };
@@ -328,7 +362,7 @@ class Project extends Component {
     const { id } = params;
     const rev = loadProjectPayload._rev;
     let obj2 = {};
-    const { reports = [] } = loadProjectPayload;
+    let { reports = [] } = loadProjectPayload;
     projectReportFields.map(field => {
       try {
         obj2[field] = formElements[field].value;
@@ -337,13 +371,25 @@ class Project extends Component {
       }
     });
     const reportId = guid();
-    obj2.submittedOn = new Date();
-    obj2.category = "reports";
-    obj2.approved = false;
-    obj2.id = reportId;
     delete loadProjectPayload._id;
     delete loadProjectPayload._rev;
-    let obj = {
+    obj2.category = "reports";
+    let media;
+    obj2.approved = false;
+    obj2.submittedOn = new Date();
+    if (!this.state.editingReport) {
+      obj2.id = reportId;
+    } else {
+      reports = reports.filter(report => {
+        return report.id !== this.state.editingReport.id;
+      });
+      obj2.edittedOn = new Date();
+      obj2.edittedBy = `${this.props.userInfoPayload.firstname} ${
+        this.props.userInfoPayload.lastname
+      }`;
+      obj2.media = this.state.editingReport.media || [];
+    }
+    const obj = {
       ...loadProjectPayload,
       reports: [...reports, obj2]
     };
@@ -371,17 +417,25 @@ class Project extends Component {
           .then(data => {
             const { image } = this.state;
             const dataF = new FormData();
-            if (image) {
+            if (image && !this.state.editingReport) {
               let url = "";
               let m = image;
               if (m.length && m.length > 1) {
                 url = urls.postMultipleMedia;
                 m.map(f => {
-                  dataF.append("photos[]", f, f.filename);
+                  try {
+                    dataF.append("photos[]", f, f.filename || guid());
+                  } catch (err) {
+                    //
+                  }
                 });
               } else {
                 url = urls.postSingleMedia;
-                dataF.append("reports", m[0], m[0].filename);
+                try {
+                  dataF.append("reports", m[0], m[0].filename || guid());
+                } catch (err) {
+                  //
+                }
               }
 
               dataF.append("doc", obj);
@@ -427,7 +481,8 @@ class Project extends Component {
               return {
                 postData: {},
                 submitButtonLoading: false,
-                reportModal: false
+                reportModal: false,
+                editingReport: false
               };
             });
           });
@@ -584,12 +639,6 @@ class Project extends Component {
       const payment = sortedPayments[0] || {};
       const { percentage = 0 } = payment;
       totalCoverage = percentage;
-      // sortedPayments.map(payment => {
-      //   let { percentage } = payment;
-      //   if (!isNaN(parseInt(percentage, 10))) {
-      //     totalCoverage += parseInt(percentage);
-      //   }
-      // });
       if (!totalCoverage) totalCoverage = 0;
       return totalCoverage;
     }
@@ -667,17 +716,23 @@ class Project extends Component {
       displayImages,
       submitButtonLoading,
       canCreateReports,
-      canInitiatePayement,
+      canInitiatePayment,
       canEditReports
     } = this.state;
-    const locations =loadProjectPayload ?  loadProjectPayload.locations || [] : [];
+    const locations = loadProjectPayload
+      ? loadProjectPayload.locations || []
+      : [];
     return (
       <div>
         {userInfoPending || (loadProjectPending && !loadProjectPayload) ? (
           <Loader />
         ) : (
           <React.Fragment>
-            <ProjectAdd />
+            <ProjectAdd
+              canInitiatePayment={canInitiatePayment}
+              canCreateReports={canCreateReports}
+              canEditReports={canEditReports}
+            />
             <TopSection>
               <Panel>
                 <Grid default="3fr 1fr">
@@ -757,7 +812,7 @@ class Project extends Component {
                       this.getPercentPaid() ? this.getPercentPaid() : 0
                     }%`}</H4>
                     <P>Of Project Cost has been approved for payment</P>
-                    {canInitiatePayement ? (
+                    {canInitiatePayment ? (
                       <Button
                         onClick={() => this.setState({ paymentModal: true })}
                       >
@@ -828,9 +883,10 @@ class Project extends Component {
             <TimelineList
               approvePost={id => this.approvePost(id)}
               declinePost={id => this.declinePost(id)}
+              editReport={this.editReport}
               mergedList={mergedList}
               canCreateReports={canCreateReports}
-              canInitiatePayement={canInitiatePayement}
+              canInitiatePayment={canInitiatePayment}
               canEditReports={canEditReports}
               media={media}
               approvePostPending={approvePostPending}
@@ -838,17 +894,20 @@ class Project extends Component {
             />
             {reportModal ? (
               <ProjectReport
+                editingReport={this.state.editingReport}
+                editImageChanged={this.editImageChanged}
                 preSubmitForm={this.preSubmitForm}
                 submitForm={this.submitForm}
                 coverageReported={this.getPercentCompleted}
                 closeReportModal={this.closeReportModal}
                 reportModal={reportModal}
                 name={name}
+                deleteImage={this.deleteImage}
                 reporter={`${userInfoPayload.firstname} ${
                   userInfoPayload.lastname
                 }`}
                 canCreateReports={canCreateReports}
-                canInitiatePayement={canInitiatePayement}
+                canInitiatePayment={canInitiatePayment}
                 canEditReports={canEditReports}
                 submitButtonLoading={submitButtonLoading}
                 imageChanged={this.imageChanged}
@@ -870,7 +929,7 @@ class Project extends Component {
                 calculatePayable={this.calculatePayable}
                 name={name}
                 canCreateReports={canCreateReports}
-                canInitiatePayement={canInitiatePayement}
+                canInitiatePayment={canInitiatePayment}
                 canEditReports={canEditReports}
                 cost={cost}
                 submitFormPay={this.submitFormPay}

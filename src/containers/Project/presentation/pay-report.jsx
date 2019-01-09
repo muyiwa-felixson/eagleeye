@@ -34,7 +34,7 @@ export const PayReport = props => {
     name,
     cost,
     canCreateReports,
-    canInitiatePayement
+    canInitiatePayment
   } = props;
 
   let ref = React.createRef();

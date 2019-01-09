@@ -25,16 +25,36 @@ export const ProjectReport = props => {
     name,
     reporter,
     displayImages,
+    deleteImage,
+    editingReport,
+    editImageChanged,
     canCreateReports,
-    canInitiatePayement
+    canInitiatePayment
   } = props;
   let ref = React.createRef();
   let mediaFile = React.createRef();
+  if (editingReport && editingReport.media) {
+    editImageChanged(editingReport.media);
+  }
   const openFileSelect = ev => {
     ev.preventDefault();
     if (mediaFile) {
       mediaFile.current.click(); // dispatchEvent(new Event("click"));
     }
+  };
+  const base64MimeType = encoded => {
+    var result = null;
+    if (typeof encoded !== "string") {
+      return result;
+    }
+
+    var mime = encoded.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
+
+    if (mime && mime.length) {
+      result = mime[1];
+    }
+
+    return result;
   };
   return (
     <ModalComponent
@@ -48,8 +68,8 @@ export const ProjectReport = props => {
           {!submitButtonLoading ? (
             <Button onClick={() => preSubmitForm(ref)}>Save Report</Button>
           ) : (
-              <Button progess={true}>Loading ...</Button>
-            )}
+            <Button progess={true}>Loading ...</Button>
+          )}
         </div>
       }
       expandable
@@ -82,6 +102,14 @@ export const ProjectReport = props => {
             <SimpleSelect
               options={percentages("reports", true)}
               type="select"
+              defaultValue={
+                editingReport
+                  ? {
+                      value: editingReport.completionLevel,
+                      label: `${editingReport.completionLevel}%`
+                    }
+                  : -1
+              }
               name="completionLevel"
               label="Select Level of Completion"
               required
@@ -106,12 +134,51 @@ export const ProjectReport = props => {
             />
           </Grid>
           <p />
-          <TextArea name="reportComment" label="Report Comment" />
+          <TextArea
+            name="reportComment"
+            label="Report Comment"
+            defaultValue={editingReport ? editingReport.reportComment : ""}
+          />
           <p>Upload project pictures and video.</p>
           <DragZone>
             <div className="file-region">
               {displayImages.map((image, index) => {
-                return <Picture key={index} backgroundImage={image} />;
+                let type;
+                let isVideo = false;
+                if (!editingReport) {
+                  type = base64MimeType(image);
+                  isVideo = type.indexOf("video") > -1;
+                }
+                if (!isVideo) {
+                  return (
+                    <Picture
+                      onClick={() => deleteImage(index)}
+                      key={index}
+                      backgroundImage={image}
+                    />
+                  );
+                } else {
+                  return (
+                    <Video onClick={() => deleteImage(index)}>
+                      <video
+                        type="video/mp4"
+                        onClick={() => deleteImage(index)}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          display: "block"
+                        }}
+                        autoplay={false}
+                        loop={false}
+                        controls={false}
+                        muted={true}
+                        onClick={() => deleteImage(index)}
+                      >
+                        <source src={image} />
+                      </video>
+                    </Video>
+                  );
+                }
               })}
             </div>
             <div className="placeholder">
