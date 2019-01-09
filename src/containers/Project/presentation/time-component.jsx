@@ -29,7 +29,9 @@ export const TimeComponent = ({
   declinePost,
   previewer,
   canCreateReports,
-  canEditReports
+  canEditReports,
+  editReport,
+  reportBody
 }) => {
   return (
     <TimeBox type={type}>
@@ -43,7 +45,7 @@ export const TimeComponent = ({
         {!confirmed  && canEditReports && (
           <div className="button-section">
             <Button onClick={() => approvePost(reportId)}>Approve</Button>
-            <PaleButton color={Theme.PrimaryBlue}>Update</PaleButton>
+            <PaleButton color={Theme.PrimaryBlue} onClick={()=>editReport(reportBody)}>Update</PaleButton>
             <Button
               onClick={() => declinePost(reportId)}
               color={Theme.PrimaryRed}
@@ -76,7 +78,12 @@ export const TimeComponent = ({
 
           <div className="media">
             {media.map(elem => {
-              const isVideo = videoFilter(getExtension(elem.image));
+              let isVideo = false;
+              try {
+              isVideo = videoFilter(getExtension(elem.image));
+              } catch(err) { 
+                //
+              }
               return !isVideo ? (
                 <Picture
                   backgroundImage={elem.image}

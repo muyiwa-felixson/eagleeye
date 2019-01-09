@@ -59,7 +59,8 @@ const defaultState = {
   },
   canCreateReports: false,
   canInitiatePayment: false,
-  canEditReports: false
+  canEditReports: false,
+  editingReport: null
 };
 
 class Project extends Component {
@@ -73,7 +74,6 @@ class Project extends Component {
     const { id, rev } = params;
     const { cookies, history, userInfoPayload } = this.props;
     const token = cookies.get("token");
-    console.log(token, " here is token and tokenisation");
     if (!token) {
       history.push("/login");
     }
@@ -209,6 +209,15 @@ class Project extends Component {
       };
     });
   };
+  editReport = report => {
+    console.log(report, " here is report ===>");
+    this.setState(() => {
+      return {
+        editingReport: report,
+        reportModal: true
+      };
+    });
+  };
   deleteImage = index => {
     let { image, displayImages } = this.state;
     image = image.filter((im, ind) => ind !== index);
@@ -262,7 +271,19 @@ class Project extends Component {
       }
     }
   };
-
+  editImageChanged = img => {
+    let { image = [], displayImages = [] } = this.state;
+    if (image.length < 1 || displayImages.length < 1) {
+      displayImages = img;
+      image = img;
+      this.setState(() => {
+        return {
+          image,
+          displayImages
+        };
+      });
+    }
+  };
   imageChanged = (ev, ref) => {
     const target = ev.target;
     let files = ev.target.files;
@@ -305,7 +326,9 @@ class Project extends Component {
     this.setState(() => {
       return {
         reportModal: false,
-        displayImage: []
+        displayImage: [],
+        editingReport: [],
+        image: []
       };
     });
   };
@@ -339,7 +362,7 @@ class Project extends Component {
     const { id } = params;
     const rev = loadProjectPayload._rev;
     let obj2 = {};
-    const { reports = [] } = loadProjectPayload;
+    let { reports = [] } = loadProjectPayload;
     projectReportFields.map(field => {
       try {
         obj2[field] = formElements[field].value;
@@ -348,13 +371,25 @@ class Project extends Component {
       }
     });
     const reportId = guid();
-    obj2.submittedOn = new Date();
-    obj2.category = "reports";
-    obj2.approved = false;
-    obj2.id = reportId;
     delete loadProjectPayload._id;
     delete loadProjectPayload._rev;
-    let obj = {
+    obj2.category = "reports";
+    let media;
+    obj2.approved = false;
+    obj2.submittedOn = new Date();
+    if (!this.state.editingReport) {
+      obj2.id = reportId;
+    } else {
+      reports = reports.filter(report => {
+        return report.id !== this.state.editingReport.id;
+      });
+      obj2.edittedOn = new Date();
+      obj2.edittedBy = `${this.props.userInfoPayload.firstname} ${
+        this.props.userInfoPayload.lastname
+      }`;
+      obj2.media = this.state.editingReport.media || [];
+    }
+    const obj = {
       ...loadProjectPayload,
       reports: [...reports, obj2]
     };
@@ -382,17 +417,25 @@ class Project extends Component {
           .then(data => {
             const { image } = this.state;
             const dataF = new FormData();
-            if (image) {
+            if (image && !this.state.editingReport) {
               let url = "";
               let m = image;
               if (m.length && m.length > 1) {
                 url = urls.postMultipleMedia;
                 m.map(f => {
-                  dataF.append("photos[]", f, f.filename);
+                  try {
+                    dataF.append("photos[]", f, f.filename || guid());
+                  } catch (err) {
+                    //
+                  }
                 });
               } else {
                 url = urls.postSingleMedia;
-                dataF.append("reports", m[0], m[0].filename);
+                try {
+                  dataF.append("reports", m[0], m[0].filename || guid());
+                } catch (err) {
+                  //
+                }
               }
 
               dataF.append("doc", obj);
@@ -438,7 +481,8 @@ class Project extends Component {
               return {
                 postData: {},
                 submitButtonLoading: false,
-                reportModal: false
+                reportModal: false,
+                editingReport: false
               };
             });
           });
@@ -839,6 +883,7 @@ class Project extends Component {
             <TimelineList
               approvePost={id => this.approvePost(id)}
               declinePost={id => this.declinePost(id)}
+              editReport={this.editReport}
               mergedList={mergedList}
               canCreateReports={canCreateReports}
               canInitiatePayment={canInitiatePayment}
@@ -849,6 +894,8 @@ class Project extends Component {
             />
             {reportModal ? (
               <ProjectReport
+                editingReport={this.state.editingReport}
+                editImageChanged={this.editImageChanged}
                 preSubmitForm={this.preSubmitForm}
                 submitForm={this.submitForm}
                 coverageReported={this.getPercentCompleted}

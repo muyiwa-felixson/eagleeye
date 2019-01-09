@@ -301,8 +301,6 @@ class ProjectList extends Component {
     this.setState(() => {
       return {
         locations: newLocations,
-        LGA: "",
-        STATE: "",
         TOWN: ""
       };
     });

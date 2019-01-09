@@ -14,7 +14,8 @@ export const TimelineList = props => {
     previewer,
     canEditReports,
     canCreateReports,
-    canInitiatePayment
+    canInitiatePayment,
+    editReport
   } = props;
   return (
     <Panel>
@@ -29,7 +30,6 @@ export const TimelineList = props => {
               reportComment,
               completionLevel,
               approved,
-
               category,
               id,
               media = []
@@ -50,6 +50,8 @@ export const TimelineList = props => {
                   type="report"
                   key={index}
                   confirmed={approved}
+                  reportBody={item}
+                  editReport={editReport}
                   day={day}
                   reportId={id}
                   canEditReports={canEditReports}

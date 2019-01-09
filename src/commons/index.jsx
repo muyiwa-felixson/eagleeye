@@ -61,12 +61,12 @@ export const ProjectAdd = props => {
         <div />
         <div>{props.projects && <Input type="search" />}</div>
         <div>
-          {props.projects && (
+          {
             <Button iconLeft onClick={props.clickAction}>
               <i className="icon-folder" />
               New Project
             </Button>
-          )}
+          }
         </div>
         <div>
           <i className="alert icon-bell" />

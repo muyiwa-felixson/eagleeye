@@ -26,11 +26,16 @@ export const ProjectReport = props => {
     reporter,
     displayImages,
     deleteImage,
+    editingReport,
+    editImageChanged,
     canCreateReports,
     canInitiatePayment
   } = props;
   let ref = React.createRef();
   let mediaFile = React.createRef();
+  if (editingReport && editingReport.media) {
+    editImageChanged(editingReport.media);
+  }
   const openFileSelect = ev => {
     ev.preventDefault();
     if (mediaFile) {
@@ -97,6 +102,14 @@ export const ProjectReport = props => {
             <SimpleSelect
               options={percentages("reports", true)}
               type="select"
+              defaultValue={
+                editingReport
+                  ? {
+                      value: editingReport.completionLevel,
+                      label: `${editingReport.completionLevel}%`
+                    }
+                  : -1
+              }
               name="completionLevel"
               label="Select Level of Completion"
               required
@@ -121,13 +134,21 @@ export const ProjectReport = props => {
             />
           </Grid>
           <p />
-          <TextArea name="reportComment" label="Report Comment" />
+          <TextArea
+            name="reportComment"
+            label="Report Comment"
+            defaultValue={editingReport ? editingReport.reportComment : ""}
+          />
           <p>Upload project pictures and video.</p>
           <DragZone>
             <div className="file-region">
               {displayImages.map((image, index) => {
-                const type = base64MimeType(image);
-                const isVideo = type.indexOf("video") > -1;
+                let type;
+                let isVideo = false;
+                if (!editingReport) {
+                  type = base64MimeType(image);
+                  isVideo = type.indexOf("video") > -1;
+                }
                 if (!isVideo) {
                   return (
                     <Picture
