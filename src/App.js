@@ -9,7 +9,7 @@ import Project from "./containers/Project";
 import Auth from "./containers/User/index";
 import CreatUser from "./containers/CreateUser/index";
 import { withCookies, Cookies } from "react-cookie";
-
+import Contractor from './containers/Contractor/index';
 import { connect } from "react-redux";
 import { dispatchActions } from "./store/actions/action-config.action";
 import { getData } from "./api-requests/index";
@@ -101,6 +101,7 @@ class App extends Component {
                   />
                   <Route exact path="/login" component={Auth} />
                   <Route exact path="/signup" component={CreatUser} />
+                  <Route exact path="/add/contractor" component={Contractor} />
                   <Route
                     exact
                     path="/projects/project/:name/:id"

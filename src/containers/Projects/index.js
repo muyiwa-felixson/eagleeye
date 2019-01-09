@@ -67,7 +67,8 @@ const defaultState = {
   state: "",
   LGA: "",
   TOWN: "",
-  locations: []
+  locations: [],
+  contractors: []
 };
 class ProjectList extends Component {
   constructor() {
@@ -94,6 +95,12 @@ class ProjectList extends Component {
       this.props.dispatchActions("USER_INFO", { func: proxyGetInfo });
     }
     this.props.dispatchActions("LOAD_PROJECTS", { func: this.proxyGetUrl });
+    const proxygetContractors = () => {
+      return getData({ url: urls.getContractors });
+    };
+    this.props.dispatchActions("GET_CONTRACTORS", {
+      func: proxygetContractors
+    });
   }
   componentDidUpdate(prevProps, prevState) {
     const nextProps = this.props;
@@ -109,9 +116,27 @@ class ProjectList extends Component {
     if (!prevProps.userInfoPayload && nextProps.userInfoPayload) {
       this.checkInfo();
     }
+    if (prevProps.getContractorsPending && nextProps.getContractorsPayload) {
+      this.setContractors();
+    }
 
     //
   }
+  setContractors = () => {
+    const { getContractorsPayload = [] } = this.props;
+    if (getContractorsPayload) {
+      const contractors = getContractorsPayload.map(contractor => {
+        return {
+          label: contractor.doc.companyName,
+          value: contractor.doc._id || contractor.id
+        };
+      });
+      console.log(contractors, ' ===contractors');
+      this.setState(() => {
+        return { contractors };
+      });
+    }
+  };
   checkInfo = () => {
     const { userInfoPayload, userInfoError, history } = this.props;
     if (!userInfoPayload || userInfoError) {
@@ -557,7 +582,7 @@ class ProjectList extends Component {
                   required
                   forminput
                   name="contractor"
-                  options={getOptions(contractors)}
+                  options={this.state.contractors}
                 />
                 <Grid
                   default="1fr 2fr"
@@ -675,13 +700,16 @@ class ProjectList extends Component {
   }
 }
 
-const mapStateToProps = ({ loadProjects, userInfo }) => ({
+const mapStateToProps = ({ loadProjects, userInfo, getContractors }) => ({
   loadProjectsPending: loadProjects.pending,
   loadProjectsError: loadProjects.error,
   loadProjectsPayload: loadProjects.payload,
   userInfoPending: userInfo.pending,
   userInfoError: userInfo.error,
-  userInfoPayload: userInfo.payload
+  userInfoPayload: userInfo.payload,
+  getContractorsPending: getContractors.pending,
+  getContractorsPayload: getContractors.payload,
+  getContractorsError: getContractors.error
 });
 const mapDispatchToProps = dispatch =>
   bindActionCreators({ dispatchActions }, dispatch);

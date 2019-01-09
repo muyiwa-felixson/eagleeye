@@ -21,7 +21,7 @@ export const ProjectAdd = props => {
       label: "Projects"
     },
     {
-      to: "#",
+      to: "/add/contractor",
       permission: canInitiatePayment,
       label: "Contaractors"
     },
