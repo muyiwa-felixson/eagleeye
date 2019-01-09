@@ -58,7 +58,7 @@ const defaultState = {
     source: ""
   },
   canCreateReports: false,
-  canInitiatePayement: false,
+  canInitiatePayment: false,
   canEditReports: false
 };
 
@@ -135,7 +135,7 @@ class Project extends Component {
         return {
           canCreateReports: indexCreateReports > -1,
           canEditReports: indexEdit > -1,
-          canInitiatePayement: indexPayment > -1
+          canInitiatePayment: indexPayment > -1
         };
       });
     }
@@ -206,6 +206,17 @@ class Project extends Component {
         displayImages: [],
         image: [],
         submitButtonLoading: false
+      };
+    });
+  };
+  deleteImage = index => {
+    let { image, displayImages } = this.state;
+    image = image.filter((im, ind) => ind !== index);
+    displayImages = displayImages.filter((im, ind) => ind !== index);
+    this.setState(() => {
+      return {
+        image,
+        displayImages
       };
     });
   };
@@ -584,12 +595,6 @@ class Project extends Component {
       const payment = sortedPayments[0] || {};
       const { percentage = 0 } = payment;
       totalCoverage = percentage;
-      // sortedPayments.map(payment => {
-      //   let { percentage } = payment;
-      //   if (!isNaN(parseInt(percentage, 10))) {
-      //     totalCoverage += parseInt(percentage);
-      //   }
-      // });
       if (!totalCoverage) totalCoverage = 0;
       return totalCoverage;
     }
@@ -667,17 +672,23 @@ class Project extends Component {
       displayImages,
       submitButtonLoading,
       canCreateReports,
-      canInitiatePayement,
+      canInitiatePayment,
       canEditReports
     } = this.state;
-    const locations =loadProjectPayload ?  loadProjectPayload.locations || [] : [];
+    const locations = loadProjectPayload
+      ? loadProjectPayload.locations || []
+      : [];
     return (
       <div>
         {userInfoPending || (loadProjectPending && !loadProjectPayload) ? (
           <Loader />
         ) : (
           <React.Fragment>
-            <ProjectAdd />
+            <ProjectAdd
+              canInitiatePayment={canInitiatePayment}
+              canCreateReports={canCreateReports}
+              canEditReports={canEditReports}
+            />
             <TopSection>
               <Panel>
                 <Grid default="3fr 1fr">
@@ -757,7 +768,7 @@ class Project extends Component {
                       this.getPercentPaid() ? this.getPercentPaid() : 0
                     }%`}</H4>
                     <P>Of Project Cost has been approved for payment</P>
-                    {canInitiatePayement ? (
+                    {canInitiatePayment ? (
                       <Button
                         onClick={() => this.setState({ paymentModal: true })}
                       >
@@ -830,7 +841,7 @@ class Project extends Component {
               declinePost={id => this.declinePost(id)}
               mergedList={mergedList}
               canCreateReports={canCreateReports}
-              canInitiatePayement={canInitiatePayement}
+              canInitiatePayment={canInitiatePayment}
               canEditReports={canEditReports}
               media={media}
               approvePostPending={approvePostPending}
@@ -844,11 +855,12 @@ class Project extends Component {
                 closeReportModal={this.closeReportModal}
                 reportModal={reportModal}
                 name={name}
+                deleteImage={this.deleteImage}
                 reporter={`${userInfoPayload.firstname} ${
                   userInfoPayload.lastname
                 }`}
                 canCreateReports={canCreateReports}
-                canInitiatePayement={canInitiatePayement}
+                canInitiatePayment={canInitiatePayment}
                 canEditReports={canEditReports}
                 submitButtonLoading={submitButtonLoading}
                 imageChanged={this.imageChanged}
@@ -870,7 +882,7 @@ class Project extends Component {
                 calculatePayable={this.calculatePayable}
                 name={name}
                 canCreateReports={canCreateReports}
-                canInitiatePayement={canInitiatePayement}
+                canInitiatePayment={canInitiatePayment}
                 canEditReports={canEditReports}
                 cost={cost}
                 submitFormPay={this.submitFormPay}

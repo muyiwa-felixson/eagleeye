@@ -337,14 +337,22 @@ class ProjectList extends Component {
       loadProjectsError,
       loadProjectsPayload = [],
       userInfoPending,
-      userInfoPayload
+      userInfoPayload,
+      canInitiatePayment,
+      canCreateReports,
+      canEditReports
     } = this.props;
     const { submitButtonLoading, locations, STATE, LGA, TOWN } = this.state;
-    let locButtonDisabled = true; 
-    if (STATE !== '' && LGA !== '' && TOWN !== '') locButtonDisabled = false;
+    let locButtonDisabled = true;
+    if (STATE !== "" && LGA !== "" && TOWN !== "") locButtonDisabled = false;
     return (
       <Relative>
-        <ProjectAdd projects clickAction={this.toggleClickAction} />
+        <ProjectAdd
+          canInitiatePayment={canInitiatePayment}
+          canCreateReports={canCreateReports}
+          canEditReports={canEditReports}
+          clickAction={this.toggleClickAction}
+        />
         <ListBody>
           <Grid className="filter-lane" default="200px 1fr 1.5fr" tablet="1fr">
             <div>
@@ -583,13 +591,13 @@ class ProjectList extends Component {
                 </Grid>
               </Grid>
               <h3>Location</h3>
-              <form ref={this.locForm} onSubmit={(e)=>e.preventDefault()} >
-              <Grid
-                pad="15px"
-                default="1fr 1fr 1fr 1fr 2fr"
-                tablet="1fr 1fr 1fr 1fr"
-                mobile="1fr 1fr"
-              >
+              <form ref={this.locForm} onSubmit={e => e.preventDefault()}>
+                <Grid
+                  pad="15px"
+                  default="1fr 1fr 1fr 1fr 2fr"
+                  tablet="1fr 1fr 1fr 1fr"
+                  mobile="1fr 1fr"
+                >
                   <SimpleSelect
                     type="select"
                     label="State"
@@ -623,7 +631,7 @@ class ProjectList extends Component {
                   >
                     Add Location
                   </Button>
-              </Grid>
+                </Grid>
               </form>
 
               <Grid pad="0" default="4fr 2fr" tablet="1fr" mobile="1fr">

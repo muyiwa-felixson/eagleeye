@@ -35,7 +35,6 @@ export const TimelineList = props => {
               media = []
             } = item;
             const m = media.map(pic => {
-              console.log(pic, "pic");
               return {
                 type: "picture",
                 image: pic
