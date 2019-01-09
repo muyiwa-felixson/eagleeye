@@ -58,7 +58,7 @@
   },
   "scripts": {
     "check-env": "node -r dotenv/config",
-    "start-server": "node ./server/app.js",
+    "start-server": "nodemon -L ./server/app.js",
     "build": "react-scripts build",
     "start-client": "react-scripts start",
     "start": "npm-run-all -p check-env start-server start-client",

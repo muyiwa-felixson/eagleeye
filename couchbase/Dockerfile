@@ -1,5 +1,7 @@
 
-FROM  frodenas/couchdb
+FROM  klaemo/couchdb:latest
 
-COPY configure.sh /opt/couchbase
-CMD ["/opt/couchbase/configure.sh"]
+COPY configure.sh /opt
+RUN chmod +x /opt/configure.sh
+
+# CMD ["/opt/configure.sh"]

@@ -3,7 +3,7 @@
  */
 const { hashPassword, comparePassword } = require("../utils/password");
 const { createToken, verifyToken, getPermissions } = require("../utils/token");
-const { createDoc, updateDoc, getDoc } = require("../db/crud");
+const { createDoc, updateDoc, getDoc, getSomeDoc } = require("../db/crud");
 const { groups } = require("../config/table");
 /**
  * @function signup
@@ -42,14 +42,15 @@ const signup = ({ username, password, firstname, lastname, token, group }) => {
                 group,
                 createdOn
               };
-              getDoc("user")
+              getSomeDoc("user", { username }) 
                 .then(users => {
                   const exists = () =>
                     new Promise((resolve, reject) => {
-                      users.filter(item => {
-                        if (item.doc.username === username) resolve(true);
-                      });
-                      resolve(false);
+                      if (users && users.docs) {
+                        resolve(users.docs.length > 0);
+                      } else {
+                        resolve(false);
+                      }
                     });
                   exists().then(value => {
                     if (value) {
@@ -147,64 +148,64 @@ const signup = ({ username, password, firstname, lastname, token, group }) => {
  * create indecis on the data base to pull by field
  */
 const signin = ({ username, password }) => {
+  username = username.trim().toLowerCase();
+  password = password.trim().toLowerCase();
   return new Promise((resolve, reject) => {
-    getDoc("user")
-      .then(doc => {
-        doc.map((user, index) => {
-          if (user.doc.username === username) {
-            comparePassword(user.doc.password, password)
-              .then(compare => {
-                if (compare) {
-                  const tok = user.doc.token || user.doc.usertoken;
-                  getPermissions(tok)
-                    .then(permissionList => {
-                      console.log(tok, permissionList,  " got here your heard ...");
-                      resolve({
-                        token: tok,
-                        group: user.doc.group,
-                        firstname: user.doc.firstname,
-                        lastname: user.doc.lastname,
-                        permissions: permissionList
-                      });
-                    })
-                    .catch(err => {
-                      console.log(err);
-                      reject({
-                        reason: "We encountered an error",
-                        code: 500,
-                        further: err
-                      });
+    getSomeDoc("user", { username })
+      .then(users => {
+        const user = users.docs[0];
+        if (user) {
+          comparePassword(user.password, password)
+            .then(compare => {
+              if (compare) {
+                const tok = user.token || user.usertoken;
+                getPermissions(tok)
+                  .then(permissionList => {
+                    resolve({
+                      token: tok,
+                      group: user.group,
+                      firstname: user.firstname,
+                      lastname: user.lastname,
+                      permissions: permissionList
                     });
-                } else {
-                  reject({
-                    reason: "User not found",
-                    code: 404,
-                    further: "Not Found"
+                  })
+                  .catch(err => {
+                    console.log(err);
+                    reject({
+                      reason: "We encountered an error",
+                      code: 500,
+                      further: err
+                    });
                   });
-                }
-              })
-              .catch(err => {
+              } else {
                 reject({
-                  reason: "Could not compare password",
-                  code: 500,
+                  reason: "The password you entered is not correct",
+                  code: 404,
                   further: err
                 });
+              }
+            })
+            .catch(err => {
+              reject({
+                reason: "Could not compare password",
+                code: 500,
+                further: err
               });
-          }
-          // if (index === doc.length - 1 && user.doc.username !== username) {
-          //   reject({
-          //     reason: "User not found",
-          //     code: 404,
-          //     further: "Not Found"
-          //   });
-          // }
-        });
+            });
+        } else {
+          reject({
+            reason: "User not found, please check our username",
+            code: 404,
+            further: "Not Found"
+          });
+        }
       })
       .catch(err => {
+        console.log(err, " =====.> here is a simple error of user not found");
         reject({
-          reason: "Could not find a list of all users",
-          code: 500,
-          further: err
+          reason: "User not found, please check our username",
+          code: 404,
+          further: "Not Found"
         });
       });
   });
@@ -226,33 +227,35 @@ const assignGroup = ({ group, username, token }) => {
         const userCreate = "Can edit users";
         const index = permissionList.findIndex(user => user === userCreate);
         if (index > -1) {
-          getDoc("user").then(users => {
-            users.map(user => {
-              if (user.doc.username === username) {
-                verifyToken(user.doc.token)
-                  .then(userT => {
-                    getDoc("user", userT._id).then(item => {
-                      item = { ...item, group };
-                      updateDoc("user", item, item._id, item._rev)
-                        .then(res => resolve(res))
-                        .catch(err => {
-                          reject({
-                            reason: "Could not update the users group",
-                            code: 500,
-                            further: err
-                          });
-                        });
+          getSomeDoc("user", { username }).then(users => {
+            console.log(user, " ======> user");
+            const user = users.doc[0];
+            // users.map(user => {
+            //   if (user.doc.username === username) {
+            verifyToken(user.token)
+              .then(userT => {
+                getDoc("user", userT._id).then(item => {
+                  item = { ...item, group };
+                  updateDoc("user", item, item._id, item._rev)
+                    .then(res => resolve(res))
+                    .catch(err => {
+                      reject({
+                        reason: "Could not update the users group",
+                        code: 500,
+                        further: err
+                      });
                     });
-                  })
-                  .catch(err => {
-                    reject({
-                      reason: "Wrong token passed",
-                      code: 404,
-                      further: err
-                    });
-                  });
-              }
-            });
+                });
+              })
+              .catch(err => {
+                reject({
+                  reason: "Wrong token passed",
+                  code: 404,
+                  further: err
+                });
+              });
+            //   }
+            // });
           });
         } else {
           reject({

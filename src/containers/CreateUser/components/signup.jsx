@@ -17,6 +17,29 @@ export const Signup = ({
     { value: "projectCreator", label: "Project Creator" },
     { value: "paymentCreator", label: "payment Creator" }
   ];
+  let errorText = '';
+  const getError = error => {
+    if (error) {
+      const { status } = error;
+      switch (status) {
+        case status <= 400:
+          return "";
+        case status === 422:
+          return "Sorry This account already exists can not recreate it";
+        case status > 400 && status < 500 && status != 422:
+          return "Sorry the information you entered is incomplete";
+        case status >= 500:
+          return "There was a server error please contact your site adminstrator";
+        default:
+          return "Sorry This account already exists can not recreate it";
+      }
+    } else {
+      return "";
+    }
+  };
+  if (error) { 
+   errorText = getError(error);
+  }
   return (
     <React.Fragment>
       <form ref={form} onSubmit={signup}>
@@ -73,7 +96,7 @@ export const Signup = ({
               Loading ...
           </Button>
           )}
-        {error ? <P>{error}</P> : null}
+        {error ? <P>{errorText}</P> : null}
       </form>
     </React.Fragment>
   );

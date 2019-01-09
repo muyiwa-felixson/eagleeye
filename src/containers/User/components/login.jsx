@@ -1,14 +1,22 @@
 import React from "react";
-import styled, { keyframes, css } from 'styled-components';
-import { darken, lighten, transparentize } from 'polished';
-import { Fade } from 'react-slideshow-image';
-import { Theme } from '../../../components/flex/theme';
-import { Input, Button, P, H2, Layout, Boxed, H4, Space } from "../../../components/flex";
-import Logo from '../../../components/assets/logo.png';
-import Slide1 from '../../../components/assets/slider1.jpg';
-import Slide2 from '../../../components/assets/slider2.jpg';
-import Slide3 from '../../../components/assets/slider3.jpg';
-
+import styled, { keyframes, css } from "styled-components";
+import { darken, lighten, transparentize } from "polished";
+import { Fade } from "react-slideshow-image";
+import { Theme } from "../../../components/flex/theme";
+import {
+  Input,
+  Button,
+  P,
+  H2,
+  Layout,
+  Boxed,
+  H4,
+  Space
+} from "../../../components/flex";
+import Logo from "../../../components/assets/logo.png";
+import Slide1 from "../../../components/assets/slider1.jpg";
+import Slide2 from "../../../components/assets/slider2.jpg";
+import Slide3 from "../../../components/assets/slider3.jpg";
 
 const properties = {
   duration: 5000,
@@ -16,17 +24,26 @@ const properties = {
   infinite: true,
   indicators: false,
   arrows: false
-}
+};
 
 const Slideshow = () => {
   return (
     <Fade {...properties}>
-      <div className="each-slide" style={{ 'backgroundImage': `url(${Slide1})` }}></div>
-      <div className="each-slide" style={{ 'backgroundImage': `url(${Slide2})` }}></div>
-      <div className="each-slide" style={{ 'backgroundImage': `url(${Slide3})` }}></div>
+      <div
+        className="each-slide"
+        style={{ backgroundImage: `url(${Slide1})` }}
+      />
+      <div
+        className="each-slide"
+        style={{ backgroundImage: `url(${Slide2})` }}
+      />
+      <div
+        className="each-slide"
+        style={{ backgroundImage: `url(${Slide3})` }}
+      />
     </Fade>
-  )
-}
+  );
+};
 const moveup = keyframes`
   to {
     bottom: 600px;
@@ -46,9 +63,9 @@ const LoginBox = styled.div`
   min-height: 100vh;
   width: 100%;
   font-size: 12px;
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
 
-  &:after{
+  &:after {
     z-index: -1px;
     background: #000;
     opacity: 0.2;
@@ -58,7 +75,7 @@ const LoginBox = styled.div`
     position: fixed;
     top: -250px;
     left: -250px;
-    content: '';
+    content: "";
     animation: ${moveside} 20s linear alternate both infinite;
   }
 `;
@@ -72,12 +89,12 @@ const DetailBox = styled.div`
   z-index: 1;
   background: ${Theme.Gradient("rgba(0,0,0,0.3)", "rgba(0,0,0,4)")};
 
-  ${H4}{
-    text-shadow: 0 0 5px rgba(255,255,255,0.2);
+  ${H4} {
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
     opacity: 0.9;
   }
-  
-  &:before{
+
+  &:before {
     z-index: -1px;
     background: #222;
     opacity: 0.5;
@@ -87,28 +104,27 @@ const DetailBox = styled.div`
     position: absolute;
     bottom: 0px;
     right: -100px;
-    content: '';
+    content: "";
     animation: ${moveup} 20s linear alternate both infinite;
   }
 
-  &>div{
+  & > div {
     max-width: 500px;
   }
-  & strong{
+  & strong {
     display: block;
     margin-bottom: 15px;
   }
-  & ol{
-    margin:0;
-    padding:15px 15px;
+  & ol {
+    margin: 0;
+    padding: 15px 15px;
     border-top: 1px solid ${lighten(0.6, Theme.PrimaryFontColor)};
-    color: rgba(255,255,255,0.6);
-    & li{
-
+    color: rgba(255, 255, 255, 0.6);
+    & li {
     }
   }
 
-  & .neco-foot{
+  & .neco-foot {
     position: fixed;
     bottom: 20px;
     width: 100vw;
@@ -125,28 +141,28 @@ const FormBox = styled.div`
   padding: 20px;
   z-index: 10;
 
-  & form{
+  & form {
     width: 100%;
   }
 `;
 
 const SlideGuy = styled.div`
   position: fixed;
-  top:0;
-  left:0;
+  top: 0;
+  left: 0;
   z-index: 0;
   height: 100vh;
   width: 100vw;
-  & .nav{
+  & .nav {
     display: none;
   }
-  & .indicators{
+  & .indicators {
     display: none;
   }
-  & .react-slideshow-container{
+  & .react-slideshow-container {
     height: 100vh;
   }
-  & .each-slide{
+  & .each-slide {
     height: 100vh;
     width: 100vw;
     background-size: cover;
@@ -154,8 +170,28 @@ const SlideGuy = styled.div`
   }
 `;
 
-
+const getError = error => {
+  if (error) {
+    const { status } = error;
+    console.log('status is here ', status);
+    switch (status) {
+      case status <= 400:
+        return "";
+      case status == 404:
+        return "Sorry we do not recognize the Useranme or password entered ";
+      case status > 400 && status < 500 && status != 404:
+        return "Sorry the information you entered is incomplete";
+      case status >= 500:
+        return "There was a server error please contact your site adminstrator";
+      default:
+        return "Sorry we do not recognize the Useranme or password entered ";
+    }
+  } else {
+    return "";
+  }
+};
 export const Login = ({ login, error, updateInfo, usersPending, submit }) => {
+  const errorText = getError(error);
   const form = React.createRef();
   return (
     <React.Fragment>
@@ -163,22 +199,28 @@ export const Login = ({ login, error, updateInfo, usersPending, submit }) => {
         <LoginBox>
           <DetailBox>
             <div>
-              <H4 size="large" color="#fff">Project Performance Monitoring and Delivery System</H4>
+              <H4 size="large" color="#fff">
+                Project Performance Monitoring and Delivery System
+              </H4>
               <Space height="20" />
               <P color="rgba(255,255,255,0.6)">
-                Centralized project and contractor information tool for continous project performance tracking, allowing to analyze results and guide management to appropraitely pay contractors based on real time performance and to help guide in the development improvement plans.
+                Centralized project and contractor information tool for
+                continous project performance tracking, allowing to analyze
+                results and guide management to appropraitely pay contractors
+                based on real time performance and to help guide in the
+                development improvement plans.
               </P>
-
-
             </div>
 
-            <div className="neco-foot">&copy; 2019 Federal Ministry of Agriculture and Rural Development. All Rights Reserved.</div>
+            <div className="neco-foot">
+              &copy; 2019 Federal Ministry of Agriculture and Rural Development.
+              All Rights Reserved.
+            </div>
           </DetailBox>
           <SlideGuy>
             <Slideshow />
           </SlideGuy>
           <FormBox>
-
             <form ref={form} onSubmit={login}>
               <img src={Logo} style={{ height: "80px" }} />
               <H4 className="mbottom">Log in</H4>
@@ -203,14 +245,14 @@ export const Login = ({ login, error, updateInfo, usersPending, submit }) => {
                 <Button onClick={() => submit(form)} className="pull-left">
                   {" "}
                   Submit
-          </Button>
+                </Button>
               ) : (
-                  <Button className="pull-left" progress={true}>
-                    {" "}
-                    Loading ...
-          </Button>
-                )}
-              {error ? <P>{error}</P> : null}
+                <Button className="pull-left" progress={true}>
+                  {" "}
+                  Loading ...
+                </Button>
+              )}
+              {error ? <P>{errorText}</P> : null}
             </form>
           </FormBox>
         </LoginBox>

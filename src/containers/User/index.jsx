@@ -107,14 +107,14 @@ class Auth extends React.Component {
     }
   };
   render() {
-    const { usersPending } = this.props;
+    const { usersPending, usersError } = this.props;
     const { error } = this.state;
     return (
       <div className="auth-body">
         <div className="auth-box">
           <Login
             login={this.login}
-            error={error.message}
+            error={usersError}
             updateInfo={this.updateInfo}
             usersPending={usersPending}
             submit={this.submit}

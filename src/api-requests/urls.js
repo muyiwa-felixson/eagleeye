@@ -12,5 +12,7 @@ export const urls = {
   signin: `${baseurl}/auth/signin`,
   signup: `${baseurl}/auth/signup`,
   addGroup: `${baseurl}/auth/group`,
+  getUsers: `${baseurl}/item?dbname=user`,
+  deleteUser:  `${baseurl}/item`,
   verify: ({ token }) => `${baseurl}/verify?token=${token}`
 };

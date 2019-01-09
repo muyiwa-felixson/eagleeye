@@ -12,7 +12,14 @@ import { Signup } from "./components/signup";
 import { Relative } from "../../containers/Projects/components";
 import { ProjectAdd } from "../../commons/index";
 import { Loader } from "../../components/flex/Loader/Loader.components";
-import { Boxed, FlexiTable, ModalComponent, PaleButton, Grid, Button } from "../../components/flex";
+import {
+  Boxed,
+  FlexiTable,
+  ModalComponent,
+  PaleButton,
+  Grid,
+  Button
+} from "../../components/flex";
 
 const defaultState = {
   username: "",
@@ -22,6 +29,7 @@ const defaultState = {
   success: false,
   group: "",
   userModal: false,
+  data: [],
   error: {
     message: "",
     status: false
@@ -43,6 +51,7 @@ class CreatUser extends React.Component {
         return getData({ url: urls.verify({ token }) });
       };
       this.props.dispatchActions("USER_INFO", { func: proxyGetInfo });
+      this.getUsers();
     } else {
       this.props.history.push(`/login`);
     }
@@ -50,6 +59,10 @@ class CreatUser extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     const nextProps = this.props;
     const nextState = this.state;
+    console.log(prevProps.deleteUserPending, nextProps.deleteUserPayload)
+    if (prevProps.deleteUserPending && !nextProps.deleteUserPending || prevProps.deleteUserPending && nextProps.deleteUserError) {
+      this.getUsers();
+    }
     if (prevProps.userInfoPending && nextProps.userInfoPayload) {
       const { permissionList } = nextProps.userInfoPayload;
       this.checkPermissions(permissionList);
@@ -58,17 +71,41 @@ class CreatUser extends React.Component {
       this.setPendingState();
     }
     if (!prevProps.signupPayload && nextProps.signupPayload) {
-      this.props.history.push(`/projects`);
+      this.getUsers();
     }
   }
-
+  getUsers = () => {
+    const proxyGetUsers = () => {
+      return getData({ url: urls.getUsers });
+    };
+    this.props.dispatchActions("GET_USERS", { func: proxyGetUsers });
+  };
   checkPermissions = permissionList => {
     const defaultPagePermission = "Can create users";
     if (permissionList.findIndex(perm => perm === defaultPagePermission) < 0) {
       this.props.history.push(`/login`);
     }
   };
-
+  deleteUser = (id, rev) => {
+    const { cookies } = this.props;
+    if (cookies) {
+      const proxyDelete = () => {
+        const token = cookies.get("token");
+        const data = {
+          id,
+          dbname: "user",
+          token,
+          rev,
+          intent: "intiatePayment"
+        };
+        getData({ url: urls.deleteUser, inputData: data, context: "DELETE" });
+      };
+      this.props.dispatchActions("DELETE_USER", { func: proxyDelete });
+      this.setState({data: []}, ()=> { 
+        this.getUsers();
+      });
+    }
+  };
   setError = () => {
     const { usersError } = this.props;
     const { reason } = usersError;
@@ -86,9 +123,10 @@ class CreatUser extends React.Component {
     });
   };
   submit = ref => {
-    if (ref && ref.current) {
-      ref.current.dispatchEvent(new Event("submit"));
-    }
+    // if (ref && ref.current) {
+    //   ref.current.dispatchEvent(new Event("submit"));
+    // }
+    this.signup();
   };
   updateInfo = (e, name) => {
     let target;
@@ -106,10 +144,7 @@ class CreatUser extends React.Component {
     });
   };
   signup = e => {
-    e.preventDefault();
-    // PLEASE NOTE I ADDED THIS PART TO CLOSE THE MODAL ON SAVE //
-    this.closeUserModal();
-    // PLEASE NOTE I ADDED THIS PART TO CLOSE THE MODAL ON SAVE //
+    // e.preventDefault();
     const {
       firstname,
       lastname,
@@ -147,37 +182,70 @@ class CreatUser extends React.Component {
   closeUserModal = () => {
     this.setState({
       userModal: false
-    })
-  }
+    });
+  };
 
-  columns = [{
-    title: 'First Name', dataIndex: 'firstname', key: 'firstname',
-  }, {
-    title: 'Last Name', dataIndex: 'lastname', key: 'lastname',
-  }, {
-    title: 'Email', dataIndex: 'email', key: 'email',
-  }, {
-    title: 'User Group', dataIndex: 'usergroup', key: 'usergroup', width: 200
-  },
-  {
-    title: 'Actions', dataIndex: '', key: 'operations', render: () => <PaleButton small>Delete</PaleButton>, width: 100
-  },];
-
-
-  data = [
-    { firstname: 'Jack', lastname: 'Reacher', email: 'jack@reacher.com', usergroup: 'Super Admin' },
-    { firstname: 'Peter', lastname: 'Parker', email: 'peter@spidey.com', usergroup: 'Super Admin' },
-    { firstname: 'Clark', lastname: 'Kent', email: 'kent@dailyplanet.com', usergroup: 'Super Admin' },
-    { firstname: 'Bruce', lastname: 'Wayne', email: 'bruce@darkknight.com', usergroup: 'Super Admin' },
-    { firstname: 'Barry', lastname: 'Allen', email: 'allen@csi.com', usergroup: 'Super Admin' },
-    { firstname: 'Jack', lastname: 'Ryan', email: 'jack@ryan.com', usergroup: 'Admin' }
+  columns = [
+    {
+      title: "First Name",
+      dataIndex: "firstname",
+      key: "firstname"
+    },
+    {
+      title: "Last Name",
+      dataIndex: "lastname",
+      key: "lastname"
+    },
+    {
+      title: "Email",
+      dataIndex: "username",
+      key: "email"
+    },
+    {
+      title: "User Group",
+      dataIndex: "group",
+      key: "usergroup",
+      width: 200
+    },
+    {
+      title: "Actions",
+      dataIndex: "",
+      key: "operations",
+      render: i => {
+        const { _id, _rev, group } = i;
+        if (group !== "superuser") {
+          return (
+            <PaleButton small onClick={() => this.deleteUser(_id, _rev)}>
+              Delete
+            </PaleButton>
+          );
+        } else {
+          return "";
+        }
+      },
+      width: 100
+    }
   ];
-
+  constructUsers = () => {
+    const { getUsersPayload } = this.props;
+    if (getUsersPayload) {
+      const data = getUsersPayload.map(user => user.doc);
+      return data;
+    } else {
+      return [];
+    }
+  };
 
   render() {
-    const { signupPending, userInfoPending } = this.props;
-    const { error } = this.state;
-    if (userInfoPending) {
+    const {
+      signupPending,
+      userInfoPending,
+      getUsersPending,
+      signupError,
+      deleteUserPending
+    } = this.props;
+    const { error, data } = this.state;
+    if (userInfoPending || getUsersPending || deleteUserPending ) {
       return <Loader />;
     } else {
       return (
@@ -187,13 +255,11 @@ class CreatUser extends React.Component {
             <Boxed margin="0 auto" pad="120px 30px 30px 30px">
               <Grid default="auto 150px">
                 <div />
-                <Button onClick={() => this.setState({ userModal: true })}>Add User</Button>
+                <Button onClick={() => this.setState({ userModal: true })}>
+                  Add User
+                </Button>
               </Grid>
-              <FlexiTable
-                columns={this.columns}
-                data={this.data}
-              >
-              </FlexiTable>
+              <FlexiTable columns={this.columns} data={this.constructUsers()} />
             </Boxed>
           </div>
           <ModalComponent
@@ -205,26 +271,31 @@ class CreatUser extends React.Component {
           >
             <Signup
               signup={this.signup}
-              error={error.message}
+              error={signupError}
               updateInfo={this.updateInfo}
               signupPending={signupPending}
               submit={this.submit}
             />
           </ModalComponent>
-
         </Relative>
       );
     }
   }
 }
 
-const mapStateToProps = ({ userInfo, signup }) => ({
+const mapStateToProps = ({ userInfo, signup, getUsers, deleteUser }) => ({
   userInfoPending: userInfo.pending,
   userInfoError: userInfo.error,
   userInfoPayload: userInfo.payload,
   signupPending: signup.pending,
   signupPayload: signup.payload,
-  signupError: signup.error
+  signupError: signup.error,
+  getUsersPending: getUsers.pending,
+  getUsersPayload: getUsers.payload,
+  getUsersError: getUsers.error,
+  deleteUserPending: deleteUser.pending,
+  deleteUserError: deleteUser.error,
+  deleteUserPayload: deleteUser.payload
 });
 const mapDispatchToProps = dispatch =>
   bindActionCreators({ dispatchActions }, dispatch);
