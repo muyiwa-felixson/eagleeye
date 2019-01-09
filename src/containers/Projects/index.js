@@ -128,7 +128,7 @@ class ProjectList extends Component {
       const contractors = getContractorsPayload.map(contractor => {
         return {
           label: contractor.doc.companyName,
-          value: contractor.doc._id || contractor.id
+          value:  contractor.doc.companyName
         };
       });
       console.log(contractors, ' ===contractors');
