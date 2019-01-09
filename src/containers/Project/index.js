@@ -48,6 +48,7 @@ const defaultState = {
   totalPayable: 0,
   image: [],
   displayImages: [],
+  cotractors: [],
   submitButtonLoading: false,
   copleted: 0,
   approvingPost: false,
@@ -86,6 +87,12 @@ class Project extends Component {
       return getData({ url: urls.getProject({ id, rev }) });
     };
     this.props.dispatchActions("LOAD_PROJECT", { func: proxyLoadProject });
+    const proxygetContractors = () => {
+      return getData({ url: urls.getContractors });
+    };
+    this.props.dispatchActions("GET_CONTRACTORS", {
+      func: proxygetContractors
+    });
   }
   componentDidUpdate(prevProps, prevState) {
     const nextProps = this.props;
@@ -113,7 +120,22 @@ class Project extends Component {
     if (prevState.reportModal != nextState.reportModal) {
       this.resetImage();
     }
+    if ( prevProps.getContractorsPending && nextProps.getContractorsPayload) { 
+      this.setContractors();
+    }
     //
+  }
+  setContractors = () => { 
+    const { getContractorsPayload = [] } = this.props;
+    if(getContractorsPayload) { 
+      const contractors = getContractorsPayload.map((contractor)=> { 
+          return { 
+            name: contractor.doc.companyName,
+            id: contractor.doc._id || contractor.id
+          }
+      })
+      this.setState({contractors})
+    }
   }
   checkInfo = () => {
     const { userInfoPayload, userInfoError, history } = this.props;
@@ -965,7 +987,8 @@ const mapStateToProps = ({
   postCompletionStat,
   approvePost,
   declinePost,
-  userInfo
+  userInfo,
+  getContractors
 }) => ({
   loadProjectPending: loadProject.pending,
   loadProjectError: loadProject.error,
@@ -981,7 +1004,10 @@ const mapStateToProps = ({
   declinePostError: declinePost.error,
   userInfoPending: userInfo.pending,
   userInfoError: userInfo.error,
-  userInfoPayload: userInfo.payload
+  userInfoPayload: userInfo.payload,
+  getContractorsPending: getContractors.pending,
+  getContractorsPayload: getContractors.payload,
+  getContractorsError: getContractors.error
 });
 const mapDispatchToProps = dispatch =>
   bindActionCreators({ dispatchActions }, dispatch);

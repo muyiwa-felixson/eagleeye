@@ -85,7 +85,7 @@ const routes = app => {
 
   // POST
   app.post(`/${appName}/api/item`, (req, res) => {
-    const { doc, isSafe, dbname, token, intent } = req.body;
+    let { doc, isSafe, dbname, token, intent } = req.body;
     getPermissions(token).then(permissionList => {
       if (intent === "createProject") {
         if (!checkPerm(permissionList, "Can create projects")) {
