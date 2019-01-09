@@ -23,7 +23,7 @@ export const ProjectAdd = props => {
     {
       to: "/add/contractor",
       permission: canInitiatePayment,
-      label: "Contaractors"
+      label: "Contractors"
     },
     {
       to: "/signup",
@@ -62,6 +62,7 @@ export const ProjectAdd = props => {
         <div>{props.projects && <Input type="search" />}</div>
         <div>
           {
+            props.projects &&
             <Button iconLeft onClick={props.clickAction}>
               <i className="icon-folder" />
               New Project
