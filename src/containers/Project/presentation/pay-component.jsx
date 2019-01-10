@@ -32,6 +32,7 @@ import {
 } from "../../../components/flex";
 
 export const PayComponent = props => {
+  const { printPage, paymentBody } = props;
     return (
       <TimeBox type={props.type}>
         <TimeDate>
@@ -56,6 +57,11 @@ export const PayComponent = props => {
             </Grid>
             <Label>Comment</Label>
             <p>{props.comment}</p>
+            <Button
+              onClick={() => printPage(paymentBody, 'payment')}
+            >
+             Print
+            </Button>
           </TimeDiv>
         </PayContent>
       </TimeBox>

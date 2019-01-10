@@ -12,8 +12,14 @@ import Logo from "../components/assets/logo.png";
 // Local importa
 // N/A
 export const ProjectAdd = props => {
-  const { canCreateReports, canInitiatePayment, canEditReports } = props;
-
+  const {
+    canCreateReports,
+    canInitiatePayment,
+    canEditReports,
+    fromPage
+  } = props;
+  const PROJECT = "project";
+  const PROJECTS = "projects";
   const nav = [
     {
       to: "/projects",
@@ -59,14 +65,18 @@ export const ProjectAdd = props => {
           </ul>
         </PopMenu>
         <div />
-        <div>{props.projects && <Input type="search" />}</div>
+        <div>{fromPage === PROJECTS ? <Input type="search" /> : null}</div>
         <div>
-          {
+          {fromPage === PROJECTS || fromPage === PROJECT ? (
             <Button iconLeft onClick={props.clickAction}>
               <i className="icon-folder" />
-              New Project
+              {fromPage === PROJECTS
+                ? "New Project"
+                : fromPage === PROJECT
+                ? " Edit Project"
+                : null}
             </Button>
-          }
+          ) : null}
         </div>
         <div>
           <i className="alert icon-bell" />

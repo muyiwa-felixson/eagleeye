@@ -29,6 +29,7 @@ export const TimeComponent = ({
   declinePost,
   previewer,
   canCreateReports,
+  printPage,
   canEditReports,
   editReport,
   reportBody
@@ -51,6 +52,12 @@ export const TimeComponent = ({
               color={Theme.PrimaryRed}
             >
               Decline
+            </Button>
+            <Button
+              onClick={() => printPage(reportBody, 'report')}
+              color={Theme.PrimaryRed}
+            >
+              Print
             </Button>
           </div>
         )}

@@ -70,9 +70,7 @@ const defaultState = {
   locations: [],
   contractors: [],
   editingProject: null,
-  projectReporteItems: {
-
-  }
+  projectReporteItems: {}
 };
 class ProjectList extends Component {
   constructor() {
@@ -106,9 +104,9 @@ class ProjectList extends Component {
       func: proxygetContractors
     });
   }
-  editProject = doc => {
-    this.setState({ editingProject: doc, projectModal: true });
-  };
+  // editProject = doc => {
+  //   this.setState({ editingProject: doc, projectModal: true });
+  // };
   componentDidUpdate(prevProps, prevState) {
     const nextProps = this.props;
     const nextState = this.state;
@@ -184,11 +182,9 @@ class ProjectList extends Component {
         [field]: formElements[field].value
       };
     });
-    if (!editingProject) {
-      obj = { ...obj, dateOfAward, completed: 0, paid: 0, locations };
-    } else {
-      obj = { ...obj, locations: [...obj.loctions, locations] };
-    }
+
+    obj = { ...obj, dateOfAward, completed: 0, paid: 0, locations };
+
     this.setState(
       () => {
         return {
@@ -378,7 +374,7 @@ class ProjectList extends Component {
     try {
       target = e.target;
       value = target.value;
-      console.log(e)
+      console.log(e);
     } catch (error) {
       value = e.value;
     }
@@ -388,7 +384,6 @@ class ProjectList extends Component {
       });
     }
   };
-
 
   addLocations = locationObject => {
     const { locations } = this.state;
@@ -449,6 +444,7 @@ class ProjectList extends Component {
     return (
       <Relative>
         <ProjectAdd
+          fromPage={"projects"}
           canInitiatePayment={canInitiatePayment}
           canCreateReports={canCreateReports}
           canEditReports={canEditReports}
@@ -533,9 +529,6 @@ class ProjectList extends Component {
                           paid={this.getPercentCovered(id, "payments")}
                           layout={this.state.viewlayout}
                         />
-                        <button onClick={() => this.editProject(doc)}>
-                          Edit
-                        </button>
                       </React.Fragment>
                     );
                   })}
@@ -581,7 +574,6 @@ class ProjectList extends Component {
                   label="Project"
                   forminput
                   name="name"
-                  defaultValue={editingProject ? editingProject.name : ""}
                 />
 
                 <Input
@@ -590,7 +582,6 @@ class ProjectList extends Component {
                   label="File Number"
                   forminput
                   name="fileNumber"
-                  defaultValue={editingProject ? editingProject.fileNumber : ""}
                 />
               </Grid>
               <p />
@@ -602,14 +593,6 @@ class ProjectList extends Component {
                   label="Project Nature"
                   name="nature"
                   options={getOptions(natureOfProject)}
-                  defaultValue={
-                    editingProject
-                      ? {
-                          value: editingProject.nature,
-                          label: editingProject.nature
-                        }
-                      : -1
-                  }
                   required
                   forminput
                 />
@@ -620,14 +603,6 @@ class ProjectList extends Component {
                   forminput
                   name="funding"
                   options={getOptions(sourceOfFunding)}
-                 value={
-                    editingProject
-                      ? {
-                          value: editingProject.funding,
-                          label: editingProject.funding
-                        }
-                      : -1
-                  }
                 />
 
                 <SimpleSelect
@@ -637,14 +612,6 @@ class ProjectList extends Component {
                   forminput
                   name="type"
                   options={getOptions(projectTypes)}
-                  value={
-                    editingProject
-                      ? {
-                          value: editingProject.type,
-                          label: editingProject.type
-                        }
-                      : -1
-                  }
                 />
 
                 <Input
@@ -654,7 +621,6 @@ class ProjectList extends Component {
                   required
                   forminput
                   name="unit"
-                  value={editingProject ? editingProject.unit : ""}
                 />
 
                 <Input
@@ -663,7 +629,6 @@ class ProjectList extends Component {
                   label="Project Cost"
                   forminput
                   name="cost"
-                  value={editingProject ? editingProject.cost : ""}
                 />
 
                 {/* <Input
@@ -679,12 +644,8 @@ class ProjectList extends Component {
                     <Label>Date of Award</Label>
                     <DatePicker
                       name="dateOfAward"
-                      selected={
-                        editingProject
-                          ? editingProject.dateOfAward
-                          : this.state.dateOfAward || new Date()
-                      }
                       onChange={this.handleDateChange}
+                      selected={this.state.dateOfAward || new Date()}
                     />
                   </InputWrapper>
                 </div>
@@ -696,14 +657,6 @@ class ProjectList extends Component {
                   forminput
                   name="contractor"
                   options={this.state.contractors}
-                  value={
-                    editingProject
-                      ? {
-                          value: editingProject.contractor,
-                          label: editingProject.contractor
-                        }
-                      : -1
-                  }
                 />
                 <Grid
                   default="1fr 2fr"
@@ -718,14 +671,6 @@ class ProjectList extends Component {
                     required
                     forminput
                     name="duration"
-                    value={
-                      editingProject
-                        ? {
-                            value: editingProject.duration,
-                            label: editingProject.duration
-                          }
-                        : -1
-                    }
                   />
                   <SimpleSelect
                     options={[
@@ -736,14 +681,6 @@ class ProjectList extends Component {
                     ]}
                     type="select"
                     label="Duration Type"
-                    value={
-                      editingProject
-                        ? {
-                            value: editingProject.durationType,
-                            label: editingProject.durationType
-                          }
-                        : -1
-                    }
                     name="durationType"
                     required
                     forminput

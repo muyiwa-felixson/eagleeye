@@ -11,6 +11,8 @@ import { TopSection, LowerSection, Previewer } from "./components";
 import { withCookies, Cookies } from "react-cookie";
 import { LineBar } from "../Projects/components";
 import axios from "axios";
+import { projectFields } from "../../config/form-fields";
+import { EditProject } from "./presentation/edit-project";
 import {
   Button,
   Grid,
@@ -32,6 +34,7 @@ import { getData } from "../../api-requests/index";
 import { bindActionCreators } from "redux";
 import { TimelineList } from "./presentation/timeline";
 import { guid } from "../../utils/utils";
+import { PrintPage } from "../Print/index";
 
 const formatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -61,7 +64,21 @@ const defaultState = {
   canCreateReports: false,
   canInitiatePayment: false,
   canEditReports: false,
-  editingReport: null
+  editingReport: null,
+  projectModal: false,
+  editingProject: null,
+  submitButtonLoading: false,
+  locations: [],
+  postData: {},
+  LGA: "",
+  STATE: "",
+  TOWN: "",
+  contractors: [],
+  locationsEdit: [],
+  printModal: false,
+  data: null,
+  fromComponent: "",
+  printing: false
 };
 
 class Project extends Component {
@@ -120,23 +137,33 @@ class Project extends Component {
     if (prevState.reportModal != nextState.reportModal) {
       this.resetImage();
     }
-    if ( prevProps.getContractorsPending && nextProps.getContractorsPayload) { 
+    if (prevProps.getContractorsPending && nextProps.getContractorsPayload) {
       this.setContractors();
     }
-    //
-  }
-  setContractors = () => { 
-    const { getContractorsPayload = [] } = this.props;
-    if(getContractorsPayload) { 
-      const contractors = getContractorsPayload.map((contractor)=> { 
-          return { 
-            name: contractor.doc.companyName,
-            id: contractor.doc._id || contractor.id
-          }
-      })
-      this.setState({contractors})
+    if (prevState.submitButtonLoading && !nextState.submitButtonLoading) {
+      this.resetPostData();
     }
   }
+  toggleProjectModal = () => {
+    const { projectModal } = this.state;
+    this.setState(() => {
+      return {
+        projectModal: !projectModal
+      };
+    });
+  };
+  setContractors = () => {
+    const { getContractorsPayload = [] } = this.props;
+    if (getContractorsPayload) {
+      const contractors = getContractorsPayload.map(contractor => {
+        return {
+          name: contractor.doc.companyName,
+          id: contractor.doc._id || contractor.id
+        };
+      });
+      this.setState({ contractors });
+    }
+  };
   checkInfo = () => {
     const { userInfoPayload, userInfoError, history } = this.props;
     if (!userInfoPayload || userInfoError) {
@@ -178,9 +205,155 @@ class Project extends Component {
     this.setState({
       mergedList: sorted,
       sortedReports,
-      sortedPayments
+      sortedPayments,
+      editingProject: this.props.loadProjectPayload,
+      locationsEdit: this.props.loadProjectPayload.locations || []
     });
   };
+
+  submitProjectEdits = ev => {
+    ev.preventDefault();
+    const {
+      submitButtonLoading,
+      dateOfAward,
+      locationsEdit,
+      editingProject
+    } = this.state;
+    const formElements = ev.target.elements;
+    let obj = {};
+    projectFields.map(field => {
+      obj = {
+        ...obj,
+        [field]: formElements[field].value
+      };
+    });
+
+    obj = {
+      ...editingProject,
+      ...obj,
+      locations: locationsEdit
+    };
+
+    this.setState(
+      () => {
+        return {
+          submitButtonLoading: true
+        };
+      },
+      () => {
+        if (!editingProject) {
+          getData({
+            url: urls.postProject,
+            inputData: {
+              doc: obj,
+              dbname: "project",
+              token: this.props.userInfoPayload.token,
+              intent: "createProject"
+            },
+            context: "POST"
+          })
+            .then(data => {
+              this.setState(() => {
+                this.form.reset();
+                return {
+                  postData: "loading",
+                  submitButtonLoading: false,
+                  projectModal: false,
+                  editingProject: null
+                };
+              });
+            })
+            .catch(err => {
+              this.setState(() => {
+                return {
+                  postData: {},
+                  submitButtonLoading: false,
+                  projectModal: false,
+                  editingProject: null
+                };
+              });
+            });
+        } else {
+          getData({
+            url: urls.postProject,
+            inputData: {
+              doc: obj,
+              dbname: "project",
+              id: this.state.editingProject._id,
+              rev: this.state.editingProject._rev,
+              _id: this.state.editingProject._id,
+              _rev: this.state.editingProject._rev,
+              token: this.props.userInfoPayload.token,
+              intent: "createProject"
+            },
+            context: "PATCH"
+          })
+            .then(data => {
+              this.setState(() => {
+                return {
+                  postData: "loading",
+                  submitButtonLoading: false,
+                  projectModal: false,
+                  editingProject: null
+                };
+              });
+            })
+            .catch(err => {
+              this.setState(() => {
+                this.form.reset();
+                return {
+                  postData: {},
+                  submitButtonLoading: false,
+                  projectModal: false,
+                  editingProject: null
+                };
+              });
+            });
+          // editing project
+        }
+      }
+    );
+  };
+  togglePrintModal = () => {
+    const { printModal } = this.state;
+    this.setState(() => {
+      return {
+        printModal: !printModal
+      };
+    });
+  };
+  printPage = (data, fromComponent) => {
+    this.setState(() => {
+      return {
+        data,
+        fromComponent,
+        printModal: true,
+        printing: false
+      };
+    });
+  };
+  /**
+   * Perform print here
+   */
+  printAction = () => {
+    this.setState(
+      () => {
+        return {
+          printing: true
+        };
+      },
+      () => {
+        // Here is where ALL THE PRINT ACTIONS SHOULD GO 
+        // Perform your print action here and when done set state back to false
+        this.setState(() => {
+          return {
+            printing: false
+          };
+        });
+      }
+    );
+  };
+
   percentages = (stat = "payment", approved = false) => {
     let ceilVal = 100;
     let percent = 0;
@@ -372,6 +545,58 @@ class Project extends Component {
           totalPayable: payable
         };
       });
+    }
+  };
+  submitEdits = form => {
+    if (form) {
+      form.dispatchEvent(new Event("submit"));
+    }
+  };
+
+  handleLocChange = (e, name) => {
+    let target;
+    let value;
+    try {
+      target = e.target;
+      value = target.value;
+    } catch (error) {
+      value = e.value;
+    }
+    if (value) {
+      this.setState({
+        [name]: value
+      });
+    }
+  };
+  deleteLocations = locationObject => {
+    let { locationsEdit } = this.state;
+    locationsEdit = locationsEdit.filter(location => {
+      return (
+        location.STATE !== locationObject.STATE &&
+        location.LGA !== locationObject.LGA &&
+        location.TOWN !== locationObject.TOWN
+      );
+    });
+    this.setState(() => {
+      return {
+        locationsEdit
+      };
+    });
+  };
+  addLocations = locationObject => {
+    const { locationsEdit } = this.state;
+    const newLocations = [...locationsEdit, locationObject];
+    this.setState(() => {
+      return {
+        locationsEdit: newLocations,
+        TOWN: ""
+      };
+    });
+  };
+  submitState = () => {
+    const { LGA, STATE, TOWN } = this.state;
+    if (LGA && STATE && TOWN) {
+      this.addLocations({ TOWN, LGA, STATE });
     }
   };
   submitForm = ev => {
@@ -706,6 +931,31 @@ class Project extends Component {
       }
     });
   };
+  getState = () => {
+    let filters = Object.assign(require("../../utils/levels").locations);
+    let locationOptions = [];
+    filters.map(elem =>
+      locationOptions.push({
+        value: elem.state.name,
+        label: elem.state.name,
+        data: elem.state.locals
+      })
+    );
+    return locationOptions;
+  };
+  getLGA = selectedState => {
+    const locations = require("../../utils/levels").locations;
+    if (selectedState) {
+      const stateValue = [...locations].filter(
+        item => item.state.name === selectedState
+      )[0];
+      console.log(stateValue, "statevalue");
+      let locationOptions = stateValue.state.locals.map(elem => {
+        return { value: elem.name, label: elem.name };
+      });
+      return locationOptions;
+    }
+  };
   render() {
     const {
       loadProjectPayload = {},
@@ -744,6 +994,9 @@ class Project extends Component {
     const locations = loadProjectPayload
       ? loadProjectPayload.locations || []
       : [];
+    let { STATE, LGA, TOWN, editingProject } = this.state;
+    let locButtonDisabled = true;
+    if (STATE !== "" && LGA !== "" && TOWN !== "") locButtonDisabled = false;
     return (
       <div>
         {userInfoPending || (loadProjectPending && !loadProjectPayload) ? (
@@ -751,6 +1004,8 @@ class Project extends Component {
         ) : (
           <React.Fragment>
             <ProjectAdd
+              fromPage={"project"}
+              clickAction={this.toggleProjectModal}
               canInitiatePayment={canInitiatePayment}
               canCreateReports={canCreateReports}
               canEditReports={canEditReports}
@@ -841,6 +1096,14 @@ class Project extends Component {
                         Make New Payment
                       </Button>
                     ) : null}
+                    <Button
+                      onClick={() =>
+                        this.printPage(loadProjectPayload, "project")
+                      }
+                      color={Theme.PrimaryRed}
+                    >
+                      Print
+                    </Button>
                   </Aligner>
                 </Grid>
               </Panel>
@@ -913,6 +1176,7 @@ class Project extends Component {
               media={media}
               approvePostPending={approvePostPending}
               previewer={this.previewMedia}
+              printPage={this.printPage}
             />
             {reportModal ? (
               <ProjectReport
@@ -956,6 +1220,38 @@ class Project extends Component {
                 cost={cost}
                 submitFormPay={this.submitFormPay}
                 getFieldsProps={this.props.getFieldProps}
+              />
+            ) : null}
+            {this.state.projectModal ? (
+              <EditProject
+                projectModal={this.state.projectModal}
+                toggleProjectModal={this.toggleProjectModal}
+                submitProjectEdits={this.submitProjectEdits}
+                submitEdits={this.submitEdits}
+                editingProject={this.state.editingProject}
+                handleLocChange={this.handleLocChange}
+                declinePostError={this.deleteLocations}
+                deleteLocations={this.deleteLocations}
+                submitState={this.submitState}
+                locations={this.state.locationsEdit}
+                getState={this.getState}
+                getLGA={this.getLGA}
+                contractors={this.state.contractors}
+                STATE={this.state.STATE}
+                LGA={this.state.LGA}
+                TOWN={this.state.TOWN}
+                locButtonDisabled={locButtonDisabled}
+              />
+            ) : null}
+
+            {this.state.printModal ? (
+              <PrintPage
+                printModal={this.state.printModal}
+                togglePrintModal={this.togglePrintModal}
+                data={this.state.data}
+                page={this.state.fromComponent}
+                printing={this.state.printing}
+                printAction={this.printAction}
               />
             ) : null}
 
