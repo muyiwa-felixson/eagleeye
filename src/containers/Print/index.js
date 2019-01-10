@@ -30,11 +30,11 @@ export class PrintPage extends Component {
           };
         },
         () => {
-          try {
-            localStorage.removeItem("fromPage");
-          } catch (err) {
-            //
-          }
+        //   try {
+        //     localStorage.removeItem("fromPage");
+        //   } catch (err) {
+        //     //
+        //   }
         }
       );
     } catch (err) {
@@ -42,11 +42,11 @@ export class PrintPage extends Component {
     }
   }
   componentWillUnmount() {
-    try {
-      localStorage.removeItem("fromPage");
-    } catch (err) {
-      //
-    }
+    // try {
+    // //   localStorage.removeItem("fromPage");
+    // } catch (err) {
+    //   //
+    // }
   }
 
   render() {
