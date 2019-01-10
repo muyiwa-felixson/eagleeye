@@ -27,6 +27,7 @@ export const ProjectReport = props => {
     displayImages,
     deleteImage,
     editingReport,
+    formErrors,
     editImageChanged,
     canCreateReports,
     canInitiatePayment
@@ -34,7 +35,7 @@ export const ProjectReport = props => {
   let ref = React.createRef();
   let mediaFile = React.createRef();
   if (editingReport && editingReport.media) {
-   //  editImageChanged(editingReport.media);
+    //  editImageChanged(editingReport.media);
   }
   const openFileSelect = ev => {
     ev.preventDefault();
@@ -188,7 +189,9 @@ export const ProjectReport = props => {
             </div>
           </DragZone>
         </Boxed>
+        {formErrors ? "You need to fill all the required fields " : ""}
       </form>
+
     </ModalComponent>
   );
 };
