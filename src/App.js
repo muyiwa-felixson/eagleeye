@@ -9,13 +9,14 @@ import Project from "./containers/Project";
 import Auth from "./containers/User/index";
 import CreatUser from "./containers/CreateUser/index";
 import { withCookies, Cookies } from "react-cookie";
-import Contractor from './containers/Contractor/index';
+import Contractor from "./containers/Contractor/index";
 import { connect } from "react-redux";
 import { dispatchActions } from "./store/actions/action-config.action";
 import { getData } from "./api-requests/index";
 import { bindActionCreators } from "redux";
 import { urls } from "./api-requests/urls";
 import { withRouter } from "react-router-dom";
+import { PrintPage } from "./containers/Print/index";
 
 class App extends Component {
   constructor(props) {
@@ -50,11 +51,11 @@ class App extends Component {
     }
   }
   checkInfo = () => {
-    console.log('checkInfo called');
+    console.log("checkInfo called");
     const { userInfoPayload, userInfoError, history } = this.props;
     if (userInfoPayload && !userInfoError) {
       const { permissionList } = userInfoPayload;
-      console.log(permissionList)
+      console.log(permissionList);
       const tcanCreateReports = "Can create reports";
       const tcanInitiatePayment = "Can initiate payments";
       const tcanEditReports = "Can edit reports";
@@ -102,6 +103,7 @@ class App extends Component {
                   <Route exact path="/login" component={Auth} />
                   <Route exact path="/signup" component={CreatUser} />
                   <Route exact path="/add/contractor" component={Contractor} />
+                  <Route exact path="/print" component={PrintPage} />
                   <Route
                     exact
                     path="/projects/project/:name/:id"
