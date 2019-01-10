@@ -150,6 +150,13 @@ export const videoFilter = extension => {
 export const getExtension = filename => {
   return filename.split(".").pop();
 };
+export const numberList = () => {
+  let list = [];
+  for (let i = 1; i <= 100; i++) {
+    list.push({ value: i, label: i });
+  }
+  return list;
+};
 
 export {
   projectTypes,

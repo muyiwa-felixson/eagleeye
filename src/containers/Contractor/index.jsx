@@ -311,7 +311,12 @@ class Contractor extends React.Component {
     } else {
       return (
         <Relative>
-          <ProjectAdd />
+          <ProjectAdd
+            fromPage={"contractors"}
+            canInitiatePayment={true}
+            canCreateReports={true}
+            canEditReports={true}
+          />
           <div className="auth-body">
             <Boxed margin="0 auto" pad="120px 30px 30px 30px">
               <Grid default="auto 150px">

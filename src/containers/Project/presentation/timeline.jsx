@@ -15,7 +15,8 @@ export const TimelineList = props => {
     canEditReports,
     canCreateReports,
     canInitiatePayment,
-    editReport
+    editReport,
+    printPage
   } = props;
   return (
     <Panel>
@@ -54,6 +55,7 @@ export const TimelineList = props => {
                   editReport={editReport}
                   day={day}
                   reportId={id}
+                  printPage={printPage}
                   canEditReports={canEditReports}
                   canCreateReports={canCreateReports}
                   canInitiatePayment={canInitiatePayment}
@@ -75,7 +77,9 @@ export const TimelineList = props => {
                   approvedBy={submittedBy}
                   day={day}
                   key={index}
+                  paymentBody={item}
                   month={month}
+                  printPage={printPage}
                   canEditReports={canEditReports}
                   canCreateReports={canCreateReports}
                   canInitiatePayment={canInitiatePayment}
