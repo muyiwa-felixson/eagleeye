@@ -48,6 +48,7 @@ import { dispatchActions } from "../../store/actions/action-config.action";
 import { bindActionCreators } from "redux";
 import { ProjectAdd } from "../../commons/index";
 import { projectFields } from "../../config/form-fields";
+import PlaceHolder from "../../components/assets/placeholders";
 
 const numberList = () => {
   let list = [];
@@ -537,10 +538,7 @@ class ProjectList extends Component {
                 <Loader absolute />
               ) : (
                 <div>
-                  <h2>
-                    {" "}
-                    There are currently no projects reported at the moment
-                  </h2>
+                      <PlaceHolder title="No Projects" content="TThere are currently no projects reported at the moment" />
                 </div>
               )}
             </React.Fragment>

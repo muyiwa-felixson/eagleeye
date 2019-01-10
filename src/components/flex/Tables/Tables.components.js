@@ -41,7 +41,7 @@ const TableWrapper = styled.div`
             }
             & tr{
                 border-bottom: 1px solid ${lighten(0.66, Theme.PrimaryFontColor)};
-                border-left: 0 solid ${lighten(0, Theme.PrimaryColor)};
+                border-left: 3px solid transparent;
                 transition: all 0.1s ease-out;
                 & td:first-child{
                    border-left: none;
@@ -50,7 +50,7 @@ const TableWrapper = styled.div`
                     
                 }
                 &:hover{
-                    border-left: 3px solid ${lighten(0.3, Theme.PrimaryColor)};
+                    border-left: 3px solid ${lighten(0.1, Theme.PrimaryColor)};
                     background-color: ${lighten(0.7, Theme.PrimaryColor)};
                 }
             }

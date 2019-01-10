@@ -6,6 +6,7 @@ import { TimeComponent } from "./time-component";
 import { PayComponent } from "./pay-component";
 import * as moment from "moment";
 import { getMonth } from "../../../utils/utils";
+import PlaceHolder from "../../../components/assets/placeholders";
 export const TimelineList = props => {
   const {
     mergedList,
@@ -21,9 +22,10 @@ export const TimelineList = props => {
   } = props;
   return (
     <Panel>
-      <TimeLine>
-        {mergedList && mergedList.length > 0 ? (
-          mergedList.map((item, index) => {
+      {mergedList && mergedList.length > 0 ? (
+        <TimeLine>
+
+          {mergedList.map((item, index) => {
             const {
               type,
               submittedOn,
@@ -92,12 +94,15 @@ export const TimelineList = props => {
               );
             }
           })
-        ) : (
+          }
+
+        </TimeLine>
+      ) : (
           <div>
-            <h1>There are no reports or payment records to show</h1>
+            <PlaceHolder title="No report" type="locations" content="There are no reports or payment records to show" />
           </div>
         )}
-      </TimeLine>
+
     </Panel>
   );
 };

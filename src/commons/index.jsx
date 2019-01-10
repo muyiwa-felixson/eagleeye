@@ -6,7 +6,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { TopBar, PopMenu } from "./components";
-import { Button, Input } from "../components/flex";
+import { Button, Input, PaleButton } from "../components/flex";
 
 import Logo from "../components/assets/logo.png";
 // Local importa
@@ -68,14 +68,8 @@ export const ProjectAdd = props => {
         <div>{fromPage === PROJECTS ? <Input type="search" /> : null}</div>
         <div>
           {fromPage === PROJECTS || fromPage === PROJECT ? (
-            <Button iconLeft onClick={props.clickAction}>
-              <i className="icon-folder" />
-              {fromPage === PROJECTS
-                ? "New Project"
-                : fromPage === PROJECT
-                ? " Edit Project"
-                : null}
-            </Button>
+            fromPage === PROJECTS ?
+              <Button iconLeft onClick={props.clickAction}><i className="icon-folder" />New Project</Button> : <PaleButton iconLeft onClick={props.clickAction}>Edit Project</PaleButton>
           ) : null}
         </div>
         <div>
