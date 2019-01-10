@@ -34,7 +34,6 @@ import { getData } from "../../api-requests/index";
 import { bindActionCreators } from "redux";
 import { TimelineList } from "./presentation/timeline";
 import { guid } from "../../utils/utils";
-import { PrintPage } from "../Print/index";
 
 const formatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -114,10 +113,11 @@ class Project extends Component {
   componentDidUpdate(prevProps, prevState) {
     const nextProps = this.props;
     const nextState = this.state;
+    console.log(' What is')
     if (!prevState.postData && nextState.postData) {
       this.resetPostData();
     }
-    if (!prevProps.userInfoPayload && nextProps.userInfoPayload) {
+    if (prevProps.userInfoPending && nextProps.userInfoPayload) {
       this.checkInfo();
     }
     if (prevProps.loadProjectPending && nextProps.loadProjectPayload) {
@@ -128,13 +128,13 @@ class Project extends Component {
       const mergedList = [...reports, ...payments];
       this.sortByDate(mergedList, reports, payments);
     }
-    if (nextProps.approvePostPayload && prevProps.approvePostPending) {
+    if (nextProps.approvePostPayload && prevProps.approvePostPending && !prevProps.approvePostPayload) {
       this.resetPostData();
     }
     if (nextProps.declinePostPayload && prevProps.declinePostPending) {
       this.resetPostData();
     }
-    if (prevState.reportModal != nextState.reportModal) {
+    if (prevState.reportModal !== nextState.reportModal) {
       this.resetImage();
     }
     if (prevProps.getContractorsPending && nextProps.getContractorsPayload) {
@@ -314,44 +314,10 @@ class Project extends Component {
       }
     );
   };
-  togglePrintModal = () => {
-    const { printModal } = this.state;
-    this.setState(() => {
-      return {
-        printModal: !printModal
-      };
-    });
-  };
-  printPage = (data, fromComponent) => {
-    this.setState(() => {
-      return {
-        data,
-        fromComponent,
-        printModal: true,
-        printing: false
-      };
-    });
-  };
-  /**
-   * Perform print here
-   */
-  printAction = () => {
-    this.setState(
-      () => {
-        return {
-          printing: true
-        };
-      },
-      () => {
-        // Here is where ALL THE PRINT ACTIONS SHOULD GO 
-        // Perform your print action here and when done set state back to false
-        this.setState(() => {
-          return {
-            printing: false
-          };
-        });
-      }
-    );
+
+  printPage = (subdata, fromComponent, project) => {
+    const printPageReact = window.open("/print", "Print Payment");
+    localStorage.setItem('fromPage', JSON.stringify({ page: fromComponent, data: subdata, project, mergedList: this.state.mergedList }));
   };
 
   percentages = (stat = "payment", approved = false) => {
@@ -405,7 +371,6 @@ class Project extends Component {
     });
   };
   editReport = report => {
-    console.log(report, " here is report ===>");
     this.setState(() => {
       return {
         editingReport: report,
@@ -729,7 +694,7 @@ class Project extends Component {
                 postData: {},
                 submitButtonLoading: false,
                 reportModal: false,
-                editingReport: false
+                editingReport: null
               };
             });
           });
@@ -1096,14 +1061,6 @@ class Project extends Component {
                         Make New Payment
                       </Button>
                     ) : null}
-                    <Button
-                      onClick={() =>
-                        this.printPage(loadProjectPayload, "project")
-                      }
-                      color={Theme.PrimaryRed}
-                    >
-                      Print
-                    </Button>
                   </Aligner>
                 </Grid>
               </Panel>
@@ -1170,6 +1127,7 @@ class Project extends Component {
               declinePost={id => this.declinePost(id)}
               editReport={this.editReport}
               mergedList={mergedList}
+              project={loadProjectPayload}
               canCreateReports={canCreateReports}
               canInitiatePayment={canInitiatePayment}
               canEditReports={canEditReports}
@@ -1244,7 +1202,7 @@ class Project extends Component {
               />
             ) : null}
 
-            {this.state.printModal ? (
+            {/* {this.state.printModal ? (
               <PrintPage
                 printModal={this.state.printModal}
                 togglePrintModal={this.togglePrintModal}
@@ -1253,7 +1211,7 @@ class Project extends Component {
                 printing={this.state.printing}
                 printAction={this.printAction}
               />
-            ) : null}
+            ) : null} */}
 
             <Modal open={this.state.preview} backDropOpacity={0.2}>
               <ModalBody

@@ -16,6 +16,7 @@ export const TimelineList = props => {
     canEditReports,
     canCreateReports,
     canInitiatePayment,
+    project,
     editReport,
     printPage
   } = props;
@@ -57,7 +58,6 @@ export const TimelineList = props => {
                   editReport={editReport}
                   day={day}
                   reportId={id}
-                  printPage={printPage}
                   canEditReports={canEditReports}
                   canCreateReports={canCreateReports}
                   canInitiatePayment={canInitiatePayment}
@@ -80,6 +80,7 @@ export const TimelineList = props => {
                   day={day}
                   key={index}
                   paymentBody={item}
+                  project={project}
                   month={month}
                   printPage={printPage}
                   canEditReports={canEditReports}
