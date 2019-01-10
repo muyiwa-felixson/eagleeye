@@ -329,7 +329,7 @@ class Contractor extends React.Component {
             </Boxed>
           </div>
           <ModalComponent
-            title="Create User"
+            title="Create Contractor"
             subTitle=""
             open={this.state.userModal}
             onClose={this.closeUserModal}
