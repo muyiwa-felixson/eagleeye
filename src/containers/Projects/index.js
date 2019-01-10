@@ -166,7 +166,7 @@ class ProjectList extends Component {
       };
     });
   };
-  componentDidCatch() {}
+  componentDidCatch() { }
 
   submit = ev => {
     ev.preventDefault();
@@ -453,6 +453,7 @@ class ProjectList extends Component {
           canCreateReports={canCreateReports}
           canEditReports={canEditReports}
           clickAction={this.toggleClickAction}
+          projects
         />
         <ListBody>
           <Grid className="filter-lane" default="200px 1fr 1.5fr" tablet="1fr">
@@ -499,57 +500,57 @@ class ProjectList extends Component {
           >
             <React.Fragment>
               {!userInfoPending &&
-              loadProjectsPayload &&
-              loadProjectsPayload.length > 0 ? (
-                <React.Fragment>
-                  {loadProjectsPayload.map((project, index) => {
-                    const { doc, id, value } = project;
-                    let { rev } = value;
-                    if (!rev) rev = doc._rev;
-                    const {
-                      dateOfAward,
-                      fileNumber,
-                      name,
-                      completed,
-                      paid
-                    } = doc;
-                    try {
-                      const splittedDate = dateOfAward.split(" ");
-                    } catch (err) {}
-                    const date = new Date(dateOfAward) || new Date();
-                    const year = date.getFullYear();
-                    const month = date.getMonth();
-                    return (
-                      <React.Fragment>
-                        {loadProjectsPending ? <Loader absolute /> : null}
-                        <ProjectCardComponent
-                          key={index}
-                          year={year}
-                          month={getMonth(month)}
-                          code={fileNumber}
-                          onClick={() => this.navigateToProject(id, rev)}
-                          name={name}
-                          completed={this.getPercentCovered(id, "reports")}
-                          paid={this.getPercentCovered(id, "payments")}
-                          layout={this.state.viewlayout}
-                        />
-                        <button onClick={() => this.editProject(doc)}>
-                          Edit
+                loadProjectsPayload &&
+                loadProjectsPayload.length > 0 ? (
+                  <React.Fragment>
+                    {loadProjectsPayload.map((project, index) => {
+                      const { doc, id, value } = project;
+                      let { rev } = value;
+                      if (!rev) rev = doc._rev;
+                      const {
+                        dateOfAward,
+                        fileNumber,
+                        name,
+                        completed,
+                        paid
+                      } = doc;
+                      try {
+                        const splittedDate = dateOfAward.split(" ");
+                      } catch (err) { }
+                      const date = new Date(dateOfAward) || new Date();
+                      const year = date.getFullYear();
+                      const month = date.getMonth();
+                      return (
+                        <React.Fragment>
+                          {loadProjectsPending ? <Loader absolute /> : null}
+                          <ProjectCardComponent
+                            key={index}
+                            year={year}
+                            month={getMonth(month)}
+                            code={fileNumber}
+                            onClick={() => this.navigateToProject(id, rev)}
+                            name={name}
+                            completed={this.getPercentCovered(id, "reports")}
+                            paid={this.getPercentCovered(id, "payments")}
+                            layout={this.state.viewlayout}
+                          />
+                          <button onClick={() => this.editProject(doc)}>
+                            Edit
                         </button>
-                      </React.Fragment>
-                    );
-                  })}
-                </React.Fragment>
-              ) : loadProjectsPending || userInfoPending ? (
-                <Loader absolute />
-              ) : (
-                <div>
-                  <h2>
-                    {" "}
-                    There are currently no projects reported at the moment
+                        </React.Fragment>
+                      );
+                    })}
+                  </React.Fragment>
+                ) : loadProjectsPending || userInfoPending ? (
+                  <Loader absolute />
+                ) : (
+                    <div>
+                      <h2>
+                        {" "}
+                        There are currently no projects reported at the moment
                   </h2>
-                </div>
-              )}
+                    </div>
+                  )}
             </React.Fragment>
           </Grid>
         </ListBody>
@@ -602,12 +603,12 @@ class ProjectList extends Component {
                   label="Project Nature"
                   name="nature"
                   options={getOptions(natureOfProject)}
-                  defaultValue={
+                  selectedValue={
                     editingProject
                       ? {
-                          value: editingProject.nature,
-                          label: editingProject.nature
-                        }
+                        value: editingProject.nature,
+                        label: editingProject.nature
+                      }
                       : -1
                   }
                   required
@@ -620,12 +621,12 @@ class ProjectList extends Component {
                   forminput
                   name="funding"
                   options={getOptions(sourceOfFunding)}
-                 value={
+                  selectedValue={
                     editingProject
                       ? {
-                          value: editingProject.funding,
-                          label: editingProject.funding
-                        }
+                        value: editingProject.funding,
+                        label: editingProject.funding
+                      }
                       : -1
                   }
                 />
@@ -637,12 +638,12 @@ class ProjectList extends Component {
                   forminput
                   name="type"
                   options={getOptions(projectTypes)}
-                  value={
+                  selectedValue={
                     editingProject
                       ? {
-                          value: editingProject.type,
-                          label: editingProject.type
-                        }
+                        value: editingProject.type,
+                        label: editingProject.type
+                      }
                       : -1
                   }
                 />
@@ -654,7 +655,7 @@ class ProjectList extends Component {
                   required
                   forminput
                   name="unit"
-                  value={editingProject ? editingProject.unit : ""}
+                  defaultValue={editingProject ? editingProject.unit : ""}
                 />
 
                 <Input
@@ -663,7 +664,7 @@ class ProjectList extends Component {
                   label="Project Cost"
                   forminput
                   name="cost"
-                  value={editingProject ? editingProject.cost : ""}
+                  defaultValue={editingProject ? editingProject.cost : ""}
                 />
 
                 {/* <Input
@@ -696,12 +697,12 @@ class ProjectList extends Component {
                   forminput
                   name="contractor"
                   options={this.state.contractors}
-                  value={
+                  selectedValue={
                     editingProject
                       ? {
-                          value: editingProject.contractor,
-                          label: editingProject.contractor
-                        }
+                        value: editingProject.contractor,
+                        label: editingProject.contractor
+                      }
                       : -1
                   }
                 />
@@ -718,12 +719,12 @@ class ProjectList extends Component {
                     required
                     forminput
                     name="duration"
-                    value={
+                    selectedValue={
                       editingProject
                         ? {
-                            value: editingProject.duration,
-                            label: editingProject.duration
-                          }
+                          value: editingProject.duration,
+                          label: editingProject.duration
+                        }
                         : -1
                     }
                   />
@@ -736,12 +737,12 @@ class ProjectList extends Component {
                     ]}
                     type="select"
                     label="Duration Type"
-                    value={
+                    selectedValue={
                       editingProject
                         ? {
-                            value: editingProject.durationType,
-                            label: editingProject.durationType
-                          }
+                          value: editingProject.durationType,
+                          label: editingProject.durationType
+                        }
                         : -1
                     }
                     name="durationType"
