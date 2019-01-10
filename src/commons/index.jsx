@@ -29,7 +29,7 @@ export const ProjectAdd = props => {
     {
       to: "/add/contractor",
       permission: canInitiatePayment,
-      label: "Contaractors"
+      label: "Contractors"
     },
     {
       to: "/signup",
