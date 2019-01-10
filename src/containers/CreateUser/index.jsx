@@ -89,7 +89,6 @@ class CreatUser extends React.Component {
   deleteUser = (id, rev) => {
     const { cookies } = this.props;
     if (cookies) {
-      const proxyDelete = () => {
         const token = cookies.get("token");
         const data = {
           id,
@@ -98,12 +97,11 @@ class CreatUser extends React.Component {
           rev,
           intent: "intiatePayment"
         };
-        getData({ url: urls.deleteUser, inputData: data, context: "DELETE" });
-      };
-      this.props.dispatchActions("DELETE_USER", { func: proxyDelete });
-      this.setState({data: []}, ()=> { 
-        this.getUsers();
-      });
+        getData({ url: urls.deleteUser, inputData: data, context: "DELETE" }).then(()=>{ 
+          this.getUsers();
+        }).catch((err)=> { 
+          this.getUsers();
+        })
     }
   };
   setError = () => {
