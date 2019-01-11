@@ -49,6 +49,7 @@ export const EditProject = ({
 }) => {
   let forme = React.createRef();
   let locForm = React.createRef();
+  console.log(contractors, ' ===========>')
   return (
     <ModalComponent
       title="Project"

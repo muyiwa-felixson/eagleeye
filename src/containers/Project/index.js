@@ -115,7 +115,6 @@ class Project extends Component {
   componentDidUpdate(prevProps, prevState) {
     const nextProps = this.props;
     const nextState = this.state;
-    console.log(" What is");
     if (!prevState.postData && nextState.postData) {
       this.resetPostData();
     }
@@ -180,11 +179,12 @@ class Project extends Component {
     if (getContractorsPayload) {
       const contractors = getContractorsPayload.map(contractor => {
         return {
-          name: contractor.doc.companyName,
-          id: contractor.doc._id || contractor.id
+          label: contractor.doc.companyName,
+          value: contractor.doc._id || contractor.id
         };
       });
-      this.setState({ contractors });
+      this.setState({ contractors },()=> { 
+      });
     }
   };
   checkInfo = () => {
@@ -373,7 +373,7 @@ class Project extends Component {
     }
     ceilVal = 100;
     let list = [];
-    for (let i = percent + 1; i <= ceilVal; i++) {
+    for (let i = parseInt(percent) + 1; i <= ceilVal; i++) {
       list.push({ value: i, label: `${i}%` });
     }
     return list;
