@@ -1250,18 +1250,6 @@ class Project extends Component {
                 locButtonDisabled={locButtonDisabled}
               />
             ) : null}
-
-            {/* {this.state.printModal ? (
-              <PrintPage
-                printModal={this.state.printModal}
-                togglePrintModal={this.togglePrintModal}
-                data={this.state.data}
-                page={this.state.fromComponent}
-                printing={this.state.printing}
-                printAction={this.printAction}
-              />
-            ) : null} */}
-
             <Modal open={this.state.preview} backDropOpacity={0.2}>
               <ModalBody
                 style={{ backgroundColor: "rgba(0,0,0,0)" }}
