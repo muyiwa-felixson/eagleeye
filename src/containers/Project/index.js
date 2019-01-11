@@ -661,7 +661,7 @@ class Project extends Component {
             .then(data => {
               const { image } = this.state;
               const dataF = new FormData();
-              if (image && !this.state.editingReport) {
+              if (image && image.length > 0 && !this.state.editingReport) {
                 let url = "";
                 let m = image;
                 if (m.length && m.length > 1) {
