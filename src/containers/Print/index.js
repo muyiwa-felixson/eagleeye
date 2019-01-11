@@ -178,6 +178,9 @@ export class PrintPage extends Component {
     // project contains the project including all the information on the project and the payments and reports as array
     // Merged list comined both payment and report objects into an array sorted the way they are reported
     if (data && project && mergedList) {
+      const remaining = mergedList.filter((item) => {
+        return (new Date(item.submittedOn) <= new Date(data.submittedOn) && item.category === "reports");
+      })
       return <PrintWindow>
         <img src={Image} />
         <H4>LETTER OF VALIDATION</H4>
@@ -249,7 +252,6 @@ export class PrintPage extends Component {
                     <td>{elem.STATE}</td>
                     <td>{elem.LGA}</td>
                     <td>{elem.TOWN}</td>
-
                   </tr>
                 )
               })
@@ -266,7 +268,7 @@ export class PrintPage extends Component {
           </thead>
           <tbody>
             {
-              project.reports && project.reports.map(elem => {
+              remaining && remaining.map(elem => {
                 const date = new Date(elem.submittedOn);
                 const year = date.getFullYear();
                 const month = getMonth(date.getMonth());
@@ -286,7 +288,6 @@ export class PrintPage extends Component {
 
         <P>The Director of Special Duties have reviewed the Project <strong>"{project.name}"</strong> and Recommend the payment of <strong style={{ fontSize: "16px" }}>{data.percentage}%</strong> of the Project Cost, which amounts to <strong>{data.payableAmount}</strong></P>
         <Dotted>Sign</Dotted>
-
         <Dotted>Date</Dotted>
 
       </PrintWindow>;
