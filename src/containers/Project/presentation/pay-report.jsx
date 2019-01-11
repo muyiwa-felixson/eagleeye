@@ -27,6 +27,7 @@ export const PayReport = props => {
     preSubmitFormPay,
     submitFormPay,
     percentages,
+    formErrors,
     getFieldProps,
     calculatePayable,
     totalPayable,
@@ -108,6 +109,7 @@ export const PayReport = props => {
             forminput
           />
         </Grid>
+        { formErrors ? 'You need to fill all the required fields ': ''}
       </form>
     </ModalComponent>
   );

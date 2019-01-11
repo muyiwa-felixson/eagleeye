@@ -44,6 +44,8 @@ const formatter = new Intl.NumberFormat("en-US", {
 const defaultState = {
   reportModal: false,
   paymentModal: false,
+  payFormErrors: false,
+  reportFormErrors: false,
   projectCost: 34500200,
   expectedCost: 0,
   mergedList: null,
@@ -113,7 +115,7 @@ class Project extends Component {
   componentDidUpdate(prevProps, prevState) {
     const nextProps = this.props;
     const nextState = this.state;
-    console.log(' What is')
+    console.log(" What is");
     if (!prevState.postData && nextState.postData) {
       this.resetPostData();
     }
@@ -128,7 +130,11 @@ class Project extends Component {
       const mergedList = [...reports, ...payments];
       this.sortByDate(mergedList, reports, payments);
     }
-    if (nextProps.approvePostPayload && prevProps.approvePostPending && !prevProps.approvePostPayload) {
+    if (
+      nextProps.approvePostPayload &&
+      prevProps.approvePostPending &&
+      !prevProps.approvePostPayload
+    ) {
       this.resetPostData();
     }
     if (nextProps.declinePostPayload && prevProps.declinePostPending) {
@@ -143,7 +149,24 @@ class Project extends Component {
     if (prevState.submitButtonLoading && !nextState.submitButtonLoading) {
       this.resetPostData();
     }
+    if (!prevState.reportModal && nextState.reportModal) {
+      this.setFormErrors("report");
+    }
+    if (!prevState.paymentModal && nextState.paymentModal) {
+      this.setFormErrors("payment");
+    }
   }
+  setFormErrors = context => {
+    if (context === "report") {
+      this.setState(() => {
+        return { reportFormErrors: false };
+      });
+    } else {
+      this.setState(() => {
+        return { payFormErrors: false };
+      });
+    }
+  };
   toggleProjectModal = () => {
     const { projectModal } = this.state;
     this.setState(() => {
@@ -317,7 +340,15 @@ class Project extends Component {
 
   printPage = (subdata, fromComponent, project) => {
     const printPageReact = window.open("/print", "Print Payment");
-    localStorage.setItem('fromPage', JSON.stringify({ page: fromComponent, data: subdata, project, mergedList: this.state.mergedList }));
+    localStorage.setItem(
+      "fromPage",
+      JSON.stringify({
+        page: fromComponent,
+        data: subdata,
+        project,
+        mergedList: this.state.mergedList
+      })
+    );
   };
 
   percentages = (stat = "payment", approved = false) => {
@@ -605,101 +636,109 @@ class Project extends Component {
       ...loadProjectPayload,
       reports: [...reports, obj2]
     };
-    doc = obj;
-    this.setState(
-      () => {
-        return {
-          submitButtonLoading: true
-        };
-      },
-      () => {
-        getData({
-          url: urls.postProject,
-          inputData: {
-            doc: obj,
-            dbname: "project",
-            id,
-            rev,
-            confirmed: false,
-            intent: "createReport",
-            token: userInfoPayload.token
-          },
-          context: "PATCH"
-        })
-          .then(data => {
-            const { image } = this.state;
-            const dataF = new FormData();
-            if (image && !this.state.editingReport) {
-              let url = "";
-              let m = image;
-              if (m.length && m.length > 1) {
-                url = urls.postMultipleMedia;
-                m.map(f => {
+    if (obj2.completionLevel) {
+      doc = obj;
+      this.setState(
+        () => {
+          return {
+            submitButtonLoading: true
+          };
+        },
+        () => {
+          getData({
+            url: urls.postProject,
+            inputData: {
+              doc: obj,
+              dbname: "project",
+              id,
+              rev,
+              confirmed: false,
+              intent: "createReport",
+              token: userInfoPayload.token
+            },
+            context: "PATCH"
+          })
+            .then(data => {
+              const { image } = this.state;
+              const dataF = new FormData();
+              if (image && !this.state.editingReport) {
+                let url = "";
+                let m = image;
+                if (m.length && m.length > 1) {
+                  url = urls.postMultipleMedia;
+                  m.map(f => {
+                    try {
+                      dataF.append("photos[]", f, f.filename || guid());
+                    } catch (err) {
+                      //
+                    }
+                  });
+                } else {
+                  url = urls.postSingleMedia;
                   try {
-                    dataF.append("photos[]", f, f.filename || guid());
+                    dataF.append("reports", m[0], m[0].filename || guid());
                   } catch (err) {
                     //
                   }
-                });
-              } else {
-                url = urls.postSingleMedia;
-                try {
-                  dataF.append("reports", m[0], m[0].filename || guid());
-                } catch (err) {
-                  //
                 }
+
+                dataF.append("doc", obj);
+                dataF.append("reportId", reportId);
+                dataF.append("rev", data.rev);
+                dataF.append("id", data.id);
+                dataF.append("token", userInfoPayload.token);
+
+                axios
+                  .post(url, dataF, {
+                    onUploadProgress: progressEvent => {
+                      // do something
+                      const stat =
+                        (progressEvent.loaded / progressEvent.total) * 100;
+                    }
+                  })
+                  .then(data2 => {
+                    this.closeReportModal();
+                    this.setState(() => {
+                      return {
+                        postData: data,
+                        media: false,
+                        submitButtonLoading: false,
+                        reportModal: false
+                      };
+                    });
+                  })
+                  .catch(err => console.error(err));
+              } else {
+                this.closeReportModal();
+                this.setState(() => {
+                  return {
+                    postData: data,
+                    submitButtonLoading: false,
+                    reportModal: false
+                  };
+                });
               }
-
-              dataF.append("doc", obj);
-              dataF.append("reportId", reportId);
-              dataF.append("rev", data.rev);
-              dataF.append("id", data.id);
-              dataF.append("token", userInfoPayload.token);
-
-              axios
-                .post(url, dataF, {
-                  onUploadProgress: progressEvent => {
-                    // do something
-                    const stat =
-                      (progressEvent.loaded / progressEvent.total) * 100;
-                  }
-                })
-                .then(data2 => {
-                  this.closeReportModal();
-                  this.setState(() => {
-                    return {
-                      postData: data,
-                      media: false,
-                      submitButtonLoading: false,
-                      reportModal: false
-                    };
-                  });
-                })
-                .catch(err => console.error(err));
-            } else {
-              this.closeReportModal();
+            })
+            .catch(err => {
               this.setState(() => {
+                this.closeReportModal();
                 return {
-                  postData: data,
+                  postData: {},
                   submitButtonLoading: false,
-                  reportModal: false
+                  reportModal: false,
+                  editingReport: null
                 };
               });
-            }
-          })
-          .catch(err => {
-            this.setState(() => {
-              this.closeReportModal();
-              return {
-                postData: {},
-                submitButtonLoading: false,
-                reportModal: false,
-                editingReport: null
-              };
             });
-          });
-      }
-    );
+        }
+      );
+    } else {
+      this.setState(() => {
+        return {
+          reportFormErrors: true
+        };
+      });
+    }
   };
   submitFormPay = ev => {
     ev.preventDefault();
@@ -724,47 +763,55 @@ class Project extends Component {
       ...loadProjectPayload,
       payments: [...payments, obj2]
     };
-    this.setState(
-      () => {
-        return {
-          submitButtonLoading: true
-        };
-      },
-      () => {
-        getData({
-          url: urls.postProject,
-          inputData: {
-            doc: obj,
-            dbname: "project",
-            id,
-            rev,
-            itent: "initiatePayment",
-            token: userInfoPayload.token
-          },
-          context: "PATCH"
-        })
-          .then(data => {
-            this.setState(() => {
-              this.closePaymentModal();
-              return {
-                postData: data,
-                submitButtonLoading: false,
-                paymentModal: false
-              };
-            });
+    if (obj2.percentage) {
+      this.setState(
+        () => {
+          return {
+            submitButtonLoading: true
+          };
+        },
+        () => {
+          getData({
+            url: urls.postProject,
+            inputData: {
+              doc: obj,
+              dbname: "project",
+              id,
+              rev,
+              itent: "initiatePayment",
+              token: userInfoPayload.token
+            },
+            context: "PATCH"
           })
-          .catch(err => {
-            this.closePaymentModal();
-            this.setState(() => {
-              return {
-                postData: {},
-                submitButtonLoading: false,
-                paymentModal: false
-              };
+            .then(data => {
+              this.setState(() => {
+                this.closePaymentModal();
+                return {
+                  postData: data,
+                  submitButtonLoading: false,
+                  paymentModal: false
+                };
+              });
+            })
+            .catch(err => {
+              this.closePaymentModal();
+              this.setState(() => {
+                return {
+                  postData: {},
+                  submitButtonLoading: false,
+                  paymentModal: false
+                };
+              });
             });
-          });
-      }
-    );
+        }
+      );
+    } else {
+      this.setState(() => {
+        return {
+          payFormErrors: true
+        };
+      });
+    }
   };
   declinePost = reportId => {
     const { loadProjectPayload, userInfoPayload } = this.props;
@@ -1144,6 +1191,7 @@ class Project extends Component {
                 submitForm={this.submitForm}
                 coverageReported={this.getPercentCompleted}
                 closeReportModal={this.closeReportModal}
+                formErrors={this.state.reportFormErrors}
                 reportModal={reportModal}
                 name={name}
                 deleteImage={this.deleteImage}
@@ -1166,6 +1214,7 @@ class Project extends Component {
                 closePaymentModal={this.closePaymentModal}
                 percentages={this.percentages}
                 paidPercent={this.getPercentPaid}
+                formErrors={this.state.payFormErrors}
                 reporter={`${userInfoPayload.firstname} ${
                   userInfoPayload.lastname
                 }`}

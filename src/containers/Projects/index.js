@@ -57,7 +57,36 @@ const numberList = () => {
   }
   return list;
 };
-
+const defaultRequiredFields = [
+  "name",
+  "locations",
+  "nature",
+  "durationType",
+  "funding",
+  "duration",
+  "contractor",
+  "dateOfAward",
+  "cost",
+  "unit",
+  "type"
+];
+const checkRequired = obj => {
+  let ok = true;
+  for (let i = 0; i < defaultRequiredFields.length - 1; i++) {
+    const field = defaultRequiredFields[i];
+    if (field === "locations" && obj.locations.length < 1) {
+      ok = false;
+      break;
+    }
+    if (obj[field]) {
+      ok = true;
+    } else {
+      ok = false;
+      break;
+    }
+  }
+  return ok;
+};
 const defaultState = {
   current: 1,
   projectModal: false,
@@ -71,7 +100,8 @@ const defaultState = {
   locations: [],
   contractors: [],
   editingProject: null,
-  projectReporteItems: {}
+  projectReporteItems: {},
+  formErrors: false
 };
 class ProjectList extends Component {
   constructor() {
@@ -128,8 +158,17 @@ class ProjectList extends Component {
     if (!prevState.locations && nextState.locations) {
       this.setLocationFromState();
     }
-    //
+    if (!prevState.projectModal && nextState.projectModal) {
+      this.setErrorFalse();
+    }
   }
+  setErrorFalse = () => {
+    this.setState(() => {
+      return {
+        formErrors: false
+      };
+    });
+  };
   setLocationFromState = () => {
     this.setState(() => {
       return {
@@ -185,88 +224,94 @@ class ProjectList extends Component {
     });
 
     obj = { ...obj, dateOfAward, completed: 0, paid: 0, locations };
-
-    this.setState(
-      () => {
-        return {
-          submitButtonLoading: true
-        };
-      },
-      () => {
-        if (!editingProject) {
-          getData({
-            url: urls.postProject,
-            inputData: {
-              doc: obj,
-              dbname: "project",
-              token: this.props.userInfoPayload.token,
-              intent: "createProject"
-            },
-            context: "POST"
-          })
-            .then(data => {
-              this.setState(() => {
-                this.form.reset();
-                return {
-                  postData: "loading",
-                  submitButtonLoading: false,
-                  projectModal: false,
-                  editingProject: null
-                };
-              });
+    if (checkRequired(obj)) {
+      this.setState(
+        () => {
+          return {
+            submitButtonLoading: true
+          };
+        },
+        () => {
+          if (!editingProject) {
+            getData({
+              url: urls.postProject,
+              inputData: {
+                doc: obj,
+                dbname: "project",
+                token: this.props.userInfoPayload.token,
+                intent: "createProject"
+              },
+              context: "POST"
             })
-            .catch(err => {
-              this.setState(() => {
-                this.form.reset();
-                return {
-                  postData: {},
-                  submitButtonLoading: false,
-                  projectModal: false,
-                  editingProject: null
-                };
+              .then(data => {
+                this.setState(() => {
+                  this.form.reset();
+                  return {
+                    postData: "loading",
+                    formErrors: false,
+                    submitButtonLoading: false,
+                    projectModal: false,
+                    editingProject: null
+                  };
+                });
+              })
+              .catch(err => {
+                this.setState(() => {
+                  this.form.reset();
+                  return {
+                    postData: {},
+                    submitButtonLoading: false,
+                    projectModal: false,
+                    editingProject: null
+                  };
+                });
               });
-            });
-        } else {
-          getData({
-            url: urls.postProject,
-            inputData: {
-              doc: obj,
-              dbname: "project",
-              id: this.state.editingProject._id,
-              rev: this.state.editingProject._rev,
-              _id: this.state.editingProject._id,
-              _rev: this.state.editingProject._rev,
-              token: this.props.userInfoPayload.token,
-              intent: "createProject"
-            },
-            context: "PATCH"
-          })
-            .then(data => {
-              this.setState(() => {
-                this.form.reset();
-                return {
-                  postData: "loading",
-                  submitButtonLoading: false,
-                  projectModal: false,
-                  editingProject: null
-                };
-              });
+          } else {
+            getData({
+              url: urls.postProject,
+              inputData: {
+                doc: obj,
+                dbname: "project",
+                id: this.state.editingProject._id,
+                rev: this.state.editingProject._rev,
+                _id: this.state.editingProject._id,
+                _rev: this.state.editingProject._rev,
+                token: this.props.userInfoPayload.token,
+                intent: "createProject"
+              },
+              context: "PATCH"
             })
-            .catch(err => {
-              this.setState(() => {
-                this.form.reset();
-                return {
-                  postData: {},
-                  submitButtonLoading: false,
-                  projectModal: false,
-                  editingProject: null
-                };
+              .then(data => {
+                this.setState(() => {
+                  this.form.reset();
+                  return {
+                    postData: "loading",
+                    submitButtonLoading: false,
+                    projectModal: false,
+                    editingProject: null
+                  };
+                });
+              })
+              .catch(err => {
+                this.setState(() => {
+                  this.form.reset();
+                  return {
+                    postData: {},
+                    submitButtonLoading: false,
+                    projectModal: false,
+                    editingProject: null
+                  };
+                });
               });
-            });
-          // editing project
+            // editing project
+          }
         }
-      }
-    );
+      );
+    } else {
+      this.setState(() => {
+        return { formErrors: true };
+      });
+    }
   };
   navigateToProject = (rev, id) => {
     this.props.history.push(`/projects/project/${id}/${rev}`);
@@ -538,7 +583,10 @@ class ProjectList extends Component {
                 <Loader absolute />
               ) : (
                 <div>
-                      <PlaceHolder title="No Projects" content="TThere are currently no projects reported at the moment" />
+                  <PlaceHolder
+                    title="No Projects"
+                    content="TThere are currently no projects reported at the moment"
+                  />
                 </div>
               )}
             </React.Fragment>
@@ -573,7 +621,6 @@ class ProjectList extends Component {
                   forminput
                   name="name"
                 />
-
                 <Input
                   placeholder="File Number"
                   type="text"
@@ -656,6 +703,7 @@ class ProjectList extends Component {
                   name="contractor"
                   options={this.state.contractors}
                 />
+
                 <Grid
                   default="1fr 2fr"
                   tablet="1fr 2fr"
@@ -766,6 +814,7 @@ class ProjectList extends Component {
               <p />
             </Boxed>
           </form>
+          {this.state.formErrors ? "All required fields must be completed" : ""}
         </ModalComponent>
       </Relative>
     );
