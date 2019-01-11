@@ -16,6 +16,7 @@ export const ProjectAdd = props => {
     canCreateReports,
     canInitiatePayment,
     canEditReports,
+    searchAction,
     fromPage
   } = props;
   const PROJECT = "project";
@@ -65,7 +66,7 @@ export const ProjectAdd = props => {
           </ul>
         </PopMenu>
         <div />
-        <div>{fromPage === PROJECTS ? <Input type="search" /> : null}</div>
+        <div>{fromPage === PROJECTS ? <Input type="search" onChange={searchAction} /> : null}</div>
         <div>
           {fromPage === PROJECTS || fromPage === PROJECT ? (
             fromPage === PROJECTS ?

@@ -49,6 +49,7 @@ import { bindActionCreators } from "redux";
 import { ProjectAdd } from "../../commons/index";
 import { projectFields } from "../../config/form-fields";
 import PlaceHolder from "../../components/assets/placeholders";
+import { wildSearch, sortArrayOfObjects } from "../../utils/search";
 
 const numberList = () => {
   let list = [];
@@ -101,7 +102,8 @@ const defaultState = {
   contractors: [],
   editingProject: null,
   projectReporteItems: {},
-  formErrors: false
+  formErrors: false,
+  searchParam: []
 };
 class ProjectList extends Component {
   constructor() {
@@ -161,7 +163,17 @@ class ProjectList extends Component {
     if (!prevState.projectModal && nextState.projectModal) {
       this.setErrorFalse();
     }
+    if (prevProps.loadProjectsPending && nextProps.loadProjectsPayload) {
+      this.runSearchParam();
+    }
   }
+  runSearchParam = () => {
+    this.setState(() => {
+      return {
+        searchParam: this.props.loadProjectsPayload
+      };
+    });
+  };
   setErrorFalse = () => {
     this.setState(() => {
       return {
@@ -175,6 +187,45 @@ class ProjectList extends Component {
         locations: this.state.editingProject.locations
       };
     });
+  };
+  subSearchAction = (doc, q, array) => {
+    const newArr = wildSearch(doc, q, array);
+    this.setState(
+      () => {
+        return {
+          searchParam: newArr
+        };
+      },
+      () => this.forceUpdate()
+    );
+  };
+  searchAction = e => {
+    const q = e.target.value.trim();
+    const { loadProjectsPayload } = this.props;
+    if (loadProjectsPayload) {
+      const { doc } = loadProjectsPayload[0] || {};
+      if (!q) {
+        this.setState(() => {
+          return {
+            searchParam: loadProjectsPayload
+          };
+        });
+      } else {
+        const { searchParam } = this.state;
+        if (searchParam.length === 0) {
+          this.setState(
+            () => {
+              return {
+                searchParam: loadProjectsPayload
+              };
+            },
+            () => this.subSearchAction(doc, q, loadProjectsPayload)
+          );
+        } else {
+          this.subSearchAction(doc, q, searchParam);
+        }
+      }
+    }
   };
   setContractors = () => {
     const { getContractorsPayload = [] } = this.props;
@@ -191,7 +242,17 @@ class ProjectList extends Component {
     }
   };
   checkInfo = () => {
-    const { userInfoPayload, userInfoError, history } = this.props;
+    const {
+      userInfoPayload,
+      userInfoError,
+      history,
+      loadProjectsPayload
+    } = this.props;
+    this.setState(() => {
+      return {
+        searchParam: loadProjectsPayload
+      };
+    });
     if (!userInfoPayload || userInfoError) {
       history.push("/login");
     }
@@ -406,7 +467,6 @@ class ProjectList extends Component {
       const stateValue = [...locations].filter(
         item => item.state.name === selectedState
       )[0];
-      console.log(stateValue, "statevalue");
       let locationOptions = stateValue.state.locals.map(elem => {
         return { value: elem.name, label: elem.name };
       });
@@ -420,7 +480,6 @@ class ProjectList extends Component {
     try {
       target = e.target;
       value = target.value;
-      console.log(e);
     } catch (error) {
       value = e.value;
     }
@@ -467,7 +526,7 @@ class ProjectList extends Component {
     }
   };
   render() {
-    const {
+    let {
       loadProjectsPending,
       loadProjectsError,
       loadProjectsPayload = [],
@@ -480,6 +539,7 @@ class ProjectList extends Component {
     let {
       submitButtonLoading,
       locations,
+      searchParam,
       STATE,
       LGA,
       TOWN,
@@ -487,10 +547,13 @@ class ProjectList extends Component {
     } = this.state;
     let locButtonDisabled = true;
     if (STATE !== "" && LGA !== "" && TOWN !== "") locButtonDisabled = false;
+    loadProjectsPayload = searchParam;
+
     return (
       <Relative>
         <ProjectAdd
           fromPage={"projects"}
+          searchAction={this.searchAction}
           canInitiatePayment={canInitiatePayment}
           canCreateReports={canCreateReports}
           canEditReports={canEditReports}
