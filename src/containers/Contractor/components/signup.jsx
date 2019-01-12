@@ -39,10 +39,13 @@ export const Signup = ({
   }
   return (
     <React.Fragment>
-      <form ref={form} onSubmit={(e) => {
-        e.preventDefault();
-        // signup();
-      }}>
+      <form
+        ref={form}
+        onSubmit={e => {
+          e.preventDefault();
+          // signup();
+        }}
+      >
         {/* <H2 className="mbottom">Create Users</H2> */}
         <Input
           label="companyName"
@@ -62,11 +65,19 @@ export const Signup = ({
           forminput
         />
         <Input
-          label="phoneNumber"
+          label="phone Number"
           placeholder="Phone Number"
           type="phone"
           className="mbottom"
           onChange={e => updateInfo(e, "phoneNumber")}
+          forminput
+        />
+        <Input
+          label="RC Number"
+          placeholder="RC Number"
+          type="text"
+          className="mbottom"
+          onChange={e => updateInfo(e, "rcNumber")}
           forminput
         />
         <Input
@@ -81,8 +92,8 @@ export const Signup = ({
         {!signupPending ? (
           <Button onClick={() => submit(form)}> Submit</Button>
         ) : (
-            <Button progress={true}> Loading ...</Button>
-          )}
+          <Button progress={true}> Loading ...</Button>
+        )}
         {error ? <P>{errorText}</P> : null}
       </form>
     </React.Fragment>

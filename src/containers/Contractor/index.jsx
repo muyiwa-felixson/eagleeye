@@ -26,6 +26,7 @@ const defaultState = {
   address: "",
   phoneNumber: "",
   email: "",
+  rcNumber: "",
   userModal: false,
   data: [],
   contractors: {},
@@ -247,6 +248,11 @@ class Contractor extends React.Component {
       title: "Phone Number",
       dataIndex: "phoneNumber",
       key: "phoneNumber"
+    },
+    {
+      title: "RC Number",
+      dataIndex: "rcNumber",
+      key: "rcNumber"
     },
     {
       title: "email",

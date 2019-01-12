@@ -13,6 +13,7 @@ import { LineBar } from "../Projects/components";
 import axios from "axios";
 import { projectFields } from "../../config/form-fields";
 import { EditProject } from "./presentation/edit-project";
+import moment from "moment";
 import {
   Button,
   Grid,
@@ -180,11 +181,24 @@ class Project extends Component {
       const contractors = getContractorsPayload.map(contractor => {
         return {
           label: contractor.doc.companyName,
-          value: contractor.doc._id || contractor.id
+          value: contractor.doc.companyName
         };
       });
-      this.setState({ contractors },()=> { 
-      });
+      this.setState({ contractors }, () => {});
+    }
+  };
+  dateChanged = e => {
+    if (e) {
+      const { editingProject } = this.state;
+      editingProject.dateOfAward = e;
+      this.setState(
+        () => {
+          return {
+            editingProject
+          };
+        },
+        () => this.forceUpdate()
+      );
     }
   };
   checkInfo = () => {
@@ -388,7 +402,8 @@ class Project extends Component {
     this.props.dispatchActions("LOAD_PROJECT", { func: proxyLoadProject });
     this.setState(() => {
       return {
-        postData: null
+        postData: null,
+        editingReport: null
       };
     });
   };
@@ -565,13 +580,15 @@ class Project extends Component {
     }
   };
   deleteLocations = locationObject => {
-    let { locationsEdit } = this.state;
+    let { locationsEdit = [] } = this.state;
     locationsEdit = locationsEdit.filter(location => {
-      return (
-        location.STATE !== locationObject.STATE &&
-        location.LGA !== locationObject.LGA &&
-        location.TOWN !== locationObject.TOWN
-      );
+      const state = location.STATE.toLowerCase().trim();
+      const STATE = locationObject.STATE.toLowerCase().trim();
+      const lga = location.LGA.toLowerCase().trim();
+      const LGA = locationObject.LGA.toLowerCase().trim();
+      const town = location.TOWN.toLowerCase().trim();
+      const TOWN = locationObject.TOWN.toLowerCase().trim();
+      return state !== STATE || lga !== LGA || town !== TOWN;
     });
     this.setState(() => {
       return {
@@ -988,7 +1005,8 @@ class Project extends Component {
       contractor = "",
       cost = "",
       media = [],
-      unit = ""
+      unit = "",
+      dateOfAward
     } = loadProjectPayload || {};
     const {
       reportModal,
@@ -1071,6 +1089,18 @@ class Project extends Component {
                         </strong>
                       </div>
                     </Grid>
+                    <Grid default="1.5fr 1.5fr " className="minibox">
+                      <div>
+                        <Label>Target Unit</Label>
+                        <span className="answer">{unit}</span>
+                      </div>
+                      <div>
+                        <Label>Date Of Award</Label>
+                        <span className="answer">
+                          {moment(dateOfAward).format("DD MMMM YYYY")}
+                        </span>
+                      </div>
+                    </Grid>
 
                     {locations.map((location, index) => {
                       return (
@@ -1086,10 +1116,6 @@ class Project extends Component {
                           <div>
                             <Label>Town</Label>
                             <span className="answer">{location.TOWN}</span>
-                          </div>
-                          <div>
-                            <Label>Target Unit</Label>
-                            <span className="answer">{unit}</span>
                           </div>
                         </Grid>
                       );
@@ -1232,6 +1258,7 @@ class Project extends Component {
             {this.state.projectModal ? (
               <EditProject
                 projectModal={this.state.projectModal}
+                dateChanged={this.dateChanged}
                 toggleProjectModal={this.toggleProjectModal}
                 submitProjectEdits={this.submitProjectEdits}
                 submitEdits={this.submitEdits}

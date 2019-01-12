@@ -17,6 +17,7 @@ import {
 import { LocTable } from "../../Projects/components/index";
 import { Theme } from "../../../components/flex/theme";
 import DatePicker from "react-datepicker";
+import moment from "moment";
 import {
   getOptions,
   sourceOfFunding,
@@ -44,12 +45,12 @@ export const EditProject = ({
   TOWN,
   locButtonDisabled,
   locations = [],
+  dateChanged,
   getState,
   getLGA
 }) => {
   let forme = React.createRef();
   let locForm = React.createRef();
-  console.log(contractors, ' ===========>')
   return (
     <ModalComponent
       title="Project"
@@ -58,7 +59,7 @@ export const EditProject = ({
       onClose={toggleProjectModal}
       footer={
         <div>
-          <PaleButton>Cancel</PaleButton>{" "}
+          <PaleButton onClick={toggleProjectModal}>Cancel</PaleButton>{" "}
           <Button onClick={() => submitEdits(forme)}>
             {" "}
             {!submitButtonLoading ? "Save Report" : "Loading ..."}
@@ -91,7 +92,11 @@ export const EditProject = ({
             />
           </Grid>
           <p />
-          <TextArea name="description" label="Project Description" />
+          <TextArea
+            name="description"
+            defaultValue={editingProject ? editingProject.description : ""}
+            label="Project Description"
+          />
           <p />
           <Grid pad="15px" default="1fr 1fr 1fr 1fr" tablet="1fr 1fr 1fr">
             <SimpleSelect
@@ -167,7 +172,9 @@ export const EditProject = ({
                 <Label>Date of Award</Label>
                 <DatePicker
                   name="dateOfAward"
+                  onChange={dateChanged}
                   selected={
+                    // moment(editingProject.dateOfAward).format("dddd D MMMM YYYY ") : moment(new Date()).format("dddd D MMMM YYYY ")
                     editingProject ? editingProject.dateOfAward : new Date()
                   }
                 />
