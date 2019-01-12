@@ -11,8 +11,11 @@ export const Signup = ({
   error,
   updateInfo,
   signupPending,
-  submit
+  submit,
+  formError,
+  editingContractors
 }) => {
+  console.log(formError , ' here is the form error and it is here ')
   const form = React.createRef();
   let errorText = "";
   const getError = error => {
@@ -54,6 +57,7 @@ export const Signup = ({
           name={"companyName"}
           className="mbottom"
           onChange={e => updateInfo(e, "companyName")}
+          defaultValue={editingContractors.companyName || '' }
           forminput
         />
         <Input
@@ -62,6 +66,7 @@ export const Signup = ({
           placeholder="address"
           className="mbottom"
           onChange={e => updateInfo(e, "address")}
+          defaultValue={editingContractors.address || '' }
           forminput
         />
         <Input
@@ -70,6 +75,7 @@ export const Signup = ({
           type="phone"
           className="mbottom"
           onChange={e => updateInfo(e, "phoneNumber")}
+          defaultValue={editingContractors.phoneNumber || '' }
           forminput
         />
         <Input
@@ -78,6 +84,7 @@ export const Signup = ({
           type="text"
           className="mbottom"
           onChange={e => updateInfo(e, "rcNumber")}
+          defaultValue={editingContractors.rcNumber || '' }
           forminput
         />
         <Input
@@ -86,6 +93,7 @@ export const Signup = ({
           type="email"
           className="mbottom"
           onChange={e => updateInfo(e, "email")}
+          defaultValue={editingContractors.email || '' }
           forminput
         />
 
@@ -95,6 +103,7 @@ export const Signup = ({
           <Button progress={true}> Loading ...</Button>
         )}
         {error ? <P>{errorText}</P> : null}
+        { formError.status ? <P>{formError.message}</P> : null} 
       </form>
     </React.Fragment>
   );
