@@ -203,7 +203,8 @@ class ProjectList extends Component {
     const q = e.target.value.trim();
     const { loadProjectsPayload } = this.props;
     if (loadProjectsPayload) {
-      const { doc } = loadProjectsPayload[0] || {};
+      let  { doc } = loadProjectsPayload[0] || {};
+      doc = {...doc, tags: ''};
       if (!q) {
         this.setState(() => {
           return {
@@ -277,14 +278,26 @@ class ProjectList extends Component {
     } = this.state;
     const formElements = ev.target.elements;
     let obj = {};
+    let tags = "";
     projectFields.map(field => {
       obj = {
         ...obj,
         [field]: formElements[field].value
       };
     });
+    if (locations.length > 0) {
+      locations.map(location => {
+        Object.keys(location).map(item => {
+          if (!tags) {
+            tags += location[item];
+          } else {
+            tags += `;${location[item]}`;
+          }
+        });
+      });
+    }
 
-    obj = { ...obj, dateOfAward, completed: 0, paid: 0, locations };
+    obj = { ...obj, dateOfAward, tags, completed: 0, paid: 0, locations };
     if (checkRequired(obj)) {
       this.setState(
         () => {
