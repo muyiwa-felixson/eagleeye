@@ -502,17 +502,19 @@ class ProjectList extends Component {
     });
   };
   deleteLocations = locationObject => {
-    let { locations } = this.state;
-    locations = locations.filter(location => {
-      return (
-        location.STATE === locationObject.STATE &&
-        location.LGA === locationObject.LGA &&
-        location.TOWN === locationObject.town
-      );
+    let { locationsEdit = [] } = this.state;
+    locationsEdit = locationsEdit.filter(location => {
+      const state = location.STATE.toLowerCase().trim();
+      const STATE = locationObject.STATE.toLowerCase().trim();
+      const lga = location.LGA.toLowerCase().trim();
+      const LGA = locationObject.LGA.toLowerCase().trim();
+      const town = location.TOWN.toLowerCase().trim();
+      const TOWN = locationObject.TOWN.toLowerCase().trim();
+      return state !== STATE || lga !== LGA || town !== TOWN;
     });
     this.setState(() => {
       return {
-        locations
+        locationsEdit
       };
     });
   };
