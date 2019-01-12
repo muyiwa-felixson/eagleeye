@@ -106,8 +106,8 @@ export const ProjectReport = props => {
               defaultValue={
                 editingReport
                   ? {
-                      value: editingReport.completionLevel,
-                      label: `${editingReport.completionLevel}%`
+                      value: editingReport.completionLevel || 0,
+                      label: `${editingReport.completionLevel || 0 }%`
                     }
                   : -1
               }

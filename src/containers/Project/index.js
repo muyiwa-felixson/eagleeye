@@ -13,6 +13,7 @@ import { LineBar } from "../Projects/components";
 import axios from "axios";
 import { projectFields } from "../../config/form-fields";
 import { EditProject } from "./presentation/edit-project";
+import moment from "moment";
 import {
   Button,
   Grid,
@@ -401,7 +402,8 @@ class Project extends Component {
     this.props.dispatchActions("LOAD_PROJECT", { func: proxyLoadProject });
     this.setState(() => {
       return {
-        postData: null
+        postData: null,
+        editingReport: null
       };
     });
   };
@@ -1003,7 +1005,8 @@ class Project extends Component {
       contractor = "",
       cost = "",
       media = [],
-      unit = ""
+      unit = "",
+      dateOfAward
     } = loadProjectPayload || {};
     const {
       reportModal,
@@ -1086,6 +1089,18 @@ class Project extends Component {
                         </strong>
                       </div>
                     </Grid>
+                    <Grid default="1.5fr 1.5fr " className="minibox">
+                      <div>
+                        <Label>Target Unit</Label>
+                        <span className="answer">{unit}</span>
+                      </div>
+                      <div>
+                        <Label>Date Of Award</Label>
+                        <span className="answer">
+                          {moment(dateOfAward).format("DD MMMM YYYY")}
+                        </span>
+                      </div>
+                    </Grid>
 
                     {locations.map((location, index) => {
                       return (
@@ -1101,10 +1116,6 @@ class Project extends Component {
                           <div>
                             <Label>Town</Label>
                             <span className="answer">{location.TOWN}</span>
-                          </div>
-                          <div>
-                            <Label>Target Unit</Label>
-                            <span className="answer">{unit}</span>
                           </div>
                         </Grid>
                       );
