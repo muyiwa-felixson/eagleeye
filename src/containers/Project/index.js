@@ -183,8 +183,21 @@ class Project extends Component {
           value: contractor.doc._id || contractor.id
         };
       });
-      this.setState({ contractors },()=> { 
-      });
+      this.setState({ contractors }, () => {});
+    }
+  };
+  dateChanged = e => {
+    if (e) {
+      const { editingProject } = this.state;
+      editingProject.dateOfAward = e;
+      this.setState(
+        () => {
+          return {
+            editingProject
+          };
+        },
+        () => this.forceUpdate()
+      );
     }
   };
   checkInfo = () => {
@@ -1232,6 +1245,7 @@ class Project extends Component {
             {this.state.projectModal ? (
               <EditProject
                 projectModal={this.state.projectModal}
+                dateChanged={this.dateChanged}
                 toggleProjectModal={this.toggleProjectModal}
                 submitProjectEdits={this.submitProjectEdits}
                 submitEdits={this.submitEdits}

@@ -17,6 +17,7 @@ import {
 import { LocTable } from "../../Projects/components/index";
 import { Theme } from "../../../components/flex/theme";
 import DatePicker from "react-datepicker";
+import moment from "moment";
 import {
   getOptions,
   sourceOfFunding,
@@ -44,6 +45,7 @@ export const EditProject = ({
   TOWN,
   locButtonDisabled,
   locations = [],
+  dateChanged,
   getState,
   getLGA
 }) => {
@@ -170,7 +172,9 @@ export const EditProject = ({
                 <Label>Date of Award</Label>
                 <DatePicker
                   name="dateOfAward"
+                  onChange={dateChanged}
                   selected={
+                    // moment(editingProject.dateOfAward).format("dddd D MMMM YYYY ") : moment(new Date()).format("dddd D MMMM YYYY ")
                     editingProject ? editingProject.dateOfAward : new Date()
                   }
                 />
