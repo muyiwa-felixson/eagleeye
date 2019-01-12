@@ -33,7 +33,8 @@ const defaultState = {
   error: {
     message: "",
     status: false
-  }
+  },
+  editingContractors: null
 };
 class Contractor extends React.Component {
   constructor(props) {
@@ -96,16 +97,15 @@ class Contractor extends React.Component {
       const contractorsProject = getContractorsPayload.map(contractor => {
         let counter = 0;
         loadProjectsPayload.map(project => {
-          if (project.doc.contractor === contractor.doc.compnayName) {
+          if (project.doc.contractor === contractor.doc.companyName) {
             counter += 1;
           }
         });
         contractor.doc.projectHandled = counter;
         return contractor;
       });
-      console.log("loading contrac", contractorsProject);
       this.setState(() => {
-        return { contractors: contractorsProject };
+        return { contractors: contractorsProject, editingContractors: null };
       });
     }
   };
@@ -126,19 +126,21 @@ class Contractor extends React.Component {
   deleteUser = (id, rev) => {
     const { cookies } = this.props;
     if (cookies) {
-        const token = cookies.get("token");
-        const data = {
-          id,
-          dbname: "contractor",
-          token,
-          rev,
-          intent: "intiatePayment"
-        };
-        getData({ url: urls.deleteUser, inputData: data, context: "DELETE" }).then(()=>{ 
-          this.getContractors();
-        }).catch((err)=> { 
+      const token = cookies.get("token");
+      const data = {
+        id,
+        dbname: "contractor",
+        token,
+        rev,
+        intent: "intiatePayment"
+      };
+      getData({ url: urls.deleteUser, inputData: data, context: "DELETE" })
+        .then(() => {
           this.getContractors();
         })
+        .catch(err => {
+          this.getContractors();
+        });
     }
   };
   setError = () => {
@@ -158,9 +160,6 @@ class Contractor extends React.Component {
     });
   };
   submit = ref => {
-    // if (ref && ref.current) {
-    //   ref.current.dispatchEvent(new Event("submit"));
-    // }
     this.signup();
   };
   updateInfo = (e, name) => {
@@ -178,16 +177,17 @@ class Contractor extends React.Component {
       };
     });
   };
-  signup = e => {
-    // e.preventDefault();
+  signup = () => {
     const {
       companyName = "",
       address = "",
       phoneNumber = "",
       email = "",
-      error
+      rcNumber = "",
+      error,
+      editingContractors
     } = this.state;
-    if (!companyName || !address || !phoneNumber || !email) {
+    if (!companyName || !address || !phoneNumber || !email || !rcNumber) {
       error.message = "You need to provide all the field information";
       error.status = true;
       this.setState(() => {
@@ -201,19 +201,28 @@ class Contractor extends React.Component {
           companyName,
           address,
           phoneNumber,
+          rcNumber,
           email,
           dbname: "contractor",
           intent: "intiatePayment",
           token: this.props.userInfoPayload.token
         };
+        if (editingContractors) {
+          const id = editingContractors.id || editingContractors._id;
+          const rev = editingContractors.rev || editingContractors._rev;
+          inputData.id = id;
+          inputData.rev = rev;
+        }
+
         return getData({
           url: urls.postProject,
-          context: "POST",
+          context: editingContractors ? "PATCH" : "POST",
           inputData: {
             ...inputData,
             doc: {
               companyName,
               address,
+              rcNumber,
               phoneNumber,
               email,
               dbname: "contractor"
@@ -226,13 +235,22 @@ class Contractor extends React.Component {
       });
     }
   };
+  editUser = contractor => {
+    this.setState(() => {
+      return {
+        ...this.state,
+        ...contractor,
+        editingContractors: contractor,
+        userModal: true
+      };
+    });
+  };
 
   closeUserModal = () => {
     this.setState({
       userModal: false
     });
   };
-
   columns = [
     {
       title: "Company Name",
@@ -273,9 +291,22 @@ class Contractor extends React.Component {
         const { _id, _rev, group } = i;
         if (group !== "superuser") {
           return (
-            <PaleButton small onClick={() => this.deleteUser(_id, _rev)}>
-              Delete
-            </PaleButton>
+            <div>
+              <PaleButton
+                style={{ display: "inline-block", marginRight: "3px" }}
+                small
+                onClick={() => this.editUser(i)}
+              >
+                edit
+              </PaleButton>
+              <PaleButton
+                style={{ display: "inline-block", marginLeft: "3px" }}
+                small
+                onClick={() => this.deleteUser(_id, _rev)}
+              >
+                Delete
+              </PaleButton>
+            </div>
           );
         } else {
           return "";
@@ -309,7 +340,7 @@ class Contractor extends React.Component {
       signupError,
       deleteUserPending
     } = this.props;
-    const { error, data } = this.state;
+    const { error, data, editingContractors } = this.state;
     if (userInfoPending || getContractorsPending || deleteUserPending) {
       return <Loader />;
     } else {
@@ -341,7 +372,9 @@ class Contractor extends React.Component {
           >
             <Signup
               signup={this.signup}
+              editingContractors={editingContractors || {}}
               error={signupError}
+              formError={error}
               updateInfo={this.updateInfo}
               getContractorsPending={getContractorsPending}
               submit={this.submit}
