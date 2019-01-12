@@ -49,7 +49,6 @@ export const EditProject = ({
 }) => {
   let forme = React.createRef();
   let locForm = React.createRef();
-  console.log(contractors, ' ===========>')
   return (
     <ModalComponent
       title="Project"
@@ -91,7 +90,11 @@ export const EditProject = ({
             />
           </Grid>
           <p />
-          <TextArea name="description" label="Project Description" />
+          <TextArea
+            name="description"
+            defaultValue={editingProject ? editingProject.description : ""}
+            label="Project Description"
+          />
           <p />
           <Grid pad="15px" default="1fr 1fr 1fr 1fr" tablet="1fr 1fr 1fr">
             <SimpleSelect
