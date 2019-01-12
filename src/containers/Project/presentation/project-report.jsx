@@ -107,7 +107,7 @@ export const ProjectReport = props => {
                 editingReport
                   ? {
                       value: editingReport.completionLevel || 0,
-                      label: `${editingReport.completionLevel || 0 }%`
+                      label: `${editingReport.completionLevel || 0}%`
                     }
                   : -1
               }
@@ -184,14 +184,20 @@ export const ProjectReport = props => {
             </div>
             <div className="placeholder">
               <i className="icon-upload-cloud-outline" />
-              <Button onClick={openFileSelect}>Choose files to Upload</Button>
+              <Button
+                onClick={ev => {
+                  openFileSelect(ev);
+                  if (mediaFile.current) mediaFile.current.value = null;
+                }}
+              >
+                Choose files to Upload
+              </Button>
               <P>Drag and drop files here to upload </P>
             </div>
           </DragZone>
         </Boxed>
         {formErrors ? "You need to fill all the required fields " : ""}
       </form>
-
     </ModalComponent>
   );
 };
