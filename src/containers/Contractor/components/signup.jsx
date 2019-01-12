@@ -15,7 +15,6 @@ export const Signup = ({
   formError,
   editingContractors
 }) => {
-  console.log(formError , ' here is the form error and it is here ')
   const form = React.createRef();
   let errorText = "";
   const getError = error => {

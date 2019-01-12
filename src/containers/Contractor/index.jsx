@@ -97,7 +97,7 @@ class Contractor extends React.Component {
       const contractorsProject = getContractorsPayload.map(contractor => {
         let counter = 0;
         loadProjectsPayload.map(project => {
-          if (project.doc.contractor === contractor.doc.compnayName) {
+          if (project.doc.contractor === contractor.doc.companyName) {
             counter += 1;
           }
         });
@@ -160,9 +160,6 @@ class Contractor extends React.Component {
     });
   };
   submit = ref => {
-    // if (ref && ref.current) {
-    //   ref.current.dispatchEvent(new Event("submit"));
-    // }
     this.signup();
   };
   updateInfo = (e, name) => {
@@ -246,8 +243,6 @@ class Contractor extends React.Component {
         editingContractors: contractor,
         userModal: true
       };
-    }, ()=> {
-      console.log(this.state, ' Here is the state ' )
     });
   };
 
@@ -346,7 +341,6 @@ class Contractor extends React.Component {
       deleteUserPending
     } = this.props;
     const { error, data, editingContractors } = this.state;
-    console.log(error, " here are the form errors ");
     if (userInfoPending || getContractorsPending || deleteUserPending) {
       return <Loader />;
     } else {
