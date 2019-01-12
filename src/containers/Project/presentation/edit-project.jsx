@@ -59,7 +59,7 @@ export const EditProject = ({
       onClose={toggleProjectModal}
       footer={
         <div>
-          <PaleButton>Cancel</PaleButton>{" "}
+          <PaleButton onClick={toggleProjectModal}>Cancel</PaleButton>{" "}
           <Button onClick={() => submitEdits(forme)}>
             {" "}
             {!submitButtonLoading ? "Save Report" : "Loading ..."}
