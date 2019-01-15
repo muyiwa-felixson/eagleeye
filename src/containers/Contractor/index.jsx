@@ -20,6 +20,7 @@ import {
   Grid,
   Button
 } from "../../components/flex";
+import { Theme } from "../../components/flex/theme";
 
 const defaultState = {
   companyName: "",
@@ -293,15 +294,16 @@ class Contractor extends React.Component {
           return (
             <div>
               <PaleButton
-                style={{ display: "inline-block", marginRight: "3px" }}
+                style={{ display: "inline-block", fontSize: "10px" }}
                 small
                 onClick={() => this.editUser(i)}
               >
-                edit
+                Edit
               </PaleButton>
               <PaleButton
-                style={{ display: "inline-block", marginLeft: "3px" }}
+                style={{ display: "inline-block", marginLeft: "5px", fontSize: "10px" }}
                 small
+                color={Theme.PrimaryRed}
                 onClick={() => this.deleteUser(_id, _rev)}
               >
                 Delete
@@ -312,7 +314,7 @@ class Contractor extends React.Component {
           return "";
         }
       },
-      width: 100
+      width: 160
     }
   ];
   constructUsers = () => {
