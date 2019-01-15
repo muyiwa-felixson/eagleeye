@@ -25,7 +25,19 @@ const sortByDate = (arr, dateField, desc = false) => {
   };
   return arr.sort(sortFunction);
 };
-
+export const filterByDate = (arr, dateField, dateFilter) => {
+  return arr.filter(item => {
+    return (
+      new Date(item.doc[dateField]).getFullYear() ===
+      new Date(dateFilter).getFullYear()
+    );
+  });
+};
+export const filterByCompletion = (arr, completionField, completionFilter) => {
+  return arr.filter(item => {
+    return item.doc[completionField] == completionFilter;
+  });
+};
 const sortByAlpha = (arr, alphaField, desc = false, isNumber = false) => {
   const sortFunction = (a, b) => {
     let alpha1 = a.doc;
@@ -87,6 +99,83 @@ export const filterQuantify = (field, context, arr, lessThan) => {
 };
 
 /**
+ * Get years from item
+ * @param {*} obj
+ * @param {*} q
+ * @param {*} array
+ */
+export const getYears = (projects, dateField) => {
+  const years = [];
+  projects.map(docum => {
+    const year = new Date(docum.doc[dateField]).getFullYear();
+    const indexOfYear = years.findIndex(val => val.label == year);
+    if (indexOfYear < 0) {
+      years.push({ value: new Date(docum.doc[dateField]), label: year });
+    }
+  });
+  return years;
+};
+export const getLocations = projects => {
+  let locationsItems = [];
+  projects.filter(project => {
+    const { locations } = project.doc;
+    if (locations) {
+      locations.map(location => {
+        const { STATE, TOWN, LGA } = location;
+        locationsItems = [
+          ...locationsItems,
+          { value: STATE, label: `${STATE}` },
+          { value: LGA, label: `${LGA} Lga` },
+          { value: TOWN, label: `${TOWN}` }
+        ];
+      });
+    }
+  });
+  return locationsItems;
+};
+
+export const getNature = projects => {
+  const natureObjects = [];
+  projects.map(pj => {
+    if (pj.doc.nature) {
+      const obj = {
+        label: pj.doc.nature,
+        value: pj.doc.nature
+      };
+      const indexOfNature = natureObjects.findIndex(
+        val => val.label === pj.doc.nature
+      );
+      if (indexOfNature < 0) {
+        natureObjects.push(obj);
+      }
+    }
+  });
+  return natureObjects;
+};
+export const filterByLocation = (arr, value) => {
+  return arr.filter(val => {
+    const { locations } = val.doc;
+    let itContains = false;
+    if (locations) {
+      itContains =
+        locations.filter(location => {
+          return (
+            location.STATE === value ||
+            location.LGA === value ||
+            location.TOWN === value
+          );
+        }).length > 0;
+    }
+    return itContains;
+  });
+};
+
+export const filterByNature = (arr, nature) => {
+  return arr.filter(val => {
+    return val.doc.nature === nature;
+  });
+};
+/**
  * WOrks only for this impleentation has it has an attribute that has to get do
  */
 export const wildSearch = (obj, q, array) => {
@@ -108,7 +197,7 @@ export const wildSearch = (obj, q, array) => {
       });
     }
   });
-  
+
   let arr = [];
   keys.map(val => {
     const { key, type } = val;

@@ -49,7 +49,17 @@ import { bindActionCreators } from "redux";
 import { ProjectAdd } from "../../commons/index";
 import { projectFields } from "../../config/form-fields";
 import PlaceHolder from "../../components/assets/placeholders";
-import { wildSearch, sortArrayOfObjects } from "../../utils/search";
+import {
+  wildSearch,
+  sortArrayOfObjects,
+  getYears,
+  filterByDate,
+  filterByCompletion,
+  getLocations,
+  filterByLocation,
+  getNature,
+  filterByNature
+} from "../../utils/search";
 
 const numberList = () => {
   let list = [];
@@ -103,7 +113,9 @@ const defaultState = {
   editingProject: null,
   projectReporteItems: {},
   formErrors: false,
-  searchParam: []
+  searchParam: [],
+  yearsOption: [],
+  computedSearchParam: []
 };
 class ProjectList extends Component {
   constructor() {
@@ -167,10 +179,54 @@ class ProjectList extends Component {
       this.runSearchParam();
     }
   }
+  getCompletionOptions = () => {
+    const completionObject = [];
+    for (let i = 1; i <= 100; i++) {
+      const value = { value: i, label: `${i}%` };
+      completionObject.push(value);
+    }
+    return completionObject;
+  };
   runSearchParam = () => {
+    const projects = this.props.loadProjectsPayload.map(proj => {
+      proj.doc.completed = this.getPercentCovered(proj.id, "reports");
+      proj.doc.payment = this.getPercentCovered(proj.id, "payments");
+      return proj;
+    });
     this.setState(() => {
       return {
-        searchParam: this.props.loadProjectsPayload
+        yearsOption: getYears(this.props.loadProjectsPayload, "dateOfAward"),
+        searchParam: projects,
+        computedSearchParam: projects
+      };
+    });
+  };
+  onFilterDateChanged = (ev, type = "date") => {
+    const { value } = ev;
+    const { searchParam, computedSearchParam } = this.state;
+    let newSearchParam;
+    if (value === "reset") newSearchParam = this.props.loadProjectsPayload;
+    else if (type === "date") {
+      newSearchParam = filterByDate(
+        this.props.loadProjectsPayload,
+        "dateOfAward",
+        value
+      );
+    } else if (type === "completion") {
+      newSearchParam = filterByCompletion(
+        computedSearchParam,
+        "completed",
+        value
+      );
+    } else if (type === "location") {
+      newSearchParam = filterByLocation(computedSearchParam, value);
+    } else if (type === 'nature') { 
+      newSearchParam = filterByNature(computedSearchParam, value)
+    }
+
+    this.setState(() => {
+      return {
+        searchParam: newSearchParam
       };
     });
   };
@@ -203,8 +259,8 @@ class ProjectList extends Component {
     const q = e.target.value.trim();
     const { loadProjectsPayload } = this.props;
     if (loadProjectsPayload) {
-      let  { doc } = loadProjectsPayload[0] || {};
-      doc = {...doc, tags: ''};
+      let { doc } = loadProjectsPayload[0] || {};
+      doc = { ...doc, tags: "" };
       if (!q) {
         this.setState(() => {
           return {
@@ -600,14 +656,41 @@ class ProjectList extends Component {
               mobile="1fr"
               className="right-align"
             >
-              <SimpleSelect placeholder="Year of Initiation" />
+              <SimpleSelect
+                placeholder="Year of Initiation"
+                options={[
+                  ...this.state.yearsOption,
+                  { value: "reset", label: "Reset..." }
+                ]}
+                onChange={e => this.onFilterDateChanged(e, "date")}
+              />
               <SimpleSelect
                 placeholder="Completion Level"
                 isSearchable={false}
+                onChange={e => this.onFilterDateChanged(e, "completion")}
+                options={[
+                  ...this.getCompletionOptions(),
+                  { value: "reset", label: "Reset..." }
+                ]}
               />
-              <SimpleSelect placeholder="Location" />
-              <SimpleSelect placeholder="Category" isSearchable={false} />
-              <SimpleSelect placeholder="Status" isSearchable={false} />
+              <SimpleSelect
+                placeholder="Location"
+                onChange={e => this.onFilterDateChanged(e, "location")}
+                options={[
+                  ...getLocations(this.state.computedSearchParam),
+                  { value: "reset", label: "Reset..." }
+                ]}
+              />
+              <SimpleSelect
+                placeholder="Category"
+                isSearchable={false}
+                onChange={e => this.onFilterDateChanged(e, "nature")}
+                options={[
+                  ...getNature(this.state.computedSearchParam),
+                  { value: "reset", label: "Reset..." }
+                ]}
+              />
+              {/* <SimpleSelect placeholder="Status" isSearchable={false} /> */}
             </Grid>
           </Grid>
 

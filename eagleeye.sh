@@ -14,7 +14,7 @@ docker-compose run -d   -e COUCHDB_USER=$HOSTEDCOUCH -e COUCHDB_PASSWORD=$HOSTED
 docker-compose run  -d --service-ports  --name app app
 
 echo "Please Wait!!! starting up client Server"
-sleep 240 && source .env
+sleep 90 && source .env
 docker rm -f app
 docker-compose build app
 docker-compose run  --service-ports  --name app app
