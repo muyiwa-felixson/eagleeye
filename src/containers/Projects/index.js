@@ -698,17 +698,17 @@ class ProjectList extends Component {
               {/* <SimpleSelect placeholder="Status" isSearchable={false} /> */}
             </Grid>
           </Grid>
+          {!userInfoPending &&
+            loadProjectsPayload &&
+            loadProjectsPayload.length > 0 ? (
+              <Grid
+                default={
+                  this.state.viewlayout === "card" ? "repeat(5, 1fr)" : "1fr"
+                }
+                pad={this.state.viewlayout === "card" ? "30px" : "5px"}
+              >
+                <React.Fragment>
 
-          <Grid
-            default={
-              this.state.viewlayout === "card" ? "repeat(5, 1fr)" : "1fr"
-            }
-            pad={this.state.viewlayout === "card" ? "30px" : "5px"}
-          >
-            <React.Fragment>
-              {!userInfoPending &&
-                loadProjectsPayload &&
-                loadProjectsPayload.length > 0 ? (
                   <React.Fragment>
                     {loadProjectsPayload.map((project, index) => {
                       const { doc, id, value } = project;
@@ -745,18 +745,19 @@ class ProjectList extends Component {
                       );
                     })}
                   </React.Fragment>
-                ) : loadProjectsPending || userInfoPending ? (
-                  <Loader absolute />
-                ) : (
-                    <div>
-                      <PlaceHolder
-                        title="No Projects"
-                        content="TThere are currently no projects reported at the moment"
-                      />
-                    </div>
-                  )}
-            </React.Fragment>
-          </Grid>
+
+                </React.Fragment>
+              </Grid>
+            ) : loadProjectsPending || userInfoPending ? (
+              <Loader absolute />
+            ) : (
+                <div>
+                  <PlaceHolder
+                    title="No Projects"
+                    content="TThere are currently no projects reported at the moment"
+                  />
+                </div>
+              )}
         </ListBody>
 
         <ModalComponent
