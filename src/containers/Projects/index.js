@@ -754,7 +754,7 @@ class ProjectList extends Component {
                 <div>
                   <PlaceHolder
                     title="No Projects"
-                    content="TThere are currently no projects reported at the moment"
+                    content="There are currently no projects reported or matching your filter options"
                   />
                 </div>
               )}
