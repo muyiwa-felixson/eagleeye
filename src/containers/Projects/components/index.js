@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
 import { Theme } from '../../../components/flex/theme';
-import { InputWrapper, Label } from '../../../components/flex';
+import { InputWrapper, Label, PaleButton } from '../../../components/flex';
 import { darken, transparentize, lighten } from 'polished';
 
 
@@ -21,12 +21,22 @@ export const ListBody = styled.div`
     & .right-align{
       grid-column-gap: 10px;
     }
+    ${PaleButton}{
+      height: 38px;
+      padding: 8px 15px;
+      margin-top: 10px;
+    }
     ${InputWrapper}{
       background: none;
       & .flexisaf__control{
-        background: none;
+        background: ${Theme.Gradient("#fff", "#fefefe")};
         text-align: left;
         border: none;
+        font-size: 11px;
+        border-radius: 3px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+        height: 36px;
+        cursor: pointer;
 
         & .flexisaf__placeholder{
           ${Theme.Truncate("calc(100% - 10px)")};
