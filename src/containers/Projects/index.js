@@ -220,7 +220,7 @@ class ProjectList extends Component {
       );
     } else if (type === "location") {
       newSearchParam = filterByLocation(computedSearchParam, value);
-    } else if (type === 'nature') { 
+    } else if (type === 'nature') {
       newSearchParam = filterByNature(computedSearchParam, value)
     }
 
@@ -322,7 +322,7 @@ class ProjectList extends Component {
       };
     });
   };
-  componentDidCatch() {}
+  componentDidCatch() { }
 
   submit = ev => {
     ev.preventDefault();
@@ -657,101 +657,107 @@ class ProjectList extends Component {
               className="right-align"
             >
               <SimpleSelect
-                placeholder="Year of Initiation"
+                label="Year of Initiation"
                 options={[
                   ...this.state.yearsOption,
-                  { value: "reset", label: "Reset..." }
+                  { value: "reset", label: "All" }
                 ]}
                 onChange={e => this.onFilterDateChanged(e, "date")}
+                forminput
               />
               <SimpleSelect
-                placeholder="Completion Level"
+                label="Completion Level"
                 isSearchable={false}
                 onChange={e => this.onFilterDateChanged(e, "completion")}
                 options={[
                   ...this.getCompletionOptions(),
-                  { value: "reset", label: "Reset..." }
+                  { value: "reset", label: "All" }
                 ]}
+                forminput
               />
               <SimpleSelect
-                placeholder="Location"
+                label="Location"
                 onChange={e => this.onFilterDateChanged(e, "location")}
                 options={[
                   ...getLocations(this.state.computedSearchParam),
-                  { value: "reset", label: "Reset..." }
+                  { value: "reset", label: "All" }
                 ]}
+                forminput
               />
               <SimpleSelect
-                placeholder="Category"
+                label="Category"
                 isSearchable={false}
                 onChange={e => this.onFilterDateChanged(e, "nature")}
                 options={[
                   ...getNature(this.state.computedSearchParam),
-                  { value: "reset", label: "Reset..." }
+                  { value: "reset", label: "All" }
                 ]}
+                forminput
               />
+              <PaleButton>Clear Filter</PaleButton>
               {/* <SimpleSelect placeholder="Status" isSearchable={false} /> */}
             </Grid>
           </Grid>
-
-          <Grid
-            default={
-              this.state.viewlayout === "card" ? "repeat(5, 1fr)" : "1fr"
-            }
-            pad={this.state.viewlayout === "card" ? "30px" : "5px"}
-          >
-            <React.Fragment>
-              {!userInfoPending &&
-              loadProjectsPayload &&
-              loadProjectsPayload.length > 0 ? (
+          {!userInfoPending &&
+            loadProjectsPayload &&
+            loadProjectsPayload.length > 0 ? (
+              <Grid
+                default={
+                  this.state.viewlayout === "card" ? "repeat(5, 1fr)" : "1fr"
+                }
+                pad={this.state.viewlayout === "card" ? "30px" : "5px"}
+              >
                 <React.Fragment>
-                  {loadProjectsPayload.map((project, index) => {
-                    const { doc, id, value } = project;
-                    let { rev } = value;
-                    if (!rev) rev = doc._rev;
-                    const {
-                      dateOfAward,
-                      fileNumber,
-                      name,
-                      completed,
-                      paid
-                    } = doc;
-                    try {
-                      const splittedDate = dateOfAward.split(" ");
-                    } catch (err) {}
-                    const date = new Date(dateOfAward) || new Date();
-                    const year = date.getFullYear();
-                    const month = date.getMonth();
-                    return (
-                      <React.Fragment>
-                        {loadProjectsPending ? <Loader absolute /> : null}
-                        <ProjectCardComponent
-                          key={index}
-                          year={year}
-                          month={getMonth(month)}
-                          code={fileNumber}
-                          onClick={() => this.navigateToProject(id, rev)}
-                          name={name}
-                          completed={this.getPercentCovered(id, "reports")}
-                          paid={this.getPercentCovered(id, "payments")}
-                          layout={this.state.viewlayout}
-                        />
-                      </React.Fragment>
-                    );
-                  })}
+
+                  <React.Fragment>
+                    {loadProjectsPayload.map((project, index) => {
+                      const { doc, id, value } = project;
+                      let { rev } = value;
+                      if (!rev) rev = doc._rev;
+                      const {
+                        dateOfAward,
+                        fileNumber,
+                        name,
+                        completed,
+                        paid
+                      } = doc;
+                      try {
+                        const splittedDate = dateOfAward.split(" ");
+                      } catch (err) { }
+                      const date = new Date(dateOfAward) || new Date();
+                      const year = date.getFullYear();
+                      const month = date.getMonth();
+                      return (
+                        <React.Fragment>
+                          {loadProjectsPending ? <Loader absolute /> : null}
+                          <ProjectCardComponent
+                            key={index}
+                            year={year}
+                            month={getMonth(month)}
+                            code={fileNumber}
+                            onClick={() => this.navigateToProject(id, rev)}
+                            name={name}
+                            completed={this.getPercentCovered(id, "reports")}
+                            paid={this.getPercentCovered(id, "payments")}
+                            layout={this.state.viewlayout}
+                          />
+                        </React.Fragment>
+                      );
+                    })}
+                  </React.Fragment>
+
                 </React.Fragment>
-              ) : loadProjectsPending || userInfoPending ? (
-                <Loader absolute />
-              ) : (
+              </Grid>
+            ) : loadProjectsPending || userInfoPending ? (
+              <Loader absolute />
+            ) : (
                 <div>
                   <PlaceHolder
                     title="No Projects"
-                    content="TThere are currently no projects reported at the moment"
+                    content="There are currently no projects reported or matching your filter options"
                   />
                 </div>
               )}
-            </React.Fragment>
-          </Grid>
         </ListBody>
 
         <ModalComponent
