@@ -81,6 +81,12 @@ const defaultRequiredFields = [
   "unit",
   "type"
 ];
+const filterTypes = {
+  DATE: "date",
+  LOCATION: "location",
+  COMPLETION: "completion",
+  NATURE: "nature"
+};
 const checkRequired = obj => {
   let ok = true;
   for (let i = 0; i < defaultRequiredFields.length - 1; i++) {
@@ -115,6 +121,7 @@ const defaultState = {
   formErrors: false,
   searchParam: [],
   yearsOption: [],
+  filterContentArray: [],
   computedSearchParam: []
 };
 class ProjectList extends Component {
@@ -179,6 +186,53 @@ class ProjectList extends Component {
       this.runSearchParam();
     }
   }
+  updateFilterContent = (ev, filterType, add = true) => {
+    this.setState(
+      state => {
+        const { computedSearchParam } = state;
+        return { searchParam: computedSearchParam };
+      },
+      () => {
+        const { value } = ev;
+        if (value === -1) add = false;
+        let { filterContentArray } = this.state;
+        filterContentArray = filterContentArray.filter(
+          item => Object.keys(item)[0] !== filterType
+        );
+        if (add) {
+          const filterObject = { [filterType]: value };
+          filterContentArray.push(filterObject);
+        }
+        filterContentArray.map(item => {
+          const key = Object.keys(item)[0];
+          const val = item[key];
+          this.onFilterDateChanged({ value: val }, key);
+        });
+        this.setState(() => {
+          return { filterContentArray };
+        });
+      }
+    );
+  };
+  checkIfDisabled = filterType => {
+    let { filterContentArray } = this.state;
+    filterContentArray = filterContentArray.filter(
+      content => Object.keys(content)[0] === filterType
+    );
+    if (filterContentArray.length < 1) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+  clearFilter = () => {
+    this.setState(() => {
+      return {
+        filterContentArray: [],
+        searchParam: this.props.loadProjectsPayload
+      };
+    });
+  };
   getCompletionOptions = () => {
     const completionObject = [];
     for (let i = 1; i <= 100; i++) {
@@ -205,23 +259,15 @@ class ProjectList extends Component {
     const { value } = ev;
     const { searchParam, computedSearchParam } = this.state;
     let newSearchParam;
-    if (value === "reset") newSearchParam = this.props.loadProjectsPayload;
+    if (value === -1) newSearchParam = this.props.loadProjectsPayload;
     else if (type === "date") {
-      newSearchParam = filterByDate(
-        this.props.loadProjectsPayload,
-        "dateOfAward",
-        value
-      );
+      newSearchParam = filterByDate(searchParam, "dateOfAward", value);
     } else if (type === "completion") {
-      newSearchParam = filterByCompletion(
-        computedSearchParam,
-        "completed",
-        value
-      );
+      newSearchParam = filterByCompletion(searchParam, "completed", value);
     } else if (type === "location") {
-      newSearchParam = filterByLocation(computedSearchParam, value);
-    } else if (type === 'nature') {
-      newSearchParam = filterByNature(computedSearchParam, value)
+      newSearchParam = filterByLocation(searchParam, value);
+    } else if (type === "nature") {
+      newSearchParam = filterByNature(searchParam, value);
     }
 
     this.setState(() => {
@@ -322,7 +368,7 @@ class ProjectList extends Component {
       };
     });
   };
-  componentDidCatch() { }
+  componentDidCatch() {}
 
   submit = ev => {
     ev.preventDefault();
@@ -660,104 +706,118 @@ class ProjectList extends Component {
                 label="Year of Initiation"
                 options={[
                   ...this.state.yearsOption,
-                  { value: "reset", label: "All" }
+                  {
+                    value: -1,
+                    label: "Year of Initiation",
+                    selected: this.checkIfDisabled("date")
+                  }
                 ]}
-                onChange={e => this.onFilterDateChanged(e, "date")}
+                onChange={e => this.updateFilterContent(e, "date")}
                 forminput
               />
               <SimpleSelect
                 label="Completion Level"
                 isSearchable={false}
-                onChange={e => this.onFilterDateChanged(e, "completion")}
+                onChange={e => this.updateFilterContent(e, "completion")}
                 options={[
                   ...this.getCompletionOptions(),
-                  { value: "reset", label: "All" }
+                  {
+                    value: -1,
+                    label: "Completion Level",
+                    selected: this.checkIfDisabled("completion")
+                  }
                 ]}
                 forminput
               />
               <SimpleSelect
                 label="Location"
-                onChange={e => this.onFilterDateChanged(e, "location")}
+                onChange={e => this.updateFilterContent(e, "location")}
                 options={[
                   ...getLocations(this.state.computedSearchParam),
-                  { value: "reset", label: "All" }
+                  {
+                    value: -1,
+                    label: "Location",
+                    selected: this.checkIfDisabled("location")
+                  }
                 ]}
                 forminput
               />
               <SimpleSelect
                 label="Category"
                 isSearchable={false}
-                onChange={e => this.onFilterDateChanged(e, "nature")}
+                onChange={e => this.updateFilterContent(e, "nature")}
                 options={[
                   ...getNature(this.state.computedSearchParam),
-                  { value: "reset", label: "All" }
+                  {
+                    value: -1,
+                    label: "Category",
+                    selected: this.checkIfDisabled("nature")
+                  }
                 ]}
                 forminput
               />
-              <PaleButton>Clear Filter</PaleButton>
+              <PaleButton onClick={this.clearFilter}>Clear Filter</PaleButton>
               {/* <SimpleSelect placeholder="Status" isSearchable={false} /> */}
             </Grid>
           </Grid>
           {!userInfoPending &&
-            loadProjectsPayload &&
-            loadProjectsPayload.length > 0 ? (
-              <Grid
-                default={
-                  this.state.viewlayout === "card" ? "repeat(5, 1fr)" : "1fr"
-                }
-                pad={this.state.viewlayout === "card" ? "30px" : "5px"}
-              >
+          loadProjectsPayload &&
+          loadProjectsPayload.length > 0 ? (
+            <Grid
+              default={
+                this.state.viewlayout === "card" ? "repeat(5, 1fr)" : "1fr"
+              }
+              pad={this.state.viewlayout === "card" ? "30px" : "5px"}
+            >
+              <React.Fragment>
                 <React.Fragment>
-
-                  <React.Fragment>
-                    {loadProjectsPayload.map((project, index) => {
-                      const { doc, id, value } = project;
-                      let { rev } = value;
-                      if (!rev) rev = doc._rev;
-                      const {
-                        dateOfAward,
-                        fileNumber,
-                        name,
-                        completed,
-                        paid
-                      } = doc;
-                      try {
-                        const splittedDate = dateOfAward.split(" ");
-                      } catch (err) { }
-                      const date = new Date(dateOfAward) || new Date();
-                      const year = date.getFullYear();
-                      const month = date.getMonth();
-                      return (
-                        <React.Fragment>
-                          {loadProjectsPending ? <Loader absolute /> : null}
-                          <ProjectCardComponent
-                            key={index}
-                            year={year}
-                            month={getMonth(month)}
-                            code={fileNumber}
-                            onClick={() => this.navigateToProject(id, rev)}
-                            name={name}
-                            completed={this.getPercentCovered(id, "reports")}
-                            paid={this.getPercentCovered(id, "payments")}
-                            layout={this.state.viewlayout}
-                          />
-                        </React.Fragment>
-                      );
-                    })}
-                  </React.Fragment>
-
+                  {loadProjectsPayload.map((project, index) => {
+                    const { doc, id, value } = project;
+                    let { rev } = value;
+                    if (!rev) rev = doc._rev;
+                    const {
+                      dateOfAward,
+                      fileNumber,
+                      name,
+                      completed,
+                      paid
+                    } = doc;
+                    try {
+                      const splittedDate = dateOfAward.split(" ");
+                    } catch (err) {}
+                    const date = new Date(dateOfAward) || new Date();
+                    const year = date.getFullYear();
+                    const month = date.getMonth();
+                    return (
+                      <React.Fragment>
+                        {loadProjectsPending ? <Loader absolute /> : null}
+                        <ProjectCardComponent
+                          key={index}
+                          year={year}
+                          month={getMonth(month)}
+                          code={fileNumber}
+                          onClick={() => this.navigateToProject(id, rev)}
+                          name={name}
+                          completed={this.getPercentCovered(id, "reports")}
+                          paid={this.getPercentCovered(id, "payments")}
+                          layout={this.state.viewlayout}
+                        />
+                      </React.Fragment>
+                    );
+                  })}
                 </React.Fragment>
-              </Grid>
-            ) : loadProjectsPending || userInfoPending ? (
-              <Loader absolute />
-            ) : (
-                <div>
-                  <PlaceHolder
-                    title="No Projects"
-                    content="There are currently no projects reported or matching your filter options"
-                  />
-                </div>
-              )}
+              </React.Fragment>
+            </Grid>
+          ) : loadProjectsPending || userInfoPending ? (
+            <Loader absolute />
+          ) : (
+            <div>
+              <PlaceHolder
+                title="No Projects"
+                content="There are currently no projects reported or matching your filter options"
+              />
+            </div>
+          )}
         </ListBody>
 
         <ModalComponent
