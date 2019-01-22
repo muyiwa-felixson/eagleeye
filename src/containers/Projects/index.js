@@ -209,7 +209,7 @@ class ProjectList extends Component {
           this.onFilterDateChanged({ value: val }, key);
         });
         this.setState(() => {
-          return { filterContentArray };
+          return { filterContentArray   };
         });
       }
     );
