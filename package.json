@@ -46,6 +46,7 @@
     "react-simple-dropdown": "^3.2.3",
     "react-slideshow-image": "^1.0.10",
     "react-switch": "^3.0.4",
+    "read-excel-file": "^2.0.7",
     "redux": "^4.0.1",
     "redux-logger": "^3.0.6",
     "redux-promise": "^0.6.0",
