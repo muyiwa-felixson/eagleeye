@@ -1,65 +1,66 @@
-import React, { Component } from "react";
-import { createForm, formShape } from "rc-form";
-import { withCookies, Cookies } from "react-cookie";
-import DatePicker from "react-datepicker";
-import {
-  getOptions,
-  sourceOfFunding,
-  natureOfProject,
-  projectTypes,
-  targetUnits,
-  contractors,
-  getMonth
-} from "../../utils/utils";
 // import Autosuggest from 'react-autosuggest';
 import {
-  Relative,
-  TopBar,
-  ListBody,
-  ProjectCard,
-  LineBar,
+  AutosuggestItem,
   BallLegend,
   LevelList,
-  AutosuggestItem,
-  LocTable
+  LineBar,
+  ListBody,
+  LocTable,
+  ProjectCard,
+  Relative,
+  TopBar
 } from "./components";
-import { locations } from "../../utils/levels";
 import {
-  Button,
-  Input,
-  Grid,
-  SimpleSelect,
-  Label,
-  ModalComponent,
-  PaleButton,
   Boxed,
-  TextArea,
-  P,
+  Button,
+  Grid,
+  Input,
+  InputWrapper,
+  Label,
   Loader,
-  InputWrapper
+  ModalComponent,
+  P,
+  PaleButton,
+  SimpleSelect,
+  TextArea
 } from "../../components/flex";
-import { Theme } from "../../components/flex/theme";
-import { withRouter } from "react-router-dom";
-import { connect } from "react-redux";
-import { urls, baseurl } from "../../api-requests/urls";
-import { ProjectCardComponent } from "./presentation/projectCard";
-import { getData } from "../../api-requests/index";
-import { dispatchActions } from "../../store/actions/action-config.action";
-import { bindActionCreators } from "redux";
-import { ProjectAdd } from "../../commons/index";
-import { projectFields } from "../../config/form-fields";
-import PlaceHolder from "../../components/assets/placeholders";
+import { Cookies, withCookies } from "react-cookie";
+import React, { Component } from "react";
+import { baseurl, urls } from "../../api-requests/urls";
 import {
-  wildSearch,
-  sortArrayOfObjects,
-  getYears,
-  filterByDate,
+  contractors,
+  getMonth,
+  getOptions,
+  natureOfProject,
+  projectTypes,
+  sourceOfFunding,
+  targetUnits
+} from "../../utils/utils";
+import { createForm, formShape } from "rc-form";
+import {
   filterByCompletion,
-  getLocations,
+  filterByDate,
   filterByLocation,
+  filterByNature,
+  getLocations,
   getNature,
-  filterByNature
+  getYears,
+  sortArrayOfObjects,
+  wildSearch
 } from "../../utils/search";
+
+import DatePicker from "react-datepicker";
+import PlaceHolder from "../../components/assets/placeholders";
+import { ProjectAdd } from "../../commons/index";
+import { ProjectCardComponent } from "./presentation/projectCard";
+import { Theme } from "../../components/flex/theme";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
+import { dispatchActions } from "../../store/actions/action-config.action";
+import { getData } from "../../api-requests/index";
+import { locations } from "../../utils/levels";
+import { projectFields } from "../../config/form-fields";
+import { withRouter } from "react-router-dom";
 
 const numberList = () => {
   let list = [];
@@ -487,7 +488,7 @@ class ProjectList extends Component {
       const date1 = new Date(a.submittedOn);
       const date2 = new Date(b.submittedOn);
       // Turn your strings into dates, and then subtract them
-      // to get a value that is either negative, positive, or zero.
+      // to get a value that is      either negative, positive, or zero.
       if (date1 < date2) return 1;
       if (date1 > date2) return -1;
       return 0;

@@ -9,6 +9,8 @@ ENV PATH /usr/src/app/node_modules/.bin:$PATH
 COPY server /usr/src/app/server
 COPY public /usr/src/app/public
 COPY src /usr/src/app/src
+COPY populateDB /usr/src/app/populateDB
+# RUN node /usr/src/app/populateDB/index.js
 # EXPOSE 80
 # start app
 CMD ["npm", "start"]

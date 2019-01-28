@@ -7,7 +7,7 @@ const Log = require("../utils/log");
 const schema = require("../config/table");
 const Couch = require("couch-db").CouchDB;
 const { dburl, dbhost, dbusername, dbpassword } = constants;
-console.log(dburl, ' url is here');
+console.log(dburl, dbhost, dbusername, dbpassword, '==========================++>', ' url is here');
 const nano = require("nano")({
   url: dburl,
   requestDefaults: {
@@ -87,6 +87,31 @@ const createDoc = (dbValue, doc) => {
   });
 };
 
+/**
+ * @function createBulkDoc create a doc use this function only when sure the data does not exist in the table
+ * @param { string } dbValue the table name
+ * @param { string } doc the key value pair
+ * @return { promise<Object> } the object returned
+ */
+const createBulkDoc = (dbValue, docs) => {
+  console.log(' Calling bulk  create dock is beong called')
+  return new Promise((resolve, reject) => {
+    dbValue = dbValue.toLowerCase();
+    if (!checkDbValue(dbValue))
+      throw new Error(
+        `Wrong database name passed in please check the value ${dbValue}`
+      );
+    let db;
+    db = nano.db.use(dbValue);
+    db.bulk(docs, (err, result) => {
+      if (err) {
+        console.log( err, ' There is an error here and it cant work')
+        reject(err);
+      }
+      resolve(result);
+    });
+  });
+};
 /**
  * @function getDoc  get a doc from the database
  * @param { string } dbValue the table name
@@ -211,5 +236,6 @@ module.exports = {
   getDoc,
   getSomeDoc,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  createBulkDoc
 };

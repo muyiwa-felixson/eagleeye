@@ -8,7 +8,7 @@ const COUCHDB_HOST = process.env.COUCHBASE_HOST;
 const COUCHDB_URL = process.env.HOSTEDCOUCHURL;
 const SECRET_KEY = process.env.SECRET_KEY;
 const constants = {
-  dburl: COUCHDB_URL,
+  dburl: COUCHDB_URL || 'http://Administrator:password@localhost:5984',
   dbpassword: COUCHDB_PASSWORD,
   dbhost: COUCHDB_HOST,
   dbusername: COUCHDB_USERNAME,
