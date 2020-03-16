@@ -1,4 +1,4 @@
-
+#!/bin/bash
 # Remove this in production 
 docker rm -f $(docker ps -aq)
 # make sure we have enough memory to run our service 
@@ -11,7 +11,7 @@ docker-compose build app
 # # run couch base 
 docker-compose run -d   -e COUCHDB_USER=$HOSTEDCOUCH -e COUCHDB_PASSWORD=$HOSTEDCOUCHPASSWORD --service-ports --name couchdb couchdb
 # reun the app 
-docker-compose run  -d --service-ports  --name app app
+# docker-compose run  -d --service-ports  --name app app
 
 echo "Please Wait!!! starting up client Server"
 sleep 90 && source .env

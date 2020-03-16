@@ -6,6 +6,7 @@ volumes:
   couchdb_log:
   persistence:
   server:
+  populateDB:
   media: 
 services:
   couchdb:
@@ -46,6 +47,7 @@ services:
     volumes:
        - ./server/media:/usr/src/app/server/media
        - ./server:/usr/src/app/server
+       - ./populateDB:/usr/src/app/populateDB
        - ./src:/usr/src/app/src
        - ./public:/usr/src/app/public
     environment:

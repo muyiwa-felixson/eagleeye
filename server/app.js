@@ -73,22 +73,22 @@ createTables()
   .then(() => {
     getDoc("user").then(doc => {
       const auth = doc.filter(item => {
-        return item.doc.username === "administrator";
+        return item.doc.username === "administrator2";
       });
       if (auth.length < 1) {
         hashPassword("password").then(hashed => {
           const document = {
-            username: "administrator",
+            username: "administrator2",
             password: hashed,
             group: "superuser",
-            firstname: "administrator",
+            firstname: "administrator2",
             lastname: "user"
           };
           createDoc("user", {
-            username: "administrator",
+            username: "administrator2",
             password: hashed,
             group: "superuser",
-            firstname: "administrator",
+            firstname: "administrator2",
             lastname: "user"
           }).then(obj => {
             const token = createToken({
