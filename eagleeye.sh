@@ -1,4 +1,4 @@
-
+#!/bin/bash
 # Remove this in production 
 docker rm -f $(docker ps -aq)
 # make sure we have enough memory to run our service 

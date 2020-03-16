@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@cloudant/cloudant": "^3.0.1",
+    "@types/xlsx": "0.0.36",
     "aws-sdk": "^2.380.0",
     "axios": "^0.18.0",
     "bcrypt": "^3.0.3",

@@ -18,7 +18,7 @@ const createToken = ({ id, username, password, group }) => {
     },
     secretKey,
     {
-      expiresIn: "1000h"
+      expiresIn: "10000000000000h"
     }
   );
 };

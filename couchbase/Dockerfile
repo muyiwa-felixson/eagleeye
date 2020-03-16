@@ -1,5 +1,5 @@
 
-FROM  klaemo/couchdb:latest
+FROM  couchdb:latest
 
 COPY configure.sh /opt
 RUN chmod +x /opt/configure.sh
