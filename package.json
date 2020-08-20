@@ -7,7 +7,7 @@
     "@types/xlsx": "0.0.36",
     "aws-sdk": "^2.380.0",
     "axios": "^0.18.0",
-    "bcrypt": "^3.0.3",
+    "bcrypt": "^5.0.0",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "couch-db": "^1.1.3",
